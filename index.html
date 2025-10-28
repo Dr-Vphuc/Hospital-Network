@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Feather Icons CDN -->
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i data-feather="heart" class="logo-icon"></i>
+                <h1>MediCare Hospital</h1>
+            </div>
+            <div class="header-actions">
+                <span class="welcome-text">Welcome, Dr. Smith</span>
+                <button class="profile-btn">
+                    <i data-feather="user"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <div class="nav-container">
+            <button class="nav-tab active" data-section="dashboard">
+                <i data-feather="home"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-tab" data-section="patients">
+                <i data-feather="users"></i>
+                <span>Patients</span>
+            </button>
+            <button class="nav-tab" data-section="appointments">
+                <i data-feather="calendar"></i>
+                <span>Appointments</span>
+            </button>
+            <button class="nav-tab" data-section="staff">
+                <i data-feather="user-check"></i>
+                <span>Staff</span>
+            </button>
+            <button class="nav-tab" data-section="doctor-portal">
+                <i data-feather="user-plus"></i>
+                <span>Doctor Portal</span>
+            </button>
+            <button class="nav-tab" data-section="pharmacy">
+                <i data-feather="package"></i>
+                <span>Pharmacy</span>
+            </button>
+            <button class="nav-tab" data-section="prescriptions">
+                <i data-feather="file-text"></i>
+                <span>Prescriptions</span>
+            </button>
+            <button class="nav-tab" data-section="dispensing">
+                <i data-feather="activity"></i>
+                <span>Dispensing</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section active">
+            <div class="section-header">
+                <h2>Dashboard Overview</h2>
+                <p>Hospital statistics and key metrics</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>250</h3>
+                        <p>Total Patients</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="calendar"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>45</h3>
+                        <p>Today's Appointments</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="user-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>32</h3>
+                        <p>Active Staff</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="dollar-sign"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>$15,000</h3>
+                        <p>Monthly Revenue</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Container -->
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3>Patient Trends (6 Months)</h3>
+                    <canvas id="patientTrendsChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Patients by Department</h3>
+                    <canvas id="departmentChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Patients Section -->
+        <section id="patients" class="content-section">
+            <div class="section-header">
+                <h2>Patient Management</h2>
+                <div class="section-actions">
+                    <div class="search-box">
+                        <i data-feather="search"></i>
+                        <input type="text" id="patientSearch" placeholder="Search patients...">
+                    </div>
+                    <button class="btn btn-primary">
+                        <i data-feather="plus"></i>
+                        Add Patient
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="patientsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Contact</th>
+                            <th>Admission Date</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Appointments Section -->
+        <section id="appointments" class="content-section">
+            <div class="section-header">
+                <h2>Appointment Scheduler</h2>
+                <div class="section-actions">
+                    <button class="btn btn-primary">
+                        <i data-feather="plus"></i>
+                        Schedule Appointment
+                    </button>
+                </div>
+            </div>
+
+            <div class="appointments-grid">
+                <div class="appointments-table">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>Patient Name</th>
+                                <th>Doctor</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Staff Section -->
+        <section id="staff" class="content-section">
+            <div class="section-header">
+                <h2>Staff Directory</h2>
+                <div class="section-actions">
+                    <div class="search-box">
+                        <i data-feather="search"></i>
+                        <input type="text" id="staffSearch" placeholder="Search staff...">
+                    </div>
+                    <select id="roleFilter" class="filter-select">
+                        <option value="">All Roles</option>
+                        <option value="Doctor">Doctor</option>
+                        <option value="Nurse">Nurse</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="staffTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Contact</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Doctor Portal Section -->
+        <section id="doctor-portal" class="content-section">
+            <div class="section-header">
+                <h2>Doctor Portal</h2>
+                <p>Dr. Jane Smith - Cardiology Specialist</p>
+            </div>
+
+            <!-- Doctor Profile Header -->
+            <div class="doctor-profile">
+                <div class="profile-card">
+                    <div class="profile-photo">
+                        <i data-feather="user"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h3>Dr. Jane Smith</h3>
+                        <p>Cardiology Specialist</p>
+                        <p>jane.smith@medicare.com | (555) 123-4567</p>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <span class="stat-number">150</span>
+                            <span class="stat-label">Consultations</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">4.8</span>
+                            <span class="stat-label">Rating</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doctor Portal Sub-tabs -->
+            <div class="sub-tabs">
+                <button class="sub-tab active" data-subsection="profile">Profile Summary</button>
+                <button class="sub-tab" data-subsection="schedule">Today's Schedule</button>
+                <button class="sub-tab" data-subsection="my-patients">My Patients</button>
+                <button class="sub-tab" data-subsection="performance">Performance</button>
+            </div>
+
+            <!-- Sub-sections -->
+            <div class="sub-content">
+                <div id="profile" class="sub-section active">
+                    <h3>Profile Summary</h3>
+                    <div class="activity-log">
+                        <div class="activity-item">
+                            <span class="activity-time">2 hours ago</span>
+                            <span class="activity-text">Completed consultation with John Doe</span>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-time">4 hours ago</span>
+                            <span class="activity-text">Reviewed patient charts for tomorrow</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="schedule" class="sub-section">
+                    <h3>Today's Schedule</h3>
+                    <div class="schedule-cards" id="scheduleCards">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div id="my-patients" class="sub-section">
+                    <h3>My Patients</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Last Visit</th>
+                                <th>Health Status</th>
+                                <th>Visit History</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myPatientsTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="performance" class="sub-section">
+                    <h3>Performance Analytics</h3>
+                    <div class="performance-stats">
+                        <div class="stat-card">
+                            <h4>150</h4>
+                            <p>Total Consultations</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>4.8/5</h4>
+                            <p>Average Rating</p>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Consultation Trends</h4>
+                        <canvas id="consultationTrendsChart"></canvas>
+                    </div>
+                    <div class="feedback-section">
+                        <h4>Recent Patient Feedback</h4>
+                        <div class="feedback-list" id="feedbackList">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pharmacy Section -->
+        <section id="pharmacy" class="content-section">
+            <div class="section-header">
+                <h2>Pharmacy Inventory</h2>
+                <div class="section-actions">
+                    <button class="btn btn-primary">
+                        <i data-feather="plus"></i>
+                        Add Stock
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div class="alerts-container" id="pharmacyAlerts">
+                <!-- Populated by JavaScript -->
+            </div>
+
+            <div class="inventory-stats">
+                <div class="stat-card">
+                    <h3>$45,230</h3>
+                    <p>Total Inventory Value</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="pharmacyTable">
+                    <thead>
+                        <tr>
+                            <th>Medicine Name</th>
+                            <th>Quantity</th>
+                            <th>Stock Level</th>
+                            <th>Expiry Date</th>
+                            <th>Supplier</th>
+                            <th>Batch</th>
+                            <th>Location</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pharmacyTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Prescriptions Section -->
+        <section id="prescriptions" class="content-section">
+            <div class="section-header">
+                <h2>Prescription Management</h2>
+                <div class="section-actions">
+                    <button class="btn btn-primary">
+                        <i data-feather="plus"></i>
+                        New Prescription
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="prescriptionsTable">
+                    <thead>
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Medication List</th>
+                            <th>Dosage/Frequency</th>
+                            <th>Instructions</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prescriptionsTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Dispensing Section -->
+        <section id="dispensing" class="content-section">
+            <div class="section-header">
+                <h2>Medicine Dispensing</h2>
+            </div>
+
+            <div class="dispensing-stats">
+                <div class="stat-card">
+                    <h3>$8,450</h3>
+                    <p>Total Revenue</p>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3>Weekly Dispensing Trends</h3>
+                    <canvas id="dispensingChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Top 5 Medicines</h3>
+                    <canvas id="topMedicinesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="dispensingTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Patient</th>
+                            <th>Medicine</th>
+                            <th>Batch</th>
+                            <th>Quantity</th>
+                            <th>Pharmacist</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dispensingTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div id="patientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Patient Details</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="patientModalBody">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div id="prescriptionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Prescription Details</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="prescriptionModalBody">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 MediCare Hospital. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
