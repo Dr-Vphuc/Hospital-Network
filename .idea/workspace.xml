@@ -5,15 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087c7f30-a12d-4379-8ca6-e9d96665be23" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/backend/run.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/run.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/all_css_files_go_here.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/backend/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/all_html_files_go_here.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/frontend/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/frontend/static/js/script.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/frontend/static/css/styles.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
