@@ -3,7 +3,7 @@ from app.backend.db import db
 class Patient(db.Model):
     __tablename__ = 'benhnhan'
 
-    __id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    __id = db.Column(db.String(50), primary_key=True)
     __hoten = db.Column(db.String(100), nullable=False)
     __ngaysinh = db.Column(db.Date, nullable=False)
     __sdt = db.Column(db.String(15), nullable=False)

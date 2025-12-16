@@ -3,8 +3,8 @@ from app.backend.db import db
 class Room(db.Model):
     __tablename__ = 'phongbenh'
 
-    __id = db.Column(db.Integet, primary_key=True, autoincrement=True)
-    __makhoa = db.Column(db.Integer, db.ForeignKey('khoa.__id'), nullable=False)
+    __id = db.Column(db.String(50), primary_key=True)
+    __makhoa = db.Column(db.String(50), db.ForeignKey('khoa.__id'), nullable=False)
     __sogiuong = db.Column(db.Integer, nullable=False)
     __gia = db.Column(db.Float, nullable=False)
 
