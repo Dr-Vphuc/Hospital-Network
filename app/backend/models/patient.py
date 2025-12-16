@@ -8,9 +8,9 @@ class Patient(db.Model):
     __ngaysinh = db.Column(db.Date, nullable=False)
     __sdt = db.Column(db.String(15), nullable=False)
     __diachi = db.Column(db.String(200), nullable=False)
-    __loaibn = db.Column(db.String(50), nullable=False, default='Thuong')
+    __loaibn = db.Column(db.String(50), nullable=False)
 
-    def __init__(self, hoten, ngaysinh, sdt, diachi, loaibn='Thuong'):
+    def __init__(self, hoten, ngaysinh, sdt, diachi, loaibn):
         self.__hoten = hoten
         self.__ngaysinh = ngaysinh
         self.__sdt = sdt

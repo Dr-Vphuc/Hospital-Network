@@ -1,6 +1,6 @@
 from app.backend.db import db
 
-class Falcuty(db.Model):
+class Faculty(db.Model):
     __tablename__ = 'khoa'
 
     __id = db.Column(db.Integer, primary_key=True, autoincrement=True)
