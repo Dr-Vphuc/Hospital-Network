@@ -372,6 +372,8 @@ INSERT INTO user (username, password, role, ref_id) VALUES
 ('bn004', '$2b$12$eIXhD1YwFzQkLQ9R0O6B8e1Y6uJp9gE5MZkXGQn0qj2FhQZ3BvZ9K', 'BENHNHAN', 'BN004'),
 ('bn005', '$2b$12$eIXhD1YwFzQkLQ9R0O6B8e1Y6uJp9gE5MZkXGQn0qj2FhQZ3BvZ9K', 'BENHNHAN', 'BN005');
 
+INSERT INTO user (username, password, role, ref_id) VALUES
+('admin', '$2b$12$eIXhD1YwFzQkLQ9R0O6B8e1Y6uJp9gE5MZkXGQn0qj2FhQZ3BvZ9K', 'ADMIN', 'ADMIN001');
 
 /*
 ==========================
