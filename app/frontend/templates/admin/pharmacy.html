@@ -1,0 +1,49 @@
+{% extends 'admin/base/base.html' %}
+
+{% block title %}Pharmacy{% endblock %}
+
+{% block content %}
+<!-- Pharmacy Section -->
+        <section id="pharmacy" class="content-section active">
+            <div class="section-header">
+                <h2>Pharmacy Inventory</h2>
+                <div class="section-actions">
+                    <button class="btn btn-primary">
+                        <i data-feather="plus"></i>
+                        Add Stock
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div class="alerts-container" id="pharmacyAlerts">
+                <!-- Populated by JavaScript -->
+            </div>
+
+            <div class="inventory-stats">
+                <div class="stat-card">
+                    <h3>$45,230</h3>
+                    <p>Total Inventory Value</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="pharmacyTable">
+                    <thead>
+                        <tr>
+                            <th>Medicine Name</th>
+                            <th>Quantity</th>
+                            <th>Stock Level</th>
+                            <th>Expiry Date</th>
+                            <th>Supplier</th>
+                            <th>Batch</th>
+                            <th>Location</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pharmacyTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+{% endblock %}

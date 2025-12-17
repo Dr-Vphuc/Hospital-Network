@@ -3,5 +3,66 @@
 {% block title %}Admin Overview{% endblock %}
 
 {% block content %}
+<!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section active">
+            <div class="section-header">
+                <h2>Tổng quan</h2>
+                <p>Thống kê và chỉ số chính của bệnh viện</p>
+            </div>
 
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>250</h3>
+                        <p>Total Patients</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="calendar"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>45</h3>
+                        <p>Today's Appointments</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="user-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>32</h3>
+                        <p>Active Staff</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="dollar-sign"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>$15,000</h3>
+                        <p>Monthly Revenue</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Container -->
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3>Patient Trends (6 Months)</h3>
+                    <canvas id="patientTrendsChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Patients by Department</h3>
+                    <canvas id="departmentChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
 {% endblock %}

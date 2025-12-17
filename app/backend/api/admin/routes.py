@@ -17,3 +17,28 @@ def admin_required(f):
 @admin_required
 def overview():
     return render_template('admin/overview.html')
+
+@admin_bp.route('/patients', methods=['GET'])
+@admin_required
+def patients():
+    return render_template('admin/patients.html')
+
+@admin_bp.route('/doctors', methods=['GET'])
+@admin_required
+def doctors():
+    return render_template('admin/doctors.html')
+
+@admin_bp.route('/medicines', methods=['GET'])
+@admin_required
+def medicines():
+    return render_template('admin/medicines.html')
+
+@admin_bp.route('/pharmacy', methods=['GET'])
+@admin_required
+def pharmacy():
+    return render_template('admin/pharmacy.html')
+
+@admin_bp.route('/prescriptions', methods=['GET'])
+@admin_required
+def prescriptions():
+    return render_template('admin/prescriptions.html')

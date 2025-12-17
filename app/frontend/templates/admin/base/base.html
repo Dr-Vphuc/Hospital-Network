@@ -16,38 +16,47 @@
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
         <div class="nav-container">
-            <button class="nav-tab active" data-section="dashboard">
+            <a href="{{ url_for('admin.overview') }}" 
+               class="nav-tab {% if request.endpoint == 'admin.overview' %}active{% endif %}"
+               style="text-decoration: none;">
                 <i data-feather="home"></i>
                 <span>Bảng điều khiển</span>
-            </button>
-            <button class="nav-tab" data-section="patients">
+            </a>
+            
+            <a href="{{ url_for('admin.patients') }}" 
+               class="nav-tab {% if request.endpoint == 'admin.patients' %}active{% endif %}"
+               style="text-decoration: none;">
                 <i data-feather="users"></i>
                 <span>Bệnh nhân</span>
-            </button>
-            <button class="nav-tab" data-section="appointments">
+            </a>
+            
+            <a href="{{ url_for('admin.medicines') }}" 
+               class="nav-tab {% if request.endpoint == 'admin.medicines' %}active{% endif %}"
+               style="text-decoration: none;">
                 <i data-feather="calendar"></i>
                 <span>Thuốc</span>
-            </button>
-            <button class="nav-tab" data-section="staff">
+            </a>
+            
+            <a href="{{ url_for('admin.doctors') }}" 
+               class="nav-tab {% if request.endpoint == 'admin.doctors' %}active{% endif %}"
+               style="text-decoration: none;">
                 <i data-feather="user-check"></i>
                 <span>Bác sĩ</span>
-            </button>
-            <button class="nav-tab" data-section="doctor-portal">
-                <i data-feather="user-plus"></i>
-                <span>Cổng thông tin bác sĩ</span>
-            </button>
-            <button class="nav-tab" data-section="pharmacy">
-                <i data-feather="package"></i>
-                <span>Nhà thuốc</span>
-            </button>
-            <button class="nav-tab" data-section="prescriptions">
+            </a>
+            
+            <a href="{{ url_for('admin.prescriptions') }}" 
+               class="nav-tab {% if request.endpoint == 'admin.prescriptions' %}active{% endif %}"
+               style="text-decoration: none;">
                 <i data-feather="file-text"></i>
                 <span>Đơn thuốc</span>
-            </button>
-            <button class="nav-tab" data-section="dispensing">
-                <i data-feather="activity"></i>
-                <span>Phát thuốc</span>
-            </button>
+            </a>
+
+            <a href="{{ url_for('admin.pharmacy') }}" 
+               class="nav-tab {% if request.endpoint == 'admin.pharmacy' %}active{% endif %}"
+               style="text-decoration: none;">
+                <i data-feather="package"></i>
+                <span>Kho thuốc</span>
+            </a>
         </div>
     </nav>
 

@@ -1,0 +1,38 @@
+{% extends 'admin/base/base.html' %}
+
+{% block title %}Medicines{% endblock %}
+
+{% block content %}
+
+<!-- Appointments Section -->
+        <section id="appointments" class="content-section active">
+            <div class="section-header">
+                <h2>Appointment Scheduler</h2>
+                <div class="section-actions">
+                    <button class="btn btn-primary">
+                        <i data-feather="plus"></i>
+                        Schedule Appointment
+                    </button>
+                </div>
+            </div>
+
+            <div class="appointments-grid">
+                <div class="appointments-table">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>Patient Name</th>
+                                <th>Doctor</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+{% endblock %}

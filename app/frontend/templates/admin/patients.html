@@ -1,0 +1,43 @@
+{% extends 'admin/base/base.html' %}
+
+{% block title %}Patients{% endblock %}
+
+{% block content %}
+
+<!-- Patients Section -->
+    <section id="patients" class="content-section active">
+        <div class="section-header">
+            <h2>Patient Management</h2>
+            <div class="section-actions">
+                <div class="search-box">
+                    <i data-feather="search"></i>
+                    <input type="text" id="patientSearch" placeholder="Search patients...">
+                </div>
+                <button class="btn btn-primary">
+                    <i data-feather="plus"></i>
+                    Add Patient
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table" id="patientsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Contact</th>
+                        <th>Admission Date</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="patientsTableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}
