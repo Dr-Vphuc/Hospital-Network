@@ -16,11 +16,14 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = \
     'mysql+pymysql://root:@localhost:3306/hospital'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = '22092005271020052025'
     
     from .api.admin import admin_bp
     app.register_blueprint(admin_bp)
-    from .api.auth.register import register_bp
-    app.register_blueprint(register_bp)
+    from .api.auth.routes import auth_bp
+    app.register_blueprint(auth_bp)
+    from .api.user.routes import user_bp
+    app.register_blueprint(user_bp)
 
     db.init_app(app)
     login_manager.init_app(app)
