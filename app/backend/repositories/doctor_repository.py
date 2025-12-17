@@ -1,5 +1,5 @@
-from app.backend.models.doctor import Doctor
-from app.backend.db import db
+from backend.models.doctor import Doctor
+from backend.db import db
 
 class DoctorRepository:
     def get_doctor_by_id(self, doctor_id):
@@ -28,3 +28,10 @@ class DoctorRepository:
         db.session.delete(doctor)
         db.session.commit()
         return True
+    
+    def get_total_active_doctors(self):
+        """Get total number of active doctors
+        SQL equivalent:
+        SELECT COUNT(*) FROM doctor WHERE is_active = TRUE
+        """
+        return Doctor.query.filter_by(trangthai=True).count()
