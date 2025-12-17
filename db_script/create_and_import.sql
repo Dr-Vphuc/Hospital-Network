@@ -177,6 +177,17 @@ CREATE TABLE hoadon (
     tongtien FLOAT NOT NULL
 );
 
+/* =========================
+   17. USERS
+   ========================= */
+CREATE TABLE user (
+    userid INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    ref_id VARCHAR(50) NOT NULL
+);
+
 
 /*
 ==========================
@@ -344,6 +355,23 @@ INSERT INTO hoadon VALUES
 ('HD004','BHYT004','DT004','BN004',220000),
 ('HD005','BHYT005','DT005','BN005',300000);
 
+/* =========================
+17. USERS
+========================= */
+INSERT INTO user (username, password, role, ref_id) VALUES
+('bs001', '123456', 'BACSI', 'BS001'),
+('bs002', '123456', 'BACSI', 'BS002'),
+('bs003', '123456', 'BACSI', 'BS003'),
+('bs004', '123456', 'BACSI', 'BS004'),
+('bs005', '123456', 'BACSI', 'BS005');
+
+INSERT INTO user (username, password, role, ref_id) VALUES
+('bn001', '123456', 'BENHNHAN', 'BN001'),
+('bn002', '123456', 'BENHNHAN', 'BN002'),
+('bn003', '123456', 'BENHNHAN', 'BN003'),
+('bn004', '123456', 'BENHNHAN', 'BN004'),
+('bn005', '123456', 'BENHNHAN', 'BN005');
+
 
 /*
 ==========================
@@ -484,3 +512,14 @@ FOREIGN KEY (MADT) REFERENCES chitiet_dh(MADT);
 ALTER TABLE hoadon
 ADD CONSTRAINT fk_hoadon_benhnhan
 FOREIGN KEY (MABN) REFERENCES benhnhan(MABN);
+
+/* =========================
+15. Add Foreign Keys to bacsi table, benhnhan table to users table
+========================= */
+ALTER TABLE bacsi
+ADD CONSTRAINT fk_bacsi_user
+FOREIGN KEY (MABS) REFERENCES user(username);
+
+ALTER TABLE benhnhan
+ADD CONSTRAINT fk_benhnhan_user
+FOREIGN KEY (MABN) REFERENCES user(username);
