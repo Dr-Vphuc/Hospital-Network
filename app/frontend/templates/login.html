@@ -130,66 +130,135 @@
         .hidden {
             display: none;
         }
+        
+        .success-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            animation: slideDown 0.5s ease-out;
+            text-align: center;
+            min-width: 400px;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .success-notification h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .success-notification p {
+            margin: 5px 0;
+        }
+        
+        .countdown {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .error-notification {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+            animation: shake 0.5s ease-in-out;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
     </style>
 </head>
 <body>
+    <!-- Success Notification -->
+    <div id="successNotification" class="success-notification hidden">
+        <h3>✓ Đăng ký thành công!</h3>
+        <p>Tài khoản của bạn đã được tạo thành công. <br>Hãy đăng nhập để trải nghiệm dịch vụ.</p>
+    </div>
+    
     <div class="container">
         <div class="form-container">
             <div class="logo">🏥</div>
             
             <!-- Login Form -->
             <div id="loginForm">
-                <h2>Welcome Back</h2>
+                <h2>Đăng nhập</h2>
                 <form action="/auth/login" method="POST">
                     <div class="form-group">
-                        <label for="login-username">Username</label>
+                        <label for="login-username">Tên đăng nhập</label>
                         <input type="text" id="login-username" name="username" required>
                     </div>
                     <div class="form-group">
-                        <label for="login-password">Password</label>
+                        <label for="login-password">Mật khẩu</label>
                         <input type="password" id="login-password" name="password" required>
                     </div>
-                    <button type="submit">Login</button>
+                    <div id="loginError" class="error-notification hidden">
+                        ❌ Tên đăng nhập hoặc mật khẩu không đúng!
+                    </div>
+                    <button type="submit">Đăng nhập</button>
                 </form>
                 <div class="toggle-form">
-                    Don't have an account? <a href="#" onclick="toggleForms(); return false;">Register</a>
+                    Bạn chưa có tài khoản? <a href="#" onclick="toggleForms(); return false;">Đăng ký</a>
                 </div>
             </div>
             
             <!-- Register Form -->
             <div id="registerForm" class="hidden">
-                <h2>Create Account</h2>
+                <h2>Đăng ký</h2>
                 <form action="/auth/register" method="POST">
                     <div class="form-group">
-                        <label for="reg-name">Full Name</label>
+                        <label for="reg-name">Họ và tên</label>
                         <input type="text" id="reg-name" name="name" required>
                     </div>
                     <div class="form-group">
-                        <label for="reg-username">Username</label>
+                        <label for="reg-username">Tên đăng nhập</label>
                         <input type="text" id="reg-username" name="username" required>
                     </div>
                     <div class="form-group">
-                        <label for="reg-password">Password</label>
+                        <label for="reg-password">Mật khẩu</label>
                         <input type="password" id="reg-password" name="password" required>
                     </div>
                     <div class="form-group">
-                        <label for="reg-role">Role</label>
-                        <input type="text" id="reg-role" name="role" placeholder="Doctor, Nurse, Admin, etc." required>
+                        <label for="reg-password-confirm">Nhập lại mật khẩu</label>
+                        <input type="password" id="reg-password-confirm" name="re-enter-password" required>
                     </div>
-                    <button type="submit">Register</button>
+                    <button type="submit">Đăng ký</button>
                 </form>
                 <div class="toggle-form">
-                    Already have an account? <a href="#" onclick="toggleForms(); return false;">Login</a>
+                    Bạn đã có tài khoản? <a href="#" onclick="toggleForms(); return false;">Đăng nhập</a>
                 </div>
             </div>
         </div>
         
         <div class="info-panel">
             <div class="medical-icon">⚕️</div>
-            <h1>Hospital Network System</h1>
-            <p>Secure and efficient healthcare management platform for medical professionals.</p>
-            <p>Access patient records, manage appointments, and collaborate with your medical team seamlessly.</p>
-            <p>✓ HIPAA Compliant<br>✓ Secure Authentication<br>✓ Real-time Updates</p>
+            <h1>Hệ thống Mạng Lưới Bệnh Viện</h1>
+            <p>Nền tảng quản lý chăm sóc sức khỏe an toàn và hiệu quả cho các chuyên gia y tế.</p>
+            <p>Truy cập hồ sơ bệnh nhân, quản lý cuộc hẹn, và hợp tác với đội ngũ y tế của bạn một cách liền mạch.</p>
+            <p>✓ Tuân thủ HIPAA<br>✓ Xác thực an toàn<br>✓ Hỗ trợ tức thời</p>
         </div>
     </div>
     
@@ -201,6 +270,61 @@
             loginForm.classList.toggle('hidden');
             registerForm.classList.toggle('hidden');
         }
+        
+        // Check if user just registered
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const registered = urlParams.get('registered');
+            const error = urlParams.get('error');
+            
+            // Handle registration success
+            if (registered === '1') {
+                const notification = document.getElementById('successNotification');
+                const countdownElement = document.getElementById('countdown');
+                
+                // Show notification
+                notification.classList.remove('hidden');
+                
+                // Start countdown
+                let seconds = 5;
+                const countdownInterval = setInterval(function() {
+                    seconds--;
+                    countdownElement.textContent = seconds;
+                    
+                    if (seconds <= 0) {
+                        clearInterval(countdownInterval);
+                        notification.classList.add('hidden');
+                        
+                        // Ensure we're on login form
+                        const loginForm = document.getElementById('loginForm');
+                        const registerForm = document.getElementById('registerForm');
+                        
+                        if (!loginForm.classList.contains('hidden')) {
+                            // Already on login, just remove the parameter from URL
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        } else {
+                            // Switch to login form
+                            toggleForms();
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        }
+                    }
+                }, 1000);
+            }
+            
+            // Handle login error
+            if (error === '1') {
+                const errorNotification = document.getElementById('loginError');
+                errorNotification.classList.remove('hidden');
+                
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Auto-hide after 5 seconds
+                setTimeout(function() {
+                    errorNotification.classList.add('hidden');
+                }, 5000);
+            }
+        });
     </script>
 </body>
 </html>

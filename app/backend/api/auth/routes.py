@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user
 from . import auth_bp
-from flask import request
+from flask import request, url_for, redirect
 from backend.models.user import User
 from backend.db import db
 
@@ -18,8 +18,8 @@ def register():
 
     db.session.add(user)
     db.session.commit()
-
-    return "Dang ky thanh cong"
+    
+    return redirect(url_for('user.login_page', registered=1))
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -29,7 +29,7 @@ def login():
     user = User.query.filter_by(username=username).first()
 
     if not user or not check_password_hash(user.password, password):
-        return "Sai thong tin", 401
+        return redirect(url_for('user.login_page', error=1))
 
     login_user(user)
-    return "Dang nhap thanh cong"
+    return redirect(url_for('admin.overview'))
