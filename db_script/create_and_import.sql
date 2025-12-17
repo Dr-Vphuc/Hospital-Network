@@ -1,4 +1,25 @@
 /*
+CHA → CON
+└── benhnhan
+    ├── BHYT
+    ├── donthuoc
+    │   ├── thuoc
+    │   └── chitiet_dh
+    │       └── hoadon
+    ├── sokhambenh
+    ├── thannhan
+    ├── nhapvien
+    └── xuatvien
+
+└── khoa
+    ├── bacsi
+    │   └── lamviec
+    ├── phongbenh
+    │   ├── giuong
+    │   └── toanha
+*/
+
+/*
 ==========================
 Database Table Creation Script
 ==========================
@@ -185,7 +206,7 @@ CREATE TABLE user (
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL,
-    ref_id VARCHAR(50) NOT NULL
+    ref_id VARCHAR(50)
 );
 
 
@@ -525,3 +546,4 @@ FOREIGN KEY (MABS) REFERENCES user(username);
 ALTER TABLE benhnhan
 ADD CONSTRAINT fk_benhnhan_user
 FOREIGN KEY (MABN) REFERENCES user(username);
+
