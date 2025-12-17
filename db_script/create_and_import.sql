@@ -80,7 +80,8 @@ CREATE TABLE bacsi (
     sdt VARCHAR(15) NOT NULL,
     phongkham VARCHAR(255),
     bangcap VARCHAR(255) NOT NULL,
-    MAKHOA VARCHAR(50) NOT NULL
+    MAKHOA VARCHAR(50) NOT NULL,
+    trangthai BOOLEAN DEFAULT TRUE
 );
 
 /* =========================
@@ -199,7 +200,15 @@ CREATE TABLE hoadon (
 );
 
 /* =========================
-   17. USERS
+   17. SOLUONGTHUOC
+   ========================= */
+CREATE Table soluongthuoc (
+    MATHUOC VARCHAR(50) PRIMARY KEY,
+    soluong INT NOT NULL
+);
+
+/* =========================
+   18. USERS
    ========================= */
 CREATE TABLE user (
     userid INT AUTO_INCREMENT PRIMARY KEY,
@@ -260,11 +269,11 @@ INSERT INTO khoa VALUES
 5. BACSI
 ========================= */
 INSERT INTO bacsi VALUES
-('BS001','Le Van Bac','M','1980-01-01','0921111111','P101','Tien si','K001'),
-('BS002','Tran Thi Yen','F','1982-02-02','0922222222','P102','Thac si','K002'),
-('BS003','Pham Van Khoa','M','1979-03-03','0923333333','P103','Tien si','K003'),
-('BS004','Hoang Thi Lan','F','1985-04-04','0924444444','P104','Thac si','K004'),
-('BS005','Nguyen Van Minh','M','1978-05-05','0925555555','P105','Tien si','K005');
+('BS001','Le Van Bac','M','1980-01-01','0921111111','P101','Tien si','K001', TRUE),
+('BS002','Tran Thi Yen','F','1982-02-02','0922222222','P102','Thac si','K002', TRUE),
+('BS003','Pham Van Khoa','M','1979-03-03','0923333333','P103','Tien si','K003', FALSE),
+('BS004','Hoang Thi Lan','F','1985-04-04','0924444444','P104','Thac si','K004', TRUE),
+('BS005','Nguyen Van Minh','M','1978-05-05','0925555555','P105','Tien si','K005', FALSE);
 
 /* =========================
 6. LAMVIEC
@@ -377,7 +386,17 @@ INSERT INTO hoadon VALUES
 ('HD005','BHYT005','DT005','BN005',300000);
 
 /* =========================
-17. USERS
+17. SOLUONGTHUOC
+========================= */
+INSERT into soluongthuoc VALUES
+('T001', 100),
+('T002', 150),
+('T003', 200),
+('T004', 120),
+('T005', 180);
+
+/* =========================
+18. USERS
 ========================= */
 INSERT INTO user (username, password, role, ref_id) VALUES
 ('bs001', '$2b$12$eIXhD1YwFzQkLQ9R0O6B8e1Y6uJp9gE5MZkXGQn0qj2FhQZ3BvZ9K', 'BACSI', 'BS001'),
@@ -546,3 +565,9 @@ ALTER TABLE benhnhan
 ADD CONSTRAINT fk_benhnhan_user
 FOREIGN KEY (MABN) REFERENCES user(username);
 
+/* =========================
+16. Add Foreign Keys soluongthuoc → thuoc
+========================= */
+ALTER TABLE soluongthuoc
+ADD CONSTRAINT fk_soluongthuoc_thuoc
+FOREIGN KEY (MATHUOC) REFERENCES thuoc(MATHUOC);
