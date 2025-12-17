@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hospital Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/styles.css')}}">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Feather Icons CDN -->
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+    {% include 'admin/base/header.html' %}
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <div class="nav-container">
+            <button class="nav-tab active" data-section="dashboard">
+                <i data-feather="home"></i>
+                <span>Bảng điều khiển</span>
+            </button>
+            <button class="nav-tab" data-section="patients">
+                <i data-feather="users"></i>
+                <span>Bệnh nhân</span>
+            </button>
+            <button class="nav-tab" data-section="appointments">
+                <i data-feather="calendar"></i>
+                <span>Thuốc</span>
+            </button>
+            <button class="nav-tab" data-section="staff">
+                <i data-feather="user-check"></i>
+                <span>Bác sĩ</span>
+            </button>
+            <button class="nav-tab" data-section="doctor-portal">
+                <i data-feather="user-plus"></i>
+                <span>Cổng thông tin bác sĩ</span>
+            </button>
+            <button class="nav-tab" data-section="pharmacy">
+                <i data-feather="package"></i>
+                <span>Nhà thuốc</span>
+            </button>
+            <button class="nav-tab" data-section="prescriptions">
+                <i data-feather="file-text"></i>
+                <span>Đơn thuốc</span>
+            </button>
+            <button class="nav-tab" data-section="dispensing">
+                <i data-feather="activity"></i>
+                <span>Phát thuốc</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include 'admin/base/footer.html' %}
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

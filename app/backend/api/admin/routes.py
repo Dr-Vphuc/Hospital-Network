@@ -16,4 +16,4 @@ def admin_required(f):
 @admin_bp.route('/overview', methods=['GET'])
 @admin_required
 def overview():
-    return render_template('index.html')
+    return render_template('admin/overview.html')

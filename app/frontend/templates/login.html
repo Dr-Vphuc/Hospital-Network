@@ -196,7 +196,8 @@
     <!-- Success Notification -->
     <div id="successNotification" class="success-notification hidden">
         <h3>✓ Đăng ký thành công!</h3>
-        <p>Tài khoản của bạn đã được tạo thành công. <br>Hãy đăng nhập để trải nghiệm dịch vụ.</p>
+        <p>Tài khoản của bạn đã được tạo thành công. <br>
+            Hãy đăng nhập để trải nghiệm dịch vụ.</p>
     </div>
     
     <div class="container">
@@ -280,35 +281,27 @@
             // Handle registration success
             if (registered === '1') {
                 const notification = document.getElementById('successNotification');
-                const countdownElement = document.getElementById('countdown');
                 
                 // Show notification
                 notification.classList.remove('hidden');
                 
-                // Start countdown
-                let seconds = 5;
-                const countdownInterval = setInterval(function() {
-                    seconds--;
-                    countdownElement.textContent = seconds;
+                // Auto-hide after 5 seconds
+                setTimeout(function() {
+                    notification.classList.add('hidden');
                     
-                    if (seconds <= 0) {
-                        clearInterval(countdownInterval);
-                        notification.classList.add('hidden');
-                        
-                        // Ensure we're on login form
-                        const loginForm = document.getElementById('loginForm');
-                        const registerForm = document.getElementById('registerForm');
-                        
-                        if (!loginForm.classList.contains('hidden')) {
-                            // Already on login, just remove the parameter from URL
-                            window.history.replaceState({}, document.title, window.location.pathname);
-                        } else {
-                            // Switch to login form
-                            toggleForms();
-                            window.history.replaceState({}, document.title, window.location.pathname);
-                        }
+                    // Ensure we're on login form
+                    const loginForm = document.getElementById('loginForm');
+                    const registerForm = document.getElementById('registerForm');
+                    
+                    if (!loginForm.classList.contains('hidden')) {
+                        // Already on login, just remove the parameter from URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    } else {
+                        // Switch to login form
+                        toggleForms();
+                        window.history.replaceState({}, document.title, window.location.pathname);
                     }
-                }, 1000);
+                }, 5000);
             }
             
             // Handle login error
