@@ -1,0 +1,15 @@
+Hướng dẫn viết code 
+
+Backend
+Kiến trúc 3 tầng ORM:
+1. api chỉ để gọi api, định nghĩa route: trong đấy các route của admin trong module admin, 
+module auth để xác thực login/register
+2. servies tạo các logic nghiệp vụ, được gọi từ api
+3. repositoties trực tiếp truy vấn từ db, thực hiện các logic truy vấn, 
+truy vấn được thực hiện bằng các model, model chính là đại diện cho bảng trong db
+3.1. trong model cần định nghĩa các thuộc tính cần thiết, 
+để từ đó repositoties có thể truy vấn bằng hàm mà không cần lệnh SQL
+
+Frontend
+Trang của admin trong thư mục admin, menu gồm tạm thời gồm 6 phần, 
+chia thành các template riêng và đều kế thừa base.html trong thư mục base
