@@ -1,4 +1,4 @@
-# generators/benhnhan.py
+# benhnhan generator
 from typing import List, Tuple
 from dump.pools import gen_fullname, gen_phone, gen_birthdate, TINH_TP, LOAI_DIEU_TRI, GIOI_TINH
 from dump.utils import q, fmt_date, pick_weighted
