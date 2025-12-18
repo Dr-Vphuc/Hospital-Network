@@ -46,7 +46,10 @@
                         <i data-feather="dollar-sign"></i>
                     </div>
                     <div class="stat-content">
-                        <h3>$15,000</h3>
+                        <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                            <h3>{{ (days_30_revenue / 1000) |int }}</h3>
+                            <span class="stat-unit">nghìn VNĐ</span>
+                        </div>
                         <p>Doanh thu 30 ngày</p>
                     </div>
                 </div>

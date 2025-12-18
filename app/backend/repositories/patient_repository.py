@@ -1,5 +1,8 @@
 from backend.models.patient import Patient
 from backend.models.xuatvien import XuatVien
+from backend.models.examination import Examination
+from backend.models.bill import Bill
+from datetime import timedelta
 from backend.db import db
 from datetime import date
 from sqlalchemy import or_
@@ -11,6 +14,37 @@ class PatientRepository:
     def get_all_patients(self):
         return Patient.query.all()
     
+    def get_30days_revenue(self):
+        """Get total revenue from patients discharged in the last 30 days
+        SQL equivalent:
+        WITH bn_xuatvien_30 AS (
+            SELECT benhnhan.`MABN` FROM benhnhan
+            LEFT JOIN xuatvien ON benhnhan.mabn = xuatvien.mabn
+            WHERE xuatvien.ngayxv >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
+        )
+        SELECT sum(tongtien) FROM hoadon
+        WHERE hoadon.mabn IN (SELECT mabn FROM bn_xuatvien_30);
+        """
+        # Create subquery for patients discharged in last 30 days
+        thirty_days_ago = date.today() - timedelta(days=30)
+        
+        subquery = (
+            db.session.query(Patient.MABN)
+            .join(XuatVien, Patient.MABN == XuatVien.MABN)
+            .filter(XuatVien.ngayxv >= thirty_days_ago)
+            .subquery()
+        )
+        
+        # Calculate total revenue from bills for those patients
+        result = (
+            db.session.query(db.func.sum(Bill.tongtien))
+            .filter(Bill.MABN.in_(db.select(subquery)))
+            .scalar()
+        )
+        
+        return result if result else 0.0 
+
+
     def get_total_current_inpatients(self):
         """Get total number of current inpatients
         SQL equivalent:

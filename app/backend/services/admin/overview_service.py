@@ -18,3 +18,6 @@ class OverviewService:
     
     def get_all_examinations_today(self):
         return self.examinations_repo.get_all_examinations_today()
+    
+    def get_30days_revenue(self):
+        return self.patients_repo.get_30days_revenue()
