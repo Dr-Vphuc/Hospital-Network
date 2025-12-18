@@ -3,69 +3,66 @@
 {% block title %}Admin Overview{% endblock %}
 
 {% block content %}
-<!-- Main Content -->
-    <main class="main-content">
-        <!-- Dashboard Section -->
-        <section id="dashboard" class="content-section active">
-            <div class="section-header">
-                <h2>Tổng quan</h2>
-                <p>Thống kê và chỉ số chính của bệnh viện</p>
-            </div>
+<!-- Dashboard Section -->
+<section id="dashboard" class="content-section active">
+    <div class="section-header">
+        <h2>Tổng quan</h2>
+        <p>Thống kê và chỉ số chính của bệnh viện</p>
+    </div>
 
-            <!-- Stats Cards -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i data-feather="users"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>{{ total_current_inpatients }}</h3>
-                        <p>Tổng số bệnh nhân</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i data-feather="user-check"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>{{ total_active_doctors }}</h3>
-                        <p>Bác sĩ đang hoạt động</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i data-feather="calendar"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>{{ all_examinations_today }}</h3>
-                        <p>Số lượt khám trong ngày</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i data-feather="dollar-sign"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div style="display: flex; align-items: baseline; gap: 0.5rem;">
-                            <h3>{{ (days_30_revenue / 1000) |int }}</h3>
-                            <span class="stat-unit">nghìn VNĐ</span>
-                        </div>
-                        <p>Doanh thu 30 ngày</p>
-                    </div>
-                </div>
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i data-feather="users"></i>
             </div>
+            <div class="stat-content">
+                <h3>{{ total_current_inpatients }}</h3>
+                <p>Tổng số bệnh nhân</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i data-feather="user-check"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ total_active_doctors }}</h3>
+                <p>Bác sĩ đang hoạt động</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i data-feather="calendar"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ all_examinations_today }}</h3>
+                <p>Số lượt khám trong ngày</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i data-feather="dollar-sign"></i>
+            </div>
+            <div class="stat-content">
+                <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                    <h3>{{ (days_30_revenue / 1000) |int }}</h3>
+                    <span class="stat-unit">nghìn VNĐ</span>
+                </div>
+                <p>Doanh thu 30 ngày</p>
+            </div>
+        </div>
+    </div>
 
-            <!-- Charts Container -->
-            <div class="charts-container">
-                <div class="chart-card">
-                    <h3>Patient Trends (6 Months)</h3>
-                    <canvas id="patientTrendsChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>Patients by Department</h3>
-                    <canvas id="departmentChart"></canvas>
-                </div>
-            </div>
-        </section>
-    </main>
+    <!-- Charts Container -->
+    <div class="charts-container">
+        <div class="chart-card">
+            <h3>Patient Trends (6 Months)</h3>
+            <canvas id="patientTrendsChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Patients by Department</h3>
+            <canvas id="departmentChart"></canvas>
+        </div>
+    </div>
+</section>
 {% endblock %}

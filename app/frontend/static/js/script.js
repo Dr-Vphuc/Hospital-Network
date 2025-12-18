@@ -128,6 +128,13 @@ function initializeApp() {
     loadPharmacy();
     loadPrescriptions();
     loadDispensing();
+    
+    // Initialize charts for the currently active section
+    const activeSection = document.querySelector('.content-section.active');
+    if (activeSection) {
+        const sectionId = activeSection.id;
+        initializeCharts(sectionId);
+    }
 }
 
 // Tab Navigation
@@ -283,6 +290,10 @@ function initializeDashboardCharts() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
                     legend: {
                         display: false
