@@ -1,5 +1,9 @@
-from app.backend.models.faculty import Faculty
-from app.backend.db import db
+from backend.models.faculty import Faculty
+from backend.models.examination import Examination
+from backend.repositories.examination_repository import ExaminationRepository
+from backend.repositories.xuatvien_repository import XuatVienRepository
+from backend.repositories.nhapvien_repository import NhapVienRepository
+from backend.db import db
 
 class FacultyRepository:
     def get_faculty_by_id(self, faculty_id):
@@ -28,3 +32,17 @@ class FacultyRepository:
         db.session.delete(faculty)
         db.session.commit()
         return True
+    
+    def get_all_faculties(self):
+        return [(faculty.MAKHOA, faculty.tenkhoa) for faculty in Faculty.query.all()]
+    
+    def get_all_faculties_names(self):
+        return [faculty.tenkhoa for faculty in Faculty.query.all()]
+    
+    def get_total_patients_by_faculty(self, faculty_id):
+        all_patients_in_faculty = ExaminationRepository().get_distinct_patients_by_faculty(faculty_id)
+        all_patients_in_faculty_id = [patient.MABN for patient in all_patients_in_faculty]
+        all_current_patients_id = NhapVienRepository().get_all_current_inpatients_id()
+        
+        resulting_patients_id = list(set(all_patients_in_faculty_id) & set(all_current_patients_id))
+        return len(resulting_patients_id)

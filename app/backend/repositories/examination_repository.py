@@ -31,3 +31,6 @@ class ExaminationRepository:
     
     def get_all_examinations_today(self):
         return len(Examination.query.filter_by(ngaykham=db.func.current_date()).all())
+    
+    def get_distinct_patients_by_faculty(self, faculty_id):
+        return Examination.query.filter_by(MAKHOA=faculty_id).distinct(Examination.MABN).all()

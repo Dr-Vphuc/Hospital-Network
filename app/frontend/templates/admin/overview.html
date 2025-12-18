@@ -70,8 +70,12 @@
     // Pass backend data to JavaScript
     window.backendData = {
         patientTrends: {
-            labels: {{ month_strings | tojson }},
-            data: {{ total_patients_last_6_months | tojson }}
+            patients_by_month_labels: {{ month_strings | tojson | safe }},
+            patients_by_month_data: {{ total_patients_last_6_months | tojson | safe }}
+        },
+        departmentData: {
+            faculty_names: {{ faculty_names | tojson | safe }},
+            total_patients_by_faculty: {{ total_patients_by_faculty | tojson | safe }}
         }
     };
 </script>

@@ -2,12 +2,14 @@ from datetime import datetime
 from backend.repositories.patient_repository import PatientRepository
 from backend.repositories.doctor_repository import DoctorRepository
 from backend.repositories.examination_repository import ExaminationRepository
+from backend.repositories.faculty_repository import FacultyRepository
 
 class OverviewService:
     def __init__(self):
         self.patients_repo = PatientRepository()
         self.doctors_repo = DoctorRepository()
         self.examinations_repo = ExaminationRepository()
+        self.faculty_repo = FacultyRepository()
 
     def get_total_current_inpatients(self):
         
@@ -38,4 +40,16 @@ class OverviewService:
 
         return total_patients, get_string_month() 
     
-    
+    def get_total_patients_per_faculty(self):
+        faculties = self.faculty_repo.get_all_faculties()
+        patients_per_faculty = {}
+        for faculty_id, faculty_name in faculties:
+            patients_per_faculty[faculty_id] = (faculty_name, self.faculty_repo.get_total_patients_by_faculty(faculty_id))
+        
+        n_patients = []
+        faculty_names = []
+        for faculty in patients_per_faculty.values():
+            n_patients.append(faculty[1])
+            faculty_names.append(faculty[0])
+            
+        return n_patients, faculty_names

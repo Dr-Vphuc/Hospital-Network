@@ -241,14 +241,14 @@ function setupModals() {
 function loadDashboard() {
     // Patient trends chart data (6 months)
     // Use backend data if available, otherwise use mock data
-    const labels = window.backendData?.patientTrends?.labels || ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'];
-    const data = window.backendData?.patientTrends?.data || [45, 52, 48, 61, 58, 67];
+    const patients_by_month_labels = window.backendData?.patientTrends?.patients_by_month_labels || ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'];
+    const patients_by_month_data = window.backendData?.patientTrends?.patients_by_month_data || [45, 52, 48, 61, 58, 67];
     
     const patientTrendsData = {
-        labels: labels,
+        labels: patients_by_month_labels,
         datasets: [{
             label: 'Bệnh nhân mới',
-            data: data,
+            data: patients_by_month_data,
             borderColor: '#3B82F6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.4,
@@ -257,10 +257,14 @@ function loadDashboard() {
     };
 
     // Department distribution data
+    // Use backend data if available, otherwise use mock data
+    const faculty_names = window.backendData?.departmentData?.faculty_names || ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'Emergency'];
+    const total_patients_by_faculty = window.backendData?.departmentData?.total_patients_by_faculty || [25, 20, 15, 20, 20];
+    
     const departmentData = {
-        labels: ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'Emergency'],
+        labels: faculty_names,
         datasets: [{
-            data: [25, 20, 15, 20, 20],
+            data: total_patients_by_faculty,
             backgroundColor: ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'],
             borderWidth: 0
         }]

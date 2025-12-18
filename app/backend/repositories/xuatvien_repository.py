@@ -1,5 +1,6 @@
-from app.backend.models.xuatvien import XuatVien
-from app.backend.db import db
+from datetime import date
+from backend.models.xuatvien import XuatVien
+from backend.db import db
 
 class XuatVienRepository:
     def get_xuatvien_by_mabn(self, mabn):
@@ -28,3 +29,7 @@ class XuatVienRepository:
         db.session.delete(xuatvien)
         db.session.commit()
         return True
+    
+    def get_all_discharged_patients_id(self):
+        patients = XuatVien.query.filter((XuatVien.ngayxv != None) & (XuatVien.ngayxv <= date.today())).all()
+        return [patient.MABN for patient in patients]

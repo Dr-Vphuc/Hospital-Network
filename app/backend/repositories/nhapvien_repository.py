@@ -1,4 +1,5 @@
 from backend.models.nhapvien import NhapVien
+from backend.repositories.xuatvien_repository import XuatVienRepository
 from backend.db import db
 
 class NhapVienRepository:
@@ -28,3 +29,11 @@ class NhapVienRepository:
         db.session.delete(nhapvien)
         db.session.commit()
         return True
+
+    def get_all_current_inpatients_id(self):
+        all_nhapvien = NhapVien.query.all()
+        all_nhapvien_id = [nhapvien.MABN for nhapvien in all_nhapvien]
+        all_discharged_patients_id = XuatVienRepository().get_all_discharged_patients_id()
+        # minus discharged patients
+        current_inpatients_id = list(set(all_nhapvien_id) - set(all_discharged_patients_id))
+        return current_inpatients_id

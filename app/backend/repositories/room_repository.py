@@ -1,5 +1,5 @@
-from app.backend.models.room import Room
-from app.backend.db import db
+from backend.models.room import Room
+from backend.db import db
 
 class RoomRepository:
     def get_room_by_id(self, room_id):
