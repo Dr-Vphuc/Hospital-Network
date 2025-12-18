@@ -1,7 +1,7 @@
 # Lưu các tên Việt Nam để Dump
 import random
 import datetime as dt
-from dump.utils import randint_digits
+from utils import randint_digits
 
 # ==========================================
 # 1. DỮ LIỆU NHÂN KHẨU HỌC (DEMOGRAPHICS)

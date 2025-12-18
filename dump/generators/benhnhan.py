@@ -1,8 +1,8 @@
 # benhnhan generator
 from typing import List, Tuple
-from dump.pools import gen_fullname, gen_phone, gen_birthdate, TINH_TP, LOAI_DIEU_TRI, GIOI_TINH
-from dump.utils import q, fmt_date, pick_weighted
-from dump.state import PersistentIdGen   
+from pools import gen_fullname, gen_phone, gen_birthdate, TINH_TP, LOAI_DIEU_TRI, GIOI_TINH
+from utils import q, fmt_date, pick_weighted
+from state import PersistentIdGen   
 
 def gen(n: int, id_bn: PersistentIdGen) -> Tuple[List[str], List[str]]:
     rows: List[str] = []

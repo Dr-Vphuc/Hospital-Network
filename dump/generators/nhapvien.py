@@ -1,7 +1,7 @@
 from typing import List, Dict, Tuple, Optional
 import datetime as dt
 import random
-from dump.utils import q, fmt_date, recent_date
+from utils import q, fmt_date, recent_date
 
 def gen(
     bn_ids: List[str],
