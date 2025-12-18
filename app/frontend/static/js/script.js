@@ -240,11 +240,15 @@ function setupModals() {
 // Dashboard Functions
 function loadDashboard() {
     // Patient trends chart data (6 months)
+    // Use backend data if available, otherwise use mock data
+    const labels = window.backendData?.patientTrends?.labels || ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'];
+    const data = window.backendData?.patientTrends?.data || [45, 52, 48, 61, 58, 67];
+    
     const patientTrendsData = {
-        labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'],
+        labels: labels,
         datasets: [{
-            label: 'New Patients',
-            data: [45, 52, 48, 61, 58, 67],
+            label: 'Bệnh nhân mới',
+            data: data,
             borderColor: '#3B82F6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.4,

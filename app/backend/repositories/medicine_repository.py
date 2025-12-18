@@ -1,5 +1,5 @@
-from app.backend.models.medicine import Medicine
-from app.backend.db import db
+from backend.models.medicine import Medicine
+from backend.db import db
 
 class MedicineRepository:
     def get_medicine_by_id(self, medicine_id):

@@ -1,6 +1,7 @@
 from backend.models.patient import Patient
 from backend.models.xuatvien import XuatVien
 from backend.models.examination import Examination
+from backend.models.nhapvien import NhapVien
 from backend.models.bill import Bill
 from datetime import timedelta
 from backend.db import db
@@ -87,3 +88,11 @@ class PatientRepository:
         db.session.delete(patient)
         db.session.commit()
         return True
+
+    def get_total_patients_by_month(self, month):
+        """Get total number of patients admitted in the 'month' month"""
+        # join the Patient and NhapVien tables
+        patient_with_nhapvien = db.session.query(Patient).join(NhapVien, Patient.MABN == NhapVien.MABN)
+        # filter by the month of ngaynv
+        patients_in_month = patient_with_nhapvien.filter(db.extract('month', NhapVien.ngaynv) == month).all()
+        return len(patients_in_month)

@@ -56,13 +56,23 @@
     <!-- Charts Container -->
     <div class="charts-container">
         <div class="chart-card">
-            <h3>Patient Trends (6 Months)</h3>
+            <h3>Lượng bệnh nhân nhập viện (6 tháng)</h3>
             <canvas id="patientTrendsChart"></canvas>
         </div>
         <div class="chart-card">
-            <h3>Patients by Department</h3>
+            <h3>Bệnh nhân theo khoa</h3>
             <canvas id="departmentChart"></canvas>
         </div>
     </div>
 </section>
+
+<script>
+    // Pass backend data to JavaScript
+    window.backendData = {
+        patientTrends: {
+            labels: {{ month_strings | tojson }},
+            data: {{ total_patients_last_6_months | tojson }}
+        }
+    };
+</script>
 {% endblock %}

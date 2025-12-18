@@ -9,11 +9,15 @@ def overview():
     total_active_doctors = OverviewService().get_total_active_doctors()
     all_examinations_today = OverviewService().get_all_examinations_today()
     days_30_revenue = OverviewService().get_30days_revenue()
+    total_patients_last_6_months, month_strings = OverviewService().get_total_patients_last_6_month()
+    print(total_patients_last_6_months, month_strings)
     return render_template(
         'admin/overview.html',
         total_current_inpatients=total_current_inpatients, 
         total_active_doctors=total_active_doctors,
         all_examinations_today=all_examinations_today, 
-        days_30_revenue=days_30_revenue
+        days_30_revenue=days_30_revenue,
+        total_patients_last_6_months=total_patients_last_6_months, 
+        month_strings=month_strings
         )
 
