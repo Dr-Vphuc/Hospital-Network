@@ -10,6 +10,10 @@ truy vấn được thực hiện bằng các model, model chính là đại di�
 3.1. trong model cần định nghĩa các thuộc tính cần thiết, 
 để từ đó repositoties có thể truy vấn bằng hàm mà không cần lệnh SQL
 
+Viết code thì viết hàm cần dùng trong repositoties trước, 
+sau đó viết logic nghiệp vụ (kiểu kiểm tra tháng có > 1 < 12 không,..), 
+\sau đó api gọi về service, so đó chỉnh sửa để hiển thị data trong html
+
 Frontend
 Trang của admin trong thư mục admin, menu gồm tạm thời gồm 6 phần, 
 chia thành các template riêng và đều kế thừa base.html trong thư mục base
