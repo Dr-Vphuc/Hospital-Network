@@ -65,6 +65,18 @@ def main():
         thuoc_ids=pools["thuoc_ids"],
     )
 
+    if args.mode == "realtime":
+        missing = [name for name, ids in [
+            ("khoa", ctx.khoa_ids),
+            ("bacsi", ctx.bacsi_ids),
+            ("phongbenh", ctx.phong_ids),
+            ("thuoc", ctx.thuoc_ids),
+        ] if not ids]
+        if missing:
+            raise SystemExit(
+                f"Thiếu dữ liệu seed cho: {', '.join(missing)}. Hãy chạy --mode seed hoặc --mode full trước khi realtime."
+            )
+
     wanted = [t.strip().lower() for t in args.tables.split(",")] if args.tables != "*" else ["*"]
 
     def want(table: str) -> bool:
