@@ -1,5 +1,6 @@
 # main.py
 import argparse, random
+from collections import Counter
 from config import Config, Counts
 from state import load_state, save_state, PersistentIdGen
 from sqlwriter import SqlWriter
@@ -13,6 +14,15 @@ def get_pools(state: dict) -> dict:
     return state.setdefault("_pools", {
         "khoa_ids": [], "bacsi_ids": [], "phong_ids": [], "thuoc_ids": []
     })
+
+def assert_unique_ids(items, label: str):
+    vals = [v for v in items if v is not None]
+    counter = Counter(vals)
+    dups = [k for k, v in counter.items() if v > 1]
+    if dups:
+        sample = ", ".join(dups[:5])
+        more = f" (+{len(dups) - 5} cái nữa)" if len(dups) > 5 else ""
+        raise SystemExit(f"Trùng ID {label}: {sample}{more}")
 
 def build_idgens(state: dict):
     return {
@@ -64,6 +74,9 @@ def main():
         phong_ids=pools["phong_ids"],
         thuoc_ids=pools["thuoc_ids"],
     )
+
+    for name, pool_ids in [("khoa", ctx.khoa_ids), ("bacsi", ctx.bacsi_ids), ("phongbenh", ctx.phong_ids), ("thuoc", ctx.thuoc_ids)]:
+        assert_unique_ids(pool_ids, f"pool {name}")
 
     if args.mode == "realtime":
         missing = [name for name, ids in [
@@ -128,6 +141,7 @@ def main():
         if args.mode in ("realtime", "full"):
             if want("benhnhan"):
                 rows, ctx.new_bn_ids = benhnhan.gen(cnt.benhnhan, ids["bn"])
+                assert_unique_ids(ctx.new_bn_ids, "BENHNHAN")
                 w.section("BENHNHAN", section); section += 1
                 w.insert_values_terminated("benhnhan", iter(rows), cfg.batch)
 
@@ -137,6 +151,7 @@ def main():
 
             if want("bhyt"):
                 rows, ctx.new_bhyt_ids = bhyt.gen(ctx.new_bn_ids, ids["bhyt"], cfg.bhyt_days_back)
+                assert_unique_ids(ctx.new_bhyt_ids, "BHYT")
                 w.section("BHYT", section); section += 1
                 w.insert_values_terminated("BHYT", iter(rows), cfg.batch)
 
@@ -153,6 +168,7 @@ def main():
 
             if want("donthuoc"):
                 rows, ctx.new_dt_ids = donthuoc.gen(cnt.donthuoc, ids["dt"], ctx.bacsi_ids, ctx.new_bn_ids)
+                assert_unique_ids(ctx.new_dt_ids, "DONTHUOC")
                 w.section("DONTHUOC", section); section += 1
                 w.insert_values_terminated("donthuoc", iter(rows), cfg.batch)
 
