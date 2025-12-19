@@ -1,9 +1,10 @@
 from backend.models.doctor import Doctor
+from backend.models.faculty import Faculty
 from backend.db import db
 
 class DoctorRepository:
     def get_doctor_by_id(self, doctor_id):
-        return Doctor.query.filter_by(__id=doctor_id).first()
+        return Doctor.query.filter_by(MABS=doctor_id).first()
 
     def add_doctor(self, hoten, gioitinh, ngaysinh, sdt, phongkham, bangcap, makhoa):
         new_doctor = Doctor(hoten, gioitinh, ngaysinh, sdt, phongkham, bangcap, makhoa)
@@ -35,3 +36,12 @@ class DoctorRepository:
         SELECT COUNT(*) FROM doctor WHERE is_active = TRUE
         """
         return Doctor.query.filter_by(trangthai=True).count()
+    
+    def get_all_doctors_with_department(self):
+        """Get all doctors with their department names
+        SQL equivalent:
+        SELECT d.*, dept.name FROM doctor d
+        JOIN department dept ON d.department_id = dept.id
+        """
+        return db.session.query(Doctor, Faculty.tenkhoa.label('tenkhoa'))\
+            .join(Faculty, Doctor.makhoa == Faculty.MAKHOA).all()

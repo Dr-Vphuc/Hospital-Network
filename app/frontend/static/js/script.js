@@ -466,8 +466,9 @@ function loadStaff() {
     const tbody = document.getElementById('staffTableBody');
     if (!tbody) return;
 
+    const staff = window.allDoctors || mockData.staff;
     tbody.innerHTML = '';
-    mockData.staff.forEach(member => {
+    staff.forEach(member => {
         const row = createStaffRow(member);
         tbody.appendChild(row);
     });
@@ -475,14 +476,15 @@ function loadStaff() {
 
 function createStaffRow(member) {
     const row = document.createElement('tr');
-    const statusClass = member.status === 'Available' ? 'badge-green' : 'badge-red';
+    const statusClass = member.trangthai === true ? 'badge-green' : 'badge-red';
     
     row.innerHTML = `
-        <td>${member.name}</td>
-        <td>${member.role}</td>
-        <td>${member.department}</td>
-        <td>${member.contact}</td>
-        <td><span class="badge ${statusClass}">${member.status}</span></td>
+        <td>${member.hoten}</td>
+        <td>${member.bangcap}</td>
+        <td>${member.khoa}</td>
+        <td>${member.phongkham}</td>
+        <td>${member.sdt}</td>
+        <td><span class="badge ${statusClass}">${member.trangthai}</span></td>
     `;
     
     return row;
@@ -492,8 +494,8 @@ function filterStaff(searchTerm) {
     const tbody = document.getElementById('staffTableBody');
     if (!tbody) return;
 
-    const filteredStaff = mockData.staff.filter(member =>
-        member.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredStaff = (window.allDoctors || mockData.staff).filter(member =>
+        member.hoten.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     tbody.innerHTML = '';
@@ -503,13 +505,13 @@ function filterStaff(searchTerm) {
     });
 }
 
-function filterStaffByRole(role) {
+function filterStaffByRole(faculty) {
     const tbody = document.getElementById('staffTableBody');
     if (!tbody) return;
 
-    const filteredStaff = role ? 
-        mockData.staff.filter(member => member.role === role) : 
-        mockData.staff;
+    const filteredStaff = faculty ? 
+        (window.allDoctors || mockData.staff).filter(member => member.khoa === faculty) : 
+        (window.allDoctors || mockData.staff);
 
     tbody.innerHTML = '';
     filteredStaff.forEach(member => {
@@ -567,16 +569,19 @@ function loadMyPatients() {
     const tbody = document.getElementById('myPatientsTableBody');
     if (!tbody) return;
 
+    const doctorPatients = window.examinationsData || mockData.doctorPatients;
     tbody.innerHTML = '';
-    mockData.doctorPatients.forEach(patient => {
+    doctorPatients.forEach(patient => {
         const row = document.createElement('tr');
-        const healthStatusClass = getHealthStatusClass(patient.healthStatus);
+        const healthStatusClass = getHealthStatusClass(patient.health_status);
         
         row.innerHTML = `
-            <td>${patient.name}</td>
-            <td>${formatDate(patient.lastVisit)}</td>
-            <td><span class="badge ${healthStatusClass}">${patient.healthStatus}</span></td>
-            <td>${patient.visitHistory}</td>
+            <td>${patient.patient_name}</td>
+            <td>${patient.giaidoan}</td>
+            <td>${formatDate(patient.last_visit)}</td>
+            <td><span class="badge ${healthStatusClass}">${patient.health_status}</span></td>
+            <td>${patient.medicine_name}</td>
+            <td>${patient.total_medicine_quantity}</td>
         `;
         
         tbody.appendChild(row);
@@ -943,9 +948,12 @@ function getPrescriptionStatusClass(status) {
 
 function getHealthStatusClass(status) {
     switch (status) {
-        case 'Stable': return 'badge-green';
-        case 'Improving': return 'badge-blue';
-        case 'Recovering': return 'badge-yellow';
+        case 'Ổn định': return 'badge-green';
+        case 'Đang tiến triển tốt': return 'badge-blue';
+        case 'Thuyên giảm': return 'badge-yellow';
+        case 'Nặng lên': return 'badge-orange';
+        case 'Tiên lượng dè dặt': return 'badge-red';
+        case 'Nguy kịch': return 'badge-darkred';
         default: return 'badge-blue';
     }
 }

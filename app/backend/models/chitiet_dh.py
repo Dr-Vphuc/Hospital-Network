@@ -6,8 +6,10 @@ class ChiTietDH(db.Model):
     MADT = db.Column(db.String(50), db.ForeignKey('donhang.MADH'), primary_key=True)
     MATHUOC = db.Column(db.String(50), db.ForeignKey('thuoc.MATHUOC'), primary_key=True)
     soluong = db.Column(db.Integer, nullable=False)
+    songayuong = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, MADT, MATHUOC, soluong):
+    def __init__(self, MADT, MATHUOC, soluong, songayuong):
         self.MADT = MADT
         self.MATHUOC = MATHUOC
         self.soluong = soluong
+        self.songayuong = songayuong

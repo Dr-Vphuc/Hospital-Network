@@ -1,0 +1,66 @@
+{% extends 'admin/base/base.html' %}
+
+{% block title %}Doctors{% endblock %}
+
+{% block content %}
+
+
+<!-- Doctor Portal Sub-tabs -->
+<div class="sub-tabs">
+    <button class="sub-tab" data-subsection="my-patients">Các lượt khám chữa</button>
+    <button class="sub-tab" data-subsection="performance">Hiệu suất làm việc</button>
+</div>
+
+<!-- Sub-sections -->
+<div class="sub-content">
+    
+    <div id="my-patients" class="sub-section">
+        <h3>Bác sĩ {{ doctor_name }}</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Tên bệnh nhân</th>
+                    <th>Giai đoạn</th>
+                    <th>Ngày khám</th>
+                    <th>Tình trạng sức khỏe</th>
+                    <th>Thuốc được kê</th>
+                    <th>Tổng đơn vị thuốc</th>
+                </tr>
+            </thead>
+            <tbody id="myPatientsTableBody">
+                <!-- Populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="performance" class="sub-section">
+        <h3>Bác sĩ {{ doctor_name }}</h3>
+        <div class="performance-stats">
+            <div class="stat-card">
+                <h4>150</h4>
+                <p>Tổng số lượt khám</p>
+            </div>
+            <div class="stat-card">
+                <h4>4.8/5</h4>
+                <p>Đánh giá trung bình</p>
+            </div>
+        </div>
+        <div class="chart-card">
+            <h4>Consultation Trends</h4>
+            <canvas id="consultationTrendsChart"></canvas>
+        </div>
+        <div class="feedback-section">
+            <h4>Recent Patient Feedback</h4>
+            <div class="feedback-list" id="feedbackList">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+<script>
+    window.examinationsData = {{ examinations_data | tojson | safe }};
+</script>
+
+{% endblock %}
