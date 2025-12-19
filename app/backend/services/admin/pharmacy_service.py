@@ -23,6 +23,7 @@ class PharmacyService:
                     "total_quantity": self.inventory_repo.total_quantity_by_medicine(inventory.MATHUOC),
                     "total_stock_level": MEDICINES_PER_BATCH * self.inventory_repo.count_batches_by_medicine(inventory.MATHUOC)
                 })
+        table_data.sort(key=lambda x: x['name'])
         return table_data    
         
     

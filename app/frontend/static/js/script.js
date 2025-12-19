@@ -723,7 +723,9 @@ function createPharmacyRow(medicine) {
     const stockPercentage = (medicine.quantity / medicine.max_quantity) * 100;
     const progressClass = stockPercentage > 50 ? 'progress-green' : 
                          stockPercentage > 20 ? 'progress-yellow' : 'progress-red';
-    
+    const allStockPercentages = (medicine.total_quantity / medicine.total_stock_level) * 100;
+    const allProgressClass = allStockPercentages > 50 ? 'progress-green' : 
+                         allStockPercentages > 20 ? 'progress-yellow' : 'progress-red';
     row.innerHTML = `
         <td>${medicine.name}</td>
         <td>${medicine.quantity}</td>
@@ -736,7 +738,12 @@ function createPharmacyRow(medicine) {
         <td>${formatDate(medicine.expiry_date)}</td>
         <td>${medicine.batch_count}</td>
         <td>${medicine.total_quantity}</td>
-        <td>${medicine.total_stock_level}</td>
+        <td>
+            <div class="progress-bar">
+                <div class="progress-fill ${allProgressClass}" style="width: ${allStockPercentages}%"></div>
+            </div>
+            <span style="font-size: 0.75rem; color: #6b7280;">${Math.round(allStockPercentages)}%</span>
+        </td>
     `;
     
     return row;
