@@ -181,7 +181,10 @@ THUOC_TEN = [
 def gen_fullname(sex: str) -> str:
     ho = random.choice(HO)
     
-    if sex == "M":
+    # Chấp nhận các biến thể "Nam"/"Male"/"M" cho giới tính nam
+    sex_norm = sex.strip().lower()
+    is_male = sex_norm in ("m", "male", "nam")
+    if is_male:
         ds_ten_dem = TEN_DEM_NAM
         ds_ten = TEN_NAM
     else:
