@@ -5,7 +5,15 @@ from pathlib import Path
 def load_state(path: str) -> dict:
     p = Path(path)
     if p.exists():
-        return json.loads(p.read_text(encoding="utf-8"))
+        # ngoại lệ nếu file rỗng hoặc format lỗi
+        try:
+            content = p.read_text(encoding="utf-8").strip()
+            if not content:
+                return {}
+            return json.loads(content)
+        except json.JSONDecodeError:
+            # Nếu file rỗng/format lỗi thì coi như state mới
+            return {}
     return {}
 
 def save_state(state: dict, path: str):
