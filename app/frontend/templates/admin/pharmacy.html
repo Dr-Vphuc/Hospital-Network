@@ -6,11 +6,11 @@
 <!-- Pharmacy Section -->
         <section id="pharmacy" class="content-section active">
             <div class="section-header">
-                <h2>Pharmacy Inventory</h2>
+                <h2>Kho thuốc</h2>
                 <div class="section-actions">
                     <button class="btn btn-primary">
                         <i data-feather="plus"></i>
-                        Add Stock
+                        Thêm thuốc
                     </button>
                 </div>
             </div>
@@ -23,7 +23,7 @@
             <div class="inventory-stats">
                 <div class="stat-card">
                     <h3>$45,230</h3>
-                    <p>Total Inventory Value</p>
+                    <p>Tổng giá trị kho thuốc</p>
                 </div>
             </div>
 
@@ -31,13 +31,13 @@
                 <table class="data-table" id="pharmacyTable">
                     <thead>
                         <tr>
-                            <th>Medicine Name</th>
-                            <th>Quantity</th>
-                            <th>Stock Level</th>
-                            <th>Expiry Date</th>
-                            <th>Supplier</th>
-                            <th>Batch</th>
-                            <th>Location</th>
+                            <th>Tên thuốc</th>
+                            <th>Số lượng trong lô</th>
+                            <th>Mức tồn kho</th>
+                            <th>Hạn sử dụng</th>
+                            <th>Số lô cùng loại</th>
+                            <th>Số lượng tổng</th>
+                            <th>Mức tồn kho tổng</th>
                         </tr>
                     </thead>
                     <tbody id="pharmacyTableBody">
@@ -46,4 +46,9 @@
                 </table>
             </div>
         </section>
+
+<script>
+    // Pass backend data to JavaScript
+    window.inventoryStatusTable = {{ inventory_status_table | tojson | safe }};
+</script>
 {% endblock %}

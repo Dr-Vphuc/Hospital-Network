@@ -656,38 +656,50 @@ function loadPharmacyAlerts() {
     const alertsContainer = document.getElementById('pharmacyAlerts');
     if (!alertsContainer) return;
 
-    const lowStockItems = mockData.medicines.filter(medicine => 
-        (medicine.quantity / medicine.maxQuantity) < 0.2
-    );
-    
-    const nearExpiryItems = mockData.medicines.filter(medicine => {
-        const expiryDate = new Date(medicine.expiryDate);
-        const today = new Date();
-        const diffTime = expiryDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays <= 30 && diffDays > 0;
-    });
+    // Prefer real backend data if available, otherwise fallback to mockData
+    const medicines = window.inventoryStatusTable ||
+                      window.backendData?.inventory?.medicines ||
+                      window.backendData?.medicines ||
+                      mockData.medicines;
 
     alertsContainer.innerHTML = '';
+    const today = new Date();
 
-    lowStockItems.forEach(medicine => {
-        const alert = document.createElement('div');
-        alert.className = 'alert alert-warning';
-        alert.innerHTML = `
-            <i data-feather="alert-triangle"></i>
-            Low stock: ${medicine.name} (${medicine.quantity}/${medicine.maxQuantity})
-        `;
-        alertsContainer.appendChild(alert);
-    });
+    medicines.forEach(med => {
+        const name = med.name || med.product_name || 'Unknown Medicine';
+        const quantity = Number(med.quantity ?? med.total_quantity ?? med.available_quantity ?? 0);
+        const maxQty = Number(med.maxQuantity ?? med.max_quantity ?? med.max ?? 1);
+        const expiryRaw = med.expiryDate ?? med.expiry_date ?? med.expiry;
 
-    nearExpiryItems.forEach(medicine => {
-        const alert = document.createElement('div');
-        alert.className = 'alert alert-danger';
-        alert.innerHTML = `
-            <i data-feather="alert-circle"></i>
-            Near expiry: ${medicine.name} expires on ${formatDate(medicine.expiryDate)}
-        `;
-        alertsContainer.appendChild(alert);
+        // Low stock alert
+        const stockRatio = maxQty > 0 ? (quantity / maxQty) : 0;
+        if (stockRatio < 0.2) {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-warning';
+            alert.innerHTML = `
+                <i data-feather="alert-triangle"></i>
+                Low stock: ${name} (${quantity}/${maxQty})
+            `;
+            alertsContainer.appendChild(alert);
+        }
+
+        // Near expiry alert
+        if (expiryRaw) {
+            const expiryDate = new Date(expiryRaw);
+            if (!isNaN(expiryDate)) {
+                const diffTime = expiryDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays <= 30 && diffDays > 0) {
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-danger';
+                    alert.innerHTML = `
+                        <i data-feather="alert-circle"></i>
+                        Near expiry: ${name} expires on ${formatDate(expiryDate)}
+                    `;
+                    alertsContainer.appendChild(alert);
+                }
+            }
+        }
     });
 
     feather.replace();
@@ -698,7 +710,9 @@ function loadPharmacyTable() {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    mockData.medicines.forEach(medicine => {
+    // Use real data from backend if available, otherwise fallback to mockData
+    const medicinesData = window.inventoryStatusTable || mockData.medicines;
+    medicinesData.forEach(medicine => {
         const row = createPharmacyRow(medicine);
         tbody.appendChild(row);
     });
@@ -706,7 +720,7 @@ function loadPharmacyTable() {
 
 function createPharmacyRow(medicine) {
     const row = document.createElement('tr');
-    const stockPercentage = (medicine.quantity / medicine.maxQuantity) * 100;
+    const stockPercentage = (medicine.quantity / medicine.max_quantity) * 100;
     const progressClass = stockPercentage > 50 ? 'progress-green' : 
                          stockPercentage > 20 ? 'progress-yellow' : 'progress-red';
     
@@ -719,10 +733,10 @@ function createPharmacyRow(medicine) {
             </div>
             <span style="font-size: 0.75rem; color: #6b7280;">${Math.round(stockPercentage)}%</span>
         </td>
-        <td>${formatDate(medicine.expiryDate)}</td>
-        <td>${medicine.supplier}</td>
-        <td>${medicine.batch}</td>
-        <td>${medicine.location}</td>
+        <td>${formatDate(medicine.expiry_date)}</td>
+        <td>${medicine.batch_count}</td>
+        <td>${medicine.total_quantity}</td>
+        <td>${medicine.total_stock_level}</td>
     `;
     
     return row;

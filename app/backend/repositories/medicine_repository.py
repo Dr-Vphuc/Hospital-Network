@@ -3,7 +3,7 @@ from backend.db import db
 
 class MedicineRepository:
     def get_medicine_by_id(self, medicine_id):
-        return Medicine.query.filter_by(__id=medicine_id).first()
+        return Medicine.query.filter_by(MATHUOC=medicine_id).first()
 
     def add_medicine(self, tenthuoc, congdung, hsd, giatien):
         new_medicine = Medicine(tenthuoc, congdung, hsd, giatien)
