@@ -1140,7 +1140,7 @@ function submitNewMedicine(event) {
         tenthuoc: form.tenthuoc.value,
         congdung: form.congdung.value,
         giatien: parseInt(form.giatien.value),
-        soluong: parseInt(form.soluong.value),
+        solo: parseInt(form.soluong.value),
         hsd: form.hsd.value
     };
     

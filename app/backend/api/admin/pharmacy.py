@@ -21,3 +21,11 @@ def add_medicine_batch():
     
     PharmacyService().add_medicine_batch(data)
     return {'success': True, 'message': f'Added new medicine batches successfully.'}, 200
+
+@admin_bp.route('/add-new-medicine-batch', methods=['POST'])
+@admin_required
+def add_new_medicine_batch():
+    data = request.get_json()
+    
+    PharmacyService().add_new_medicine_batch(data)
+    return {'success': True, 'message': f'Added new medicine and its batches successfully.'}, 200

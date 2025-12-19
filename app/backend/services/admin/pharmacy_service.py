@@ -51,3 +51,18 @@ class PharmacyService:
         batch_number = data.get('solo')
         for i in range(batch_number):
             self.inventory_repo.add_inventory(mathuoc, soluong, hsd)
+     
+    def add_new_medicine_batch(self, data):
+        MATHUOC = self.medicine_repo.get_next_medicine_id()
+        tenthuoc = data['tenthuoc']
+        congdung = data['congdung']
+        giatien = data['giatien'] 
+        
+        new_medicine = self.medicine_repo.add_medicine(MATHUOC, tenthuoc, congdung, giatien)
+        
+        soluong = MEDICINES_PER_BATCH
+        hsd = data['hsd']
+        
+        batch_number = data.get('solo')
+        for i in range(batch_number):
+            self.inventory_repo.add_inventory(MATHUOC, soluong, hsd)
