@@ -27,7 +27,7 @@ def ensure_and_gen(ctx: Ctx, id_bs: PersistentIdGen, khoa_ids: List[str], target
 
         doctors.append((bs, {"khoa": makhoa}))
         rows.append(
-            f"({q(bs)},{q(name)},{q(sex)},{q(dob)},{q(phone)},{q(phong)},{q(trinhdo)},{q(makhoa)},{qb(active)})"
+            f"({q(bs)},{q(name)},{q(sex)},{q(dob)},{q(phone)},{q(phong)},{q(trinhdo)},{q(makhoa)},{qb(1 if active else 0)})"
         )
 
     return rows, doctors

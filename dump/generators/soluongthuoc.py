@@ -12,6 +12,6 @@ def gen(thuoc_ids: List[str], id_lo: PersistentIdGen) -> Tuple[List[str], List[s
         malo = id_lo.next()
         hsd = date_between(dt.date.today() + dt.timedelta(days=30), dt.date.today() + dt.timedelta(days=3650))
         ton = random.randint(0, 250)
-        rows.append(f"({q(malo)},{q(t)},{q(fmt_date(hsd))},{ton})")
+        rows.append(f"({q(malo)},{q(t)},{ton},{q(fmt_date(hsd))})")
         lo_ids.append(malo)
     return rows, lo_ids
