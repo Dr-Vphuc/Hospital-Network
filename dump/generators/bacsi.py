@@ -9,12 +9,9 @@ from generators import Ctx
 Doctor = Tuple[str, Dict[str, object]]
 
 def ensure_and_gen(ctx: Ctx, id_bs: PersistentIdGen, khoa_ids: List[str], target_bacsi: int = 40) -> Tuple[List[str], List[Doctor]]:
-    # Only seed if empty to avoid duplicates
-    if ctx.bacsi_ids:
-        return [], []
-
-    for _ in range(target_bacsi):
-        ctx.bacsi_ids.append(id_bs.next())
+    if len(ctx.bacsi_ids) < target_bacsi:
+        for _ in range(target_bacsi - len(ctx.bacsi_ids)):
+            ctx.bacsi_ids.append(id_bs.next())
 
     doctors: List[Doctor] = []
     rows: List[str] = []

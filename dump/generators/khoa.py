@@ -8,16 +8,13 @@ from generators import Ctx
 
 def ensure_and_gen(ctx: Ctx, id_khoa: PersistentIdGen, id_bs: PersistentIdGen,
                    target_khoa: int = 10, target_bacsi: int = 40) -> List[str]:
-    # Only seed if empty to avoid duplicates
-    if ctx.khoa_ids and ctx.bacsi_ids:
-        return []
-
-    if not ctx.khoa_ids:
-        for _ in range(target_khoa):
+    # Bảo đảm đủ số lượng tối thiểu; không bỏ qua nếu đã có ID, để luôn sinh dữ liệu cho file SQL
+    if len(ctx.khoa_ids) < target_khoa:
+        for _ in range(target_khoa - len(ctx.khoa_ids)):
             ctx.khoa_ids.append(id_khoa.next())
 
-    if not ctx.bacsi_ids:
-        for _ in range(target_bacsi):
+    if len(ctx.bacsi_ids) < target_bacsi:
+        for _ in range(target_bacsi - len(ctx.bacsi_ids)):
             ctx.bacsi_ids.append(id_bs.next())
 
     rows: List[str] = []
