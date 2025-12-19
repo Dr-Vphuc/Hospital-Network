@@ -8,7 +8,7 @@
             <div class="section-header">
                 <h2>Kho thuốc</h2>
                 <div class="section-actions">
-                    <button class="btn btn-primary">
+                    <button class="btn btn-primary" onclick="openAddMedicineModal()">
                         <i data-feather="plus"></i>
                         Thêm thuốc
                     </button>
@@ -22,7 +22,7 @@
 
             <div class="inventory-stats">
                 <div class="stat-card">
-                    <h3>$45,230</h3>
+                    <h3>{{ total_price / 1000 }} nghìn VND</h3>
                     <p>Tổng giá trị kho thuốc</p>
                 </div>
             </div>
@@ -46,6 +46,82 @@
                 </table>
             </div>
         </section>
+
+<!-- Add Medicine Modal -->
+<div id="addMedicineModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3>Thêm thuốc</h3>
+            <button class="modal-close" onclick="closeAddMedicineModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <!-- Tab Navigation -->
+            <div class="medicine-tabs">
+                <button class="medicine-tab active" onclick="switchMedicineTab('new')">
+                    Thuốc mới
+                </button>
+                <button class="medicine-tab" onclick="switchMedicineTab('existing')">
+                    Thuốc có sẵn
+                </button>
+            </div>
+
+            <!-- New Medicine Form -->
+            <div id="newMedicineForm" class="medicine-form-container active">
+                <form id="newMedicineFormElement" onsubmit="submitNewMedicine(event)">
+                    <div class="form-group">
+                        <label for="newMedicineName">Tên thuốc *</label>
+                        <input type="text" id="newMedicineName" name="tenthuoc" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="newMedicineUsage">Công dụng *</label>
+                        <textarea id="newMedicineUsage" name="congdung" required class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="newMedicinePrice">Giá tiền (VND) *</label>
+                        <input type="number" id="newMedicinePrice" name="giatien" required class="form-control" min="0" step="1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="newMedicineQuantity">Số lượng *</label>
+                        <input type="number" id="newMedicineQuantity" name="soluong" required class="form-control" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="newMedicineExpiry">Hạn sử dụng *</label>
+                        <input type="date" id="newMedicineExpiry" name="hsd" required class="form-control">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddMedicineModal()">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Thêm thuốc mới</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Existing Medicine Form -->
+            <div id="existingMedicineForm" class="medicine-form-container">
+                <form id="existingMedicineFormElement" onsubmit="submitExistingMedicine(event)">
+                    <div class="form-group">
+                        <label for="existingMedicineName">Tên thuốc *</label>
+                        <select id="existingMedicineName" name="tenthuoc" required class="form-control">
+                            <option value="">-- Chọn thuốc --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="existingMedicineQuantity">Số lượng *</label>
+                        <input type="number" id="existingMedicineQuantity" name="soluong" required class="form-control" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="existingMedicineExpiry">Hạn sử dụng *</label>
+                        <input type="date" id="existingMedicineExpiry" name="hsd" required class="form-control">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddMedicineModal()">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Thêm lô thuốc</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     // Pass backend data to JavaScript

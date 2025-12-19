@@ -23,3 +23,6 @@ WITH bn_xuatvien_30 AS (
 )
 SELECT sum(tongtien) as 'Total Revenue Last 30 Days' FROM hoadon
 WHERE hoadon.mabn IN (SELECT mabn FROM bn_xuatvien_30);
+
+select sum(giatien * soluong) from soluongthuoc
+join thuoc on soluongthuoc.mathuoc = thuoc.mathuoc;

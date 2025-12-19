@@ -993,9 +993,214 @@ const additionalStyles = `
     color: #fbbf24;
     font-size: 1.2rem;
 }
+
+.medicine-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.medicine-tab {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.3s;
+}
+
+.medicine-tab:hover {
+    color: #3B82F6;
+}
+
+.medicine-tab.active {
+    color: #3B82F6;
+    border-bottom-color: #3B82F6;
+}
+
+.medicine-form-container {
+    display: none;
+}
+
+.medicine-form-container.active {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
 `;
 
 // Add the additional styles to the page
 const styleSheet = document.createElement('style');
 styleSheet.textContent = additionalStyles;
 document.head.appendChild(styleSheet);
+
+// Add Medicine Modal Functions
+function openAddMedicineModal() {
+    const modal = document.getElementById('addMedicineModal');
+    modal.classList.add('open');
+    
+    // Populate existing medicine dropdown
+    populateExistingMedicines();
+    
+    // Reset to first tab
+    switchMedicineTab('new');
+    
+    // Reset forms
+    document.getElementById('newMedicineFormElement').reset();
+    document.getElementById('existingMedicineFormElement').reset();
+    
+    // Re-initialize icons
+    feather.replace();
+}
+
+function closeAddMedicineModal() {
+    const modal = document.getElementById('addMedicineModal');
+    modal.classList.remove('open');
+}
+
+function switchMedicineTab(tabName) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('.medicine-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Update form containers
+    document.getElementById('newMedicineForm').classList.remove('active');
+    document.getElementById('existingMedicineForm').classList.remove('active');
+    
+    if (tabName === 'new') {
+        tabs[0].classList.add('active');
+        document.getElementById('newMedicineForm').classList.add('active');
+    } else {
+        tabs[1].classList.add('active');
+        document.getElementById('existingMedicineForm').classList.add('active');
+    }
+}
+
+function populateExistingMedicines() {
+    const select = document.getElementById('existingMedicineName');
+    
+    // Get unique medicine names from inventory data
+    const medicinesData = window.inventoryStatusTable || mockData.medicines;
+    const uniqueMedicines = [...new Set(medicinesData.map(m => m.name))];
+    
+    // Clear existing options except the first one
+    select.innerHTML = '<option value="">-- Chọn thuốc --</option>';
+    
+    // Add options for each unique medicine
+    uniqueMedicines.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+    });
+}
+
+function submitNewMedicine(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = {
+        tenthuoc: form.tenthuoc.value,
+        congdung: form.congdung.value,
+        giatien: parseInt(form.giatien.value),
+        soluong: parseInt(form.soluong.value),
+        hsd: form.hsd.value
+    };
+    
+    console.log('Submitting new medicine:', formData);
+    
+    // Send data to backend API
+    fetch('/admin/add-new-medicine-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Đã thêm thuốc mới thành công!');
+            closeAddMedicineModal();
+            loadPharmacyTable(); // Reload table
+        }
+    });
+    
+    alert('Đã thêm thuốc mới: ' + formData.tenthuoc + '\n(TODO: Kết nối backend API)');
+    closeAddMedicineModal();
+}
+
+function submitExistingMedicine(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = {
+        tenthuoc: form.tenthuoc.value,
+        solo: parseInt(form.soluong.value),
+        hsd: form.hsd.value
+    };
+    
+    console.log('Submitting existing medicine batch:', formData);
+    
+    // Send data to backend API
+    fetch('/admin/add-medicine-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Đã thêm lô thuốc thành công!\n' + data.message);
+            closeAddMedicineModal();
+            loadPharmacyTable(); // Reload table
+            loadPharmacyAlerts(); // Reload alerts
+        } else {
+            alert('Lỗi: ' + (data.message || 'Không thể thêm lô thuốc'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Lỗi kết nối: ' + error.message);
+    });
+}

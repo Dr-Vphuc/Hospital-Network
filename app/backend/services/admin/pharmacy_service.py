@@ -1,5 +1,6 @@
 from backend.repositories.inventory_repository import InventoryRepository
 from backend.repositories.medicine_repository import MedicineRepository
+from backend.models.medicine import Medicine
 
 MEDICINES_PER_BATCH = 250
 
@@ -26,4 +27,27 @@ class PharmacyService:
         table_data.sort(key=lambda x: x['name'])
         return table_data    
         
+    def get_total_price(self):
+        total_price = 0
+        inventories = self.inventory_repo.get_all_inventories()
+        for inventory in inventories:
+            total_price += self.get_total_price_by_batch(inventory.MALO)
+        return total_price
     
+    def get_total_price_by_batch(self, malo):
+        inventory = self.inventory_repo.get_inventory_by_id(malo)
+        if not inventory:
+            return 0
+        medicine = Medicine.query.filter_by(MATHUOC=inventory.MATHUOC).first()
+        if not medicine:
+            return 0
+        return inventory.soluong * medicine.giatien
+    
+    def add_medicine_batch(self, data):
+        mathuoc = MedicineRepository().get_id_by_name(data['tenthuoc'])
+        soluong = MEDICINES_PER_BATCH
+        hsd = data['hsd']
+        
+        batch_number = data.get('solo')
+        for i in range(batch_number):
+            self.inventory_repo.add_inventory(mathuoc, soluong, hsd)

@@ -6,8 +6,8 @@ class InventoryRepository:
     def get_inventory_by_id(self, malo):
         return Inventory.query.filter_by(MALO=malo).first()
 
-    def add_inventory(self, malo, mathuoc, soluong):
-        new_inventory = Inventory(malo, mathuoc, soluong)
+    def add_inventory(self, mathuoc, soluong, hsd):
+        new_inventory = Inventory(mathuoc, soluong, hsd)
         db.session.add(new_inventory)
         db.session.commit()
         return new_inventory

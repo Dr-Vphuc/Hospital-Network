@@ -28,3 +28,7 @@ class MedicineRepository:
         db.session.delete(medicine)
         db.session.commit()
         return True
+    
+    def get_id_by_name(self, tenthuoc):
+        medicine = Medicine.query.filter_by(tenthuoc=tenthuoc).first()
+        return medicine.MATHUOC if medicine else None
