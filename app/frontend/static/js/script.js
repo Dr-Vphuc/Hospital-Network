@@ -162,22 +162,9 @@ function setupTabNavigation() {
 
 // Sub-tab Navigation for Doctor Portal
 function setupSubTabNavigation() {
-    const subTabs = document.querySelectorAll('.sub-tab');
-    const subSections = document.querySelectorAll('.sub-section');
-
-    subTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetSubSection = tab.getAttribute('data-subsection');
-            
-            // Remove active class from all sub-tabs and sub-sections
-            subTabs.forEach(t => t.classList.remove('active'));
-            subSections.forEach(s => s.classList.remove('active'));
-            
-            // Add active class to clicked sub-tab and corresponding sub-section
-            tab.classList.add('active');
-            document.getElementById(targetSubSection).classList.add('active');
-        });
-    });
+    // Sub-tabs are now links that navigate to different routes
+    // The active state is controlled by the server-side template
+    // No JavaScript click handling needed - just let the links work naturally
 }
 
 // Search Functionality

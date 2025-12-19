@@ -1,4 +1,5 @@
 from backend.models.examination import Examination
+from backend.models.prescription import Prescription
 from backend.db import db
 
 class ExaminationRepository:
@@ -34,3 +35,21 @@ class ExaminationRepository:
     
     def get_distinct_patients_by_faculty(self, faculty_id):
         return Examination.query.filter_by(MAKHOA=faculty_id).distinct(Examination.MABN).all()
+    
+    def get_stable_patients_count_by_doctor(self, doctor_id):
+        """Get count of stable patients for a given doctor
+        SQL equivalent:
+        SELECT COUNT(DISTINCT sk.mabn) FROM sokhambenh sk
+        JOIN donthuoc dt ON sk.madt = dt.madt
+        WHERE dt.mabs = :doctor_id AND sk.tinhtrang = 'Stable'
+        """
+        stable_patients_count = (
+            db.session.query(db.func.count(db.distinct(Examination.MABN)))
+            .join(Prescription, Prescription.MADT == Examination.MADT)
+            .filter(
+                Prescription.MABS == doctor_id,
+                Examination.tinhtrang == 'Ổn định'
+            )
+            .scalar()
+        )
+        return stable_patients_count

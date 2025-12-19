@@ -4,11 +4,13 @@ from backend.models.examination import Examination
 from backend.models.prescription import Prescription
 from backend.models.chitiet_dh import ChiTietDH
 from backend.models.medicine import Medicine
+from backend.repositories.examination_repository import ExaminationRepository
 from backend.db import db
 
 class DoctorPortalService:
     def __init__(self):
         self.doctor_repository = DoctorRepository()
+        self.examination_repository = ExaminationRepository()
         
     def get_patients_examinations_of_doctor(self, doctor_id):
         """
@@ -42,3 +44,41 @@ class DoctorPortalService:
             results.append(exam_data)
             
         return results
+    
+    def get_total_patients_of_doctor(self, doctor_id):
+        """Get total number of unique patients for a given doctor
+        SQL equivalent:
+        SELECT COUNT(DISTINCT sk.mabn) FROM sokhambenh sk
+        JOIN donthuoc dt ON sk.madt = dt.madt
+        WHERE dt.mabs = :doctor_id
+        """
+        total_patients = (
+            db.session.query(db.func.count(db.distinct(Examination.MABN)))
+            .join(Prescription, Prescription.MADT == Examination.MADT)
+            .filter(Prescription.MABS == doctor_id)
+            .scalar()
+        )
+        return total_patients
+    
+    def get_total_examinations_of_doctor(self, doctor_id):
+        """Get total number of examinations for a given doctor
+        SQL equivalent:
+        SELECT COUNT(*) FROM sokhambenh sk
+        WHERE dt.mabs = :doctor_id
+        """
+        total_examinations = (
+            db.session.query(db.func.count(Examination.MASKB))
+            .join(Prescription, Prescription.MADT == Examination.MADT)
+            .filter(Prescription.MABS == doctor_id)
+            .scalar()
+        )
+        return total_examinations
+    
+    def get_stable_patient_ratio_of_doctor(self, doctor_id):
+        total_patients = self.get_total_patients_of_doctor(doctor_id)
+        if total_patients == 0:
+            return 0.0
+        
+        total_stable_patients = self.examination_repository.get_stable_patients_count_by_doctor(doctor_id)
+        
+        return total_stable_patients / total_patients

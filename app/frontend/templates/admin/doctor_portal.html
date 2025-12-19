@@ -1,20 +1,20 @@
 {% extends 'admin/base/base.html' %}
 
-{% block title %}Doctors{% endblock %}
+{% block title %}{{ doctor_name }}{% endblock %}
 
 {% block content %}
 
 
 <!-- Doctor Portal Sub-tabs -->
 <div class="sub-tabs">
-    <button class="sub-tab" data-subsection="my-patients">Các lượt khám chữa</button>
-    <button class="sub-tab" data-subsection="performance">Hiệu suất làm việc</button>
+    <a href="{{ url_for('admin.doctor_examinations', doctor_id=doctor_id) }}" class="sub-tab {% if active_tab == 'my-patients' %}active{% endif %}" data-subsection="my-patients">Các lượt khám chữa</a>
+    <a href="{{ url_for('admin.doctor_performent', doctor_id=doctor_id) }}" class="sub-tab {% if active_tab == 'performance' %}active{% endif %}" data-subsection="performance">Hiệu suất làm việc</a>
 </div>
 
 <!-- Sub-sections -->
 <div class="sub-content">
     
-    <div id="my-patients" class="sub-section">
+    <div id="my-patients" class="sub-section {% if active_tab == 'my-patients' %}active{% endif %}">
         <h3>Bác sĩ {{ doctor_name }}</h3>
         <table class="data-table">
             <thead>
@@ -33,16 +33,20 @@
         </table>
     </div>
 
-    <div id="performance" class="sub-section">
+    <div id="performance" class="sub-section {% if active_tab == 'performance' %}active{% endif %}">
         <h3>Bác sĩ {{ doctor_name }}</h3>
         <div class="performance-stats">
             <div class="stat-card">
-                <h4>150</h4>
+                <h4>{{ total_examinations if total_examinations is not none else 0 }}</h4>
                 <p>Tổng số lượt khám</p>
             </div>
             <div class="stat-card">
-                <h4>4.8/5</h4>
-                <p>Đánh giá trung bình</p>
+                <h4>{{ total_patients if total_patients is not none else 0 }}</h4>
+                <p>Tổng số bệnh nhân</p>
+            </div>
+            <div class="stat-card">
+                <h4>{{ stable_patients_ratio if stable_patients_ratio is not none else 0 }} %</h4>
+                <p>Tỉ lệ bệnh nhân Ổn định</p>
             </div>
         </div>
         <div class="chart-card">
@@ -60,7 +64,8 @@
 </section>
 
 <script>
-    window.examinationsData = {{ examinations_data | tojson | safe }};
+    window.examinationsData = {{ examinations_data | tojson | safe if examinations_data is not none else '[]' | safe }};
+    window.activeTab = '{{ active_tab }}';
 </script>
 
 {% endblock %}
