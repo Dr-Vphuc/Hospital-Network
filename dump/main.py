@@ -35,6 +35,7 @@ def build_idgens(state: dict):
         "dt":   PersistentIdGen("DT",   5, "DT",   state, 1),
         "skb":  PersistentIdGen("SKB",  5, "SKB",  state, 1),
         "hd":   PersistentIdGen("HD",   5, "HD",   state, 1),
+        "lo":   PersistentIdGen("LO",   5, "LO",   state, 1),
     }
 
 def main():
@@ -103,7 +104,7 @@ def main():
         # ---- SEED PART (dims) ----
         if args.mode in ("seed", "full"):
             # seed khoa/bacsi/phong/thuoc if needed
-            if (not ctx.khoa_ids) and want("khoa"):
+            if want("khoa"):
                 rows = khoa.ensure_and_gen(ctx, ids["khoa"], ids["bs"], target_khoa=10, target_bacsi=cnt.bacsi)
                 w.section("KHOA", section); section += 1
                 w.insert_values_terminated("khoa", iter(rows), cfg.batch)
@@ -127,7 +128,7 @@ def main():
                     w.insert_values_terminated("toanha", iter(toanha.gen(meta)), cfg.batch)
                 if want("giuong"):
                     w.section("GIUONG", section); section += 1
-                    w.insert_values_terminated("giuong", iter(giuong.gen(ctx.phong_ids)), cfg.batch)
+                    w.insert_values_terminated("giuong", iter(giuong.gen(meta)), cfg.batch)
 
             if want("thuoc"):
                 rows_t, new_t = thuoc.ensure_and_gen(ctx, ids["thuoc"], target_drugs=200)
@@ -135,7 +136,9 @@ def main():
                 w.insert_values_terminated("thuoc", iter(rows_t), cfg.batch)
                 if want("soluongthuoc"):
                     w.section("SOLUONGTHUOC", section); section += 1
-                    w.insert_values_terminated("soluongthuoc", iter(soluongthuoc.gen(new_t)), cfg.batch)
+                    rows_slt, lo_ids = soluongthuoc.gen(ctx.thuoc_ids, ids["lo"])
+                    assert_unique_ids(lo_ids, "SOLUONGTHUOC.MALO")
+                    w.insert_values_terminated("soluongthuoc", iter(rows_slt), cfg.batch)
 
         # ---- REALTIME PART (facts/events) ----
         if args.mode in ("realtime", "full"):
