@@ -1,0 +1,124 @@
+# Hospital SQL Data Dumper
+
+Chương trình sinh dữ liệu giả lập cho hệ thống cơ sở dữ liệu bệnh viện và xuất ra file `insert.sql` theo định dạng SQL `INSERT INTO ... VALUES (...)`.
+
+Mục tiêu: phục vụ:
+- Test logic database
+- Test hiệu năng import dữ liệu lớn
+- Mô phỏng dữ liệu gần với thực tế Việt Nam
+
+---
+
+## 1. Đặc điểm chính
+
+- Code được **module hóa**: mỗi bảng dữ liệu nằm trong một file Python riêng. Có thể tùy chỉnh định dạng dữ liệu được sinh cho mỗi bảng
+- Có thể dump **toàn bộ database** hoặc **chỉ một số bảng cụ thể**
+- Dữ liệu được sinh dựa trên **current date** để mô phỏng gần realtime
+- ID được quản lý bằng `state.json` để **chạy lại nhiều lần không trùng khóa chính**
+- Hỗ trợ các chế độ: seed, realtime, full
+- Tùy chọn linh hoạt: chỉ định file đầu ra, ghi nối tiếp, số lượng bản ghi, bảng cụ thể
+
+---
+
+## 2. Cấu trúc thư mục
+```bash
+dump/
+│
+├── main.py          # CLI entry point
+├── config.py        # Cấu hình mặc định
+├── utils.py         # Hàm tiện ích (date, SQL quote, random)
+├── pools.py         # Pool dữ liệu VN (tên, tỉnh, bệnh, thuốc…)
+├── state.py         # Lưu trạng thái ID (state.json)
+├── sqlwriter.py     # Ghi file SQL theo batch
+├── requirements.txt
+├── .gitignore
+│
+├── generators/      # Mỗi bảng là 1 file
+│ ├── benhnhan.py
+│ ├── thannhan.py
+│ ├── bhyt.py
+│ ├── khoa.py
+│ ├── bacsi.py
+│ ├── lamviec.py
+│ ├── phongbenh.py
+│ ├── toanha.py
+│ ├── giuong.py
+│ ├── nhapvien.py
+│ ├── xuatvien.py
+│ ├── thuoc.py
+│ ├── donthuoc.py
+│ ├── chitiet_dh.py
+│ ├── sokhambenh.py
+│ ├── hoadon.py
+│ ├── soluongthuoc.py
+│ └── users.py
+│
+└── state.json       # Tự sinh khi chạy (KHÔNG commit)
+```
+
+---
+
+## 3. Yêu cầu môi trường
+
+- Python **3.9 trở lên**
+- Không cần thư viện ngoài (chỉ dùng standard library)
+
+Cài đặt (nếu dùng virtual env):
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 4. Cách sử dụng
+
+Chương trình hỗ trợ ba chế độ chính:
+
+### Chế độ seed
+Sinh dữ liệu nền (dimension tables): khoa, bác sĩ, phòng, thuốc… (chạy 1 lần)
+
+```bash
+python main.py --mode seed --out insert.sql
+```
+
+Dùng khi:
+- Khởi tạo database lần đầu
+- Chỉ muốn sinh các bảng "dimension" (khoa, bác sĩ, phòng, thuốc…)
+
+### Chế độ realtime
+Sinh dữ liệu phát sinh (bệnh nhân, nhập viện, sổ khám, hóa đơn…)
+
+```bash
+python main.py --mode realtime --out insert.sql --append --n <number of records>
+```
+
+Mỗi lần chạy sẽ sinh thêm dữ liệu mới và append vào insert.sql
+
+### Chế độ full
+Chạy seed + realtime trong một lần
+
+```bash
+python main.py --mode full --out insert.sql
+```
+
+Tạo đầy đủ các bảng: khoa, bác sĩ, phòng, thuốc, bệnh nhân, hóa đơn…
+
+### Dump một số bảng cụ thể
+```bash
+python main.py --mode realtime --tables benhnhan,nhapvien,xuatvien --append --n 100
+```
+
+---
+
+## 5. Các tùy chọn quan trọng
+
+- `--out`: Chỉ định file SQL đầu ra (mặc định: insert.sql)
+- `--append`: Ghi nối tiếp vào file SQL (không ghi đè)
+- `--n`: Số lượng bản ghi sinh cho mỗi bảng chính trong một lần chạy
+- `--tables`: Chỉ dump một số bảng cụ thể (phân cách bằng dấu phẩy)
+
+Ví dụ:
+```bash
+python main.py --mode realtime --out mydata.sql --append --n 50 --tables benhnhan,hoadon
+```

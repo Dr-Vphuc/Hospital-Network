@@ -1,5 +1,6 @@
 # main.py
 import argparse, random
+from collections import Counter
 from config import Config, Counts
 from state import load_state, save_state, PersistentIdGen
 from sqlwriter import SqlWriter
@@ -14,6 +15,15 @@ def get_pools(state: dict) -> dict:
         "khoa_ids": [], "bacsi_ids": [], "phong_ids": [], "thuoc_ids": []
     })
 
+def assert_unique_ids(items, label: str):
+    vals = [v for v in items if v is not None]
+    counter = Counter(vals)
+    dups = [k for k, v in counter.items() if v > 1]
+    if dups:
+        sample = ", ".join(dups[:5])
+        more = f" (+{len(dups) - 5} cái nữa)" if len(dups) > 5 else ""
+        raise SystemExit(f"Trùng ID {label}: {sample}{more}")
+
 def build_idgens(state: dict):
     return {
         "bn":   PersistentIdGen("BN",   4, "BN",   state, 1),
@@ -25,6 +35,7 @@ def build_idgens(state: dict):
         "dt":   PersistentIdGen("DT",   5, "DT",   state, 1),
         "skb":  PersistentIdGen("SKB",  5, "SKB",  state, 1),
         "hd":   PersistentIdGen("HD",   5, "HD",   state, 1),
+        "lo":   PersistentIdGen("LO",   5, "LO",   state, 1),
     }
 
 def main():
@@ -65,6 +76,21 @@ def main():
         thuoc_ids=pools["thuoc_ids"],
     )
 
+    for name, pool_ids in [("khoa", ctx.khoa_ids), ("bacsi", ctx.bacsi_ids), ("phongbenh", ctx.phong_ids), ("thuoc", ctx.thuoc_ids)]:
+        assert_unique_ids(pool_ids, f"pool {name}")
+
+    if args.mode == "realtime":
+        missing = [name for name, ids in [
+            ("khoa", ctx.khoa_ids),
+            ("bacsi", ctx.bacsi_ids),
+            ("phongbenh", ctx.phong_ids),
+            ("thuoc", ctx.thuoc_ids),
+        ] if not ids]
+        if missing:
+            raise SystemExit(
+                f"Thiếu dữ liệu seed cho: {', '.join(missing)}. Hãy chạy --mode seed hoặc --mode full trước khi realtime."
+            )
+
     wanted = [t.strip().lower() for t in args.tables.split(",")] if args.tables != "*" else ["*"]
 
     def want(table: str) -> bool:
@@ -78,7 +104,7 @@ def main():
         # ---- SEED PART (dims) ----
         if args.mode in ("seed", "full"):
             # seed khoa/bacsi/phong/thuoc if needed
-            if (not ctx.khoa_ids) and want("khoa"):
+            if want("khoa"):
                 rows = khoa.ensure_and_gen(ctx, ids["khoa"], ids["bs"], target_khoa=10, target_bacsi=cnt.bacsi)
                 w.section("KHOA", section); section += 1
                 w.insert_values_terminated("khoa", iter(rows), cfg.batch)
@@ -102,7 +128,7 @@ def main():
                     w.insert_values_terminated("toanha", iter(toanha.gen(meta)), cfg.batch)
                 if want("giuong"):
                     w.section("GIUONG", section); section += 1
-                    w.insert_values_terminated("giuong", iter(giuong.gen(ctx.phong_ids)), cfg.batch)
+                    w.insert_values_terminated("giuong", iter(giuong.gen(meta)), cfg.batch)
 
             if want("thuoc"):
                 rows_t, new_t = thuoc.ensure_and_gen(ctx, ids["thuoc"], target_drugs=200)
@@ -110,12 +136,15 @@ def main():
                 w.insert_values_terminated("thuoc", iter(rows_t), cfg.batch)
                 if want("soluongthuoc"):
                     w.section("SOLUONGTHUOC", section); section += 1
-                    w.insert_values_terminated("soluongthuoc", iter(soluongthuoc.gen(new_t)), cfg.batch)
+                    rows_slt, lo_ids = soluongthuoc.gen(ctx.thuoc_ids, ids["lo"])
+                    assert_unique_ids(lo_ids, "SOLUONGTHUOC.MALO")
+                    w.insert_values_terminated("soluongthuoc", iter(rows_slt), cfg.batch)
 
         # ---- REALTIME PART (facts/events) ----
         if args.mode in ("realtime", "full"):
             if want("benhnhan"):
                 rows, ctx.new_bn_ids = benhnhan.gen(cnt.benhnhan, ids["bn"])
+                assert_unique_ids(ctx.new_bn_ids, "BENHNHAN")
                 w.section("BENHNHAN", section); section += 1
                 w.insert_values_terminated("benhnhan", iter(rows), cfg.batch)
 
@@ -125,6 +154,7 @@ def main():
 
             if want("bhyt"):
                 rows, ctx.new_bhyt_ids = bhyt.gen(ctx.new_bn_ids, ids["bhyt"], cfg.bhyt_days_back)
+                assert_unique_ids(ctx.new_bhyt_ids, "BHYT")
                 w.section("BHYT", section); section += 1
                 w.insert_values_terminated("BHYT", iter(rows), cfg.batch)
 
@@ -141,6 +171,7 @@ def main():
 
             if want("donthuoc"):
                 rows, ctx.new_dt_ids = donthuoc.gen(cnt.donthuoc, ids["dt"], ctx.bacsi_ids, ctx.new_bn_ids)
+                assert_unique_ids(ctx.new_dt_ids, "DONTHUOC")
                 w.section("DONTHUOC", section); section += 1
                 w.insert_values_terminated("donthuoc", iter(rows), cfg.batch)
 
