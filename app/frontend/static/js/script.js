@@ -678,7 +678,7 @@ function loadPharmacyAlerts() {
             alert.className = 'alert alert-warning';
             alert.innerHTML = `
                 <i data-feather="alert-triangle"></i>
-                Low stock: ${name} (${quantity}/${maxQty})
+                Tồn kho thấp: ${name} (${quantity}/${maxQty})
             `;
             alertsContainer.appendChild(alert);
         }
