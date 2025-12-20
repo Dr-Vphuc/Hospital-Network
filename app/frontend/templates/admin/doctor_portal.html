@@ -50,22 +50,18 @@
             </div>
         </div>
         <div class="chart-card">
-            <h4>Consultation Trends</h4>
+            <h4>Hiệu suất khám chữa</h4>
             <canvas id="consultationTrendsChart"></canvas>
-        </div>
-        <div class="feedback-section">
-            <h4>Recent Patient Feedback</h4>
-            <div class="feedback-list" id="feedbackList">
-                <!-- Populated by JavaScript -->
-            </div>
         </div>
     </div>
 </div>
+
 </section>
 
 <script>
     window.examinationsData = {{ examinations_data | tojson | safe if examinations_data is not none else '[]' | safe }};
+    window.consultationLast6Months = {{ consultation_last_6_months | tojson | safe if consultation_last_6_months is not none else '[]' | safe }};
+    window.stringMonths = {{ string_months | tojson | safe if string_months is not none else '[]' | safe }};
     window.activeTab = '{{ active_tab }}';
 </script>
-
 {% endblock %}

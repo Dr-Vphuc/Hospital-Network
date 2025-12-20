@@ -135,6 +135,12 @@ function initializeApp() {
         const sectionId = activeSection.id;
         initializeCharts(sectionId);
     }
+    
+    // Initialize doctor portal charts if on doctor portal page
+    const performanceSection = document.getElementById('performance');
+    if (performanceSection && performanceSection.classList.contains('active')) {
+        initializeDoctorPortalCharts();
+    }
 }
 
 // Tab Navigation
@@ -610,10 +616,10 @@ function initializeDoctorPortalCharts() {
         chartInstances.consultationTrends = new Chart(consultationCtx, {
             type: 'line',
             data: {
-                labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'],
+                labels: window.stringMonths,
                 datasets: [{
                     label: 'Consultations',
-                    data: [12, 15, 18, 14, 16, 20],
+                    data: window.consultationLast6Months,
                     borderColor: '#3B82F6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
@@ -623,6 +629,10 @@ function initializeDoctorPortalCharts() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
                     legend: {
                         display: false
@@ -630,7 +640,11 @@ function initializeDoctorPortalCharts() {
                 },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
                     }
                 }
             }

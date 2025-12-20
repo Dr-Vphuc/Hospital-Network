@@ -53,3 +53,28 @@ class ExaminationRepository:
             .scalar()
         )
         return stable_patients_count
+    
+    def get_all_examinations_days_by_doctor(self, doctor_id):
+        """Get all examinations details for a given doctor
+        SQL equivalent:
+        SELECT sk.ngaykham, sk.MABN, dt.MABS FROM sokhambenh sk
+        JOIN donthuoc dt ON dt.madt = sk.madt
+        WHERE dt.mabs = :doctor_id
+        """
+        query_results = (
+            db.session.query(Examination, Prescription)
+            .join(Prescription, Prescription.MADT == Examination.MADT)
+            .filter(Prescription.MABS == doctor_id)
+            .all()
+        )
+        
+        results = []
+        for exam, prescription in query_results:
+            exam_data = {
+                'ngaykham': exam.ngaykham,
+                'MABN': exam.MABN,
+                'MABS': prescription.MABS
+            }
+            results.append(exam_data)
+        
+        return results

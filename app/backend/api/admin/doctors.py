@@ -40,6 +40,7 @@ def doctor_performent(doctor_id):
     total_patients = service.get_total_patients_of_doctor(doctor_id)
     total_examinations = service.get_total_examinations_of_doctor(doctor_id)
     stable_patients_ratio = service.get_stable_patient_ratio_of_doctor(doctor_id)
+    consultation_last_6_months, string_months = service.get_consultation_last_6_months(doctor_id)
     
     return render_template(
         'admin/doctor_portal.html', 
@@ -49,5 +50,7 @@ def doctor_performent(doctor_id):
         examinations_data=None,
         total_patients=total_patients,
         total_examinations=total_examinations,
-        stable_patients_ratio=stable_patients_ratio
+        stable_patients_ratio=stable_patients_ratio,
+        consultation_last_6_months=consultation_last_6_months,
+        string_months=string_months
     )

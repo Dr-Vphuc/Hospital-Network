@@ -6,6 +6,7 @@ from backend.models.chitiet_dh import ChiTietDH
 from backend.models.medicine import Medicine
 from backend.repositories.examination_repository import ExaminationRepository
 from backend.db import db
+from datetime import datetime
 
 class DoctorPortalService:
     def __init__(self):
@@ -82,3 +83,22 @@ class DoctorPortalService:
         total_stable_patients = self.examination_repository.get_stable_patients_count_by_doctor(doctor_id)
         
         return total_stable_patients / total_patients
+    
+    def get_consultation_last_6_months(self, doctor_id):
+        current_month = datetime.now().month
+        last_6_months = [(current_month - i - 1) % 12 + 1 for i in range(6)]
+        
+        consultation_counts = []
+        for month in reversed(last_6_months):
+            count = 0
+            examinations = self.examination_repository.get_all_examinations_days_by_doctor(doctor_id)
+            for exam in examinations:
+                if exam['ngaykham'].month == month:
+                    count += 1
+            consultation_counts.append(count)
+        
+        def get_string_month():
+            string_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            return [string_months[month - 1] for month in reversed(last_6_months)]
+        
+        return consultation_counts, get_string_month()
