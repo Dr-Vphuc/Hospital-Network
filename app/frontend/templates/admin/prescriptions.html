@@ -31,7 +31,16 @@
         </div>
     </section>
 
+<!-- Patient Monitoring Modal -->
+<div id="patientMonitoringModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div id="patientMonitoringModalBody"></div>
+    </div>
+</div>
+
 <script>
     window.prescriptionsData = {{ prescriptions | tojson | safe}};
+    window.patientMonitoringData = {{ monitoring_data | tojson | safe }};
 </script>
 {% endblock %}

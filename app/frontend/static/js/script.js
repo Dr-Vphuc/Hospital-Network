@@ -440,7 +440,7 @@ function createPatientRow(patient) {
         <td>
             <button class="btn btn-sm btn-primary" onclick="viewPatientDetails(${patient.id})">
                 <i data-feather="eye"></i>
-                View Details
+                Theo dõi
             </button>
         </td>
     `;
@@ -915,7 +915,7 @@ function renderPrescriptionsPage(page) {
 function createPrescriptionRow(prescription) {
     const row = document.createElement('tr');
     const statusClass = getPrescriptionStatusClass(prescription.status);
-    
+    const patientID = prescription.patient_id;
     const patientName = prescription.patient_name;
     const patientStatus = prescription.status || 'N/A';
     const medications = prescription.medicine;
@@ -930,9 +930,9 @@ function createPrescriptionRow(prescription) {
         <td>${prescribing_doctor}</td>
         <td>${formatDate(prescription.date)}</td>
         <td>
-            <button class="btn btn-sm btn-primary" onclick="viewPrescriptionDetails(${prescription.id})">
+            <button class="btn btn-sm btn-primary" onclick="viewPatientMonitoring('${patientID}', '${patientName}')">
                 <i data-feather="eye"></i>
-                View Details
+                Theo dõi
             </button>
         </td>
     `;
@@ -995,6 +995,82 @@ function viewPrescriptionDetails(prescriptionId) {
     `;
 
     document.getElementById('prescriptionModal').classList.add('open');
+}
+
+function viewPatientMonitoring(patientID, patientName) {
+    const modalBody = document.getElementById('patientMonitoringModalBody');
+    if (!modalBody) {
+        console.error('Patient monitoring modal not found');
+        return;
+    }
+    
+    // Show loading state
+    modalBody.innerHTML = `
+        <h3 style="margin-left: 1rem;">${patientName}</h3>
+        <div style="text-align: center; padding: 2rem;">
+            <p>Đang tải dữ liệu...</p>
+        </div>
+    `;
+    
+    // Open modal immediately with loading state
+    document.getElementById('patientMonitoringModal').classList.add('open');
+    
+    // Fetch data from backend
+    fetch(`/admin/prescriptions/${patientID}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const patientData = data.monitoring_data || [];
+            
+            let tableRows = '';
+            if (patientData.length > 0) {
+                patientData.forEach(record => {
+                    const statusClass = getPrescriptionStatusClass(record.tinhtrang);
+                    tableRows += `
+                        <tr>
+                            <td>${formatDate(record.ngaykham)}</td>
+                            <td><span class="badge ${statusClass}">${record.tinhtrang}</span></td>
+                            <td>${record.medicine_name}</td>
+                            <td>${record.doctor}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tableRows = '<tr><td colspan="4" style="text-align: center;">Không có dữ liệu</td></tr>';
+            }
+            
+            modalBody.innerHTML = `
+                <h3 style="margin-left: 1rem;">${patientName}</h3>
+                <div class="table-container" style="margin-top: 1rem;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ngày</th>
+                                <th>Tình trạng</th>
+                                <th>Thuốc</th>
+                                <th>Bác sĩ kê đơn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error fetching patient monitoring data:', error);
+            modalBody.innerHTML = `
+                <h3 style="margin-left: 1rem;">${patientName}</h3>
+                <div style="text-align: center; padding: 2rem; color: #EF4444;">
+                    <p>Lỗi khi tải dữ liệu. Vui lòng thử lại.</p>
+                </div>
+            `;
+        });
 }
 
 // Dispensing Functions

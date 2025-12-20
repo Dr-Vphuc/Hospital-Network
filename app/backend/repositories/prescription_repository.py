@@ -52,6 +52,7 @@ class PrescriptionRepository:
         for prescription, patient, examination, chitietdh, medicine, doctor in prescriptions_with_patients:
             record = {
                 'id': examination.MASKB,
+                'patient_id': patient.MABN,
                 'patient_name': patient.hoten,
                 'status': examination.tinhtrang,
                 'medicine': medicine.tenthuoc,

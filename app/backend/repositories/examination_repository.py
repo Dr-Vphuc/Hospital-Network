@@ -1,5 +1,9 @@
 from backend.models.examination import Examination
 from backend.models.prescription import Prescription
+from backend.models.patient import Patient
+from backend.models.doctor import Doctor
+from backend.models.chitiet_dh import ChiTietDH
+from backend.models.medicine import Medicine
 from backend.db import db
 
 class ExaminationRepository:
@@ -78,3 +82,27 @@ class ExaminationRepository:
             results.append(exam_data)
         
         return results
+    
+    def get_all_examinations_by_patient(self, patient_id):
+        query_results = (
+            db.session.query(Examination, Prescription, Doctor, Patient, ChiTietDH, Medicine)
+            .join(Prescription, Prescription.MADT == Examination.MADT)
+            .join(Doctor, Doctor.MABS == Prescription.MABS)
+            .join(Patient, Patient.MABN == Examination.MABN)
+            .join(ChiTietDH, ChiTietDH.MADT == Prescription.MADT)
+            .join(Medicine, Medicine.MATHUOC == ChiTietDH.MATHUOC)
+            .filter(Prescription.MABN == patient_id)
+            .all()
+        )
+        
+        result = []
+        for exam, prescription, doctor, patient, chitietdh, medicine in query_results:
+            exam_data = {
+                'ngaykham': exam.ngaykham,
+                'tinhtrang': exam.tinhtrang,
+                'medicine_name': medicine.tenthuoc if medicine else None,
+                'doctor': doctor.hoten if doctor else None
+            }
+            result.append(exam_data)
+            
+        return result
