@@ -22,14 +22,18 @@ def doctors():
 def doctor_examinations(doctor_id):
     doctor_name = DoctorRepository().get_doctor_by_id(doctor_id).hoten
     examinations_data = DoctorPortalService().get_patients_examinations_of_doctor(doctor_id)
-    print(examinations_data)
+    
     return render_template(
         'admin/doctor_portal.html', 
         doctor_name=doctor_name,
         doctor_id=doctor_id,
         active_tab='my-patients',
         examinations_data=examinations_data,
-        total_patients=None
+        total_patients=None,
+        total_examinations=None,
+        stable_patients_ratio=None,
+        consultation_last_6_months=None,
+        string_months=None
     )
     
 @admin_bp.route('/doctors/<string:doctor_id>/performent', methods=['GET'])

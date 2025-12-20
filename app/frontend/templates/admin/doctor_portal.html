@@ -4,7 +4,11 @@
 
 {% block content %}
 
-
+<div class="back-link" style="margin-bottom:1rem;">
+    <a href="{{ url_for('admin.doctors') }}" class="btn btn-secondary" style="background-color: #3A80F4; border-color: #2E63D5; color: #fff;">
+        Quay lại danh sách bác sĩ
+    </a>
+</div>
 <!-- Doctor Portal Sub-tabs -->
 <div class="sub-tabs">
     <a href="{{ url_for('admin.doctor_examinations', doctor_id=doctor_id) }}" class="sub-tab {% if active_tab == 'my-patients' %}active{% endif %}" data-subsection="my-patients">Các lượt khám chữa</a>

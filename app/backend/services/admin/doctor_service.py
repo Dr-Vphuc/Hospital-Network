@@ -13,6 +13,7 @@ class DoctorService:
         doctors_list = []
         for doctor, tenkhoa in doctors:
             doctor_data = {
+                'MABS': doctor.MABS,
                 'hoten': doctor.hoten,
                 'sdt': doctor.sdt,
                 'phongkham': doctor.phongkham,

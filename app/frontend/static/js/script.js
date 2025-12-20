@@ -480,6 +480,22 @@ function createStaffRow(member) {
         <td><span class="badge ${statusClass}">${member.trangthai}</span></td>
     `;
     
+    // Add click handler to redirect to doctor's examination page
+    if (member.MABS) {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => {
+            window.location.href = `/admin/doctors/${member.MABS}/examinations`;
+        });
+        
+        // Add hover effect
+        row.addEventListener('mouseenter', () => {
+            row.style.backgroundColor = '#f3f4f6';
+        });
+        row.addEventListener('mouseleave', () => {
+            row.style.backgroundColor = '';
+        });
+    }
+    
     return row;
 }
 
