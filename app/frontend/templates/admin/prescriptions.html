@@ -7,32 +7,31 @@
 <!-- Prescriptions Section -->
     <section id="prescriptions" class="content-section active">
         <div class="section-header">
-            <h2>Prescription Management</h2>
-            <div class="section-actions">
-                <button class="btn btn-primary">
-                    <i data-feather="plus"></i>
-                    New Prescription
-                </button>
-            </div>
+            <h2>Đơn thuốc</h2>
         </div>
 
         <div class="table-container">
             <table class="data-table" id="prescriptionsTable">
                 <thead>
                     <tr>
-                        <th>Patient Name</th>
-                        <th>Medication List</th>
-                        <th>Dosage/Frequency</th>
-                        <th>Instructions</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Actions</th>
+                        <th>Bệnh nhân</th>
+                        <th>Tình trạng</th>
+                        <th>Thuốc</th>
+                        <th>Liều lượng & Tần suất</th>
+                        <th>Bác sĩ kê đơn</th>
+                        <th>Ngày</th>
+                        <th>Theo dõi bệnh nhân</th>
                     </tr>
                 </thead>
                 <tbody id="prescriptionsTableBody">
                     <!-- Populated by JavaScript -->
                 </tbody>
             </table>
+            <div id="prescriptionsPagination"></div>
         </div>
     </section>
+
+<script>
+    window.prescriptionsData = {{ prescriptions | tojson | safe}};
+</script>
 {% endblock %}

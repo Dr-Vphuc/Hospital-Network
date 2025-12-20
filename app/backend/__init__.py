@@ -14,7 +14,7 @@ def create_app():
         static_folder=os.path.join(BASE_DIR, '..', 'frontend', 'static'),
     )
     app.config['SQLALCHEMY_DATABASE_URI'] = \
-    'mysql+pymysql://root:@localhost:3306/hospital'
+    'mysql+pymysql://root:@localhost:3306/hospital_test'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = '22092005271020052025'
     

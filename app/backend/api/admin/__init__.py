@@ -15,4 +15,4 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-from . import overview, patients, doctors, medicines, pharmacy, prescriptions
+from . import overview, patients, doctors, pharmacy, prescriptions, room

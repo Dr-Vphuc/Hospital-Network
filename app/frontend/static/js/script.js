@@ -114,6 +114,79 @@ const mockData = {
 // Chart instances storage
 let chartInstances = {};
 
+// Pagination state management
+const paginationState = {
+    patients: { currentPage: 1, pageSize: 25 },
+    appointments: { currentPage: 1, pageSize: 25 },
+    staff: { currentPage: 1, pageSize: 25 },
+    myPatients: { currentPage: 1, pageSize: 25 },
+    pharmacy: { currentPage: 1, pageSize: 25 },
+    prescriptions: { currentPage: 1, pageSize: 25 },
+    dispensing: { currentPage: 1, pageSize: 25 }
+};
+
+// Generic pagination function
+function paginateData(data, page, pageSize) {
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return data.slice(startIndex, endIndex);
+}
+
+// Create pagination controls
+function createPaginationControls(containerId, totalItems, currentPage, pageSize, onPageChange) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    const totalPages = Math.ceil(totalItems / pageSize);
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = '<div class="pagination">';
+    
+    // Previous button
+    paginationHTML += `<button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="${onPageChange}(${currentPage - 1})">
+        <i data-feather="chevron-left"></i>
+    </button>`;
+    
+    // Page numbers
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    if (startPage > 1) {
+        paginationHTML += `<button class="pagination-btn" onclick="${onPageChange}(1)">1</button>`;
+        if (startPage > 2) {
+            paginationHTML += '<span class="pagination-ellipsis">...</span>';
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="${onPageChange}(${i})">${i}</button>`;
+    }
+    
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML += '<span class="pagination-ellipsis">...</span>';
+        }
+        paginationHTML += `<button class="pagination-btn" onclick="${onPageChange}(${totalPages})">${totalPages}</button>`;
+    }
+    
+    // Next button
+    paginationHTML += `<button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="${onPageChange}(${currentPage + 1})">
+        <i data-feather="chevron-right"></i>
+    </button>`;
+    
+    paginationHTML += '</div>';
+    container.innerHTML = paginationHTML;
+    feather.replace();
+}
+
 // Initialize the application
 function initializeApp() {
     setupTabNavigation();
@@ -329,15 +402,27 @@ function initializeDashboardCharts() {
 }
 
 // Patient Functions
+let allPatients = [];
+
 function loadPatients() {
+    allPatients = mockData.patients;
+    renderPatientsPage(1);
+}
+
+function renderPatientsPage(page) {
     const tbody = document.getElementById('patientsTableBody');
     if (!tbody) return;
 
+    paginationState.patients.currentPage = page;
+    const paginatedData = paginateData(allPatients, page, paginationState.patients.pageSize);
+    
     tbody.innerHTML = '';
-    mockData.patients.forEach(patient => {
+    paginatedData.forEach(patient => {
         const row = createPatientRow(patient);
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('patientsPagination', allPatients.length, page, paginationState.patients.pageSize, 'renderPatientsPage');
 }
 
 function createPatientRow(patient) {
@@ -369,15 +454,11 @@ function filterPatients(searchTerm) {
     const tbody = document.getElementById('patientsTableBody');
     if (!tbody) return;
 
-    const filteredPatients = mockData.patients.filter(patient =>
+    allPatients = mockData.patients.filter(patient =>
         patient.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    tbody.innerHTML = '';
-    filteredPatients.forEach(patient => {
-        const row = createPatientRow(patient);
-        tbody.appendChild(row);
-    });
+    renderPatientsPage(1);
 }
 
 function viewPatientDetails(patientId) {
@@ -418,15 +499,27 @@ function viewPatientDetails(patientId) {
 }
 
 // Appointment Functions
+let allAppointments = [];
+
 function loadAppointments() {
+    allAppointments = mockData.appointments;
+    renderAppointmentsPage(1);
+}
+
+function renderAppointmentsPage(page) {
     const tbody = document.getElementById('appointmentsTableBody');
     if (!tbody) return;
 
+    paginationState.appointments.currentPage = page;
+    const paginatedData = paginateData(allAppointments, page, paginationState.appointments.pageSize);
+    
     tbody.innerHTML = '';
-    mockData.appointments.forEach(appointment => {
+    paginatedData.forEach(appointment => {
         const row = createAppointmentRow(appointment);
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('appointmentsPagination', allAppointments.length, page, paginationState.appointments.pageSize, 'renderAppointmentsPage');
 }
 
 function createAppointmentRow(appointment) {
@@ -455,16 +548,27 @@ function createAppointmentRow(appointment) {
 }
 
 // Staff Functions
+let allStaff = [];
+
 function loadStaff() {
+    allStaff = window.allDoctors || mockData.staff;
+    renderStaffPage(1);
+}
+
+function renderStaffPage(page) {
     const tbody = document.getElementById('staffTableBody');
     if (!tbody) return;
 
-    const staff = window.allDoctors || mockData.staff;
+    paginationState.staff.currentPage = page;
+    const paginatedData = paginateData(allStaff, page, paginationState.staff.pageSize);
+    
     tbody.innerHTML = '';
-    staff.forEach(member => {
+    paginatedData.forEach(member => {
         const row = createStaffRow(member);
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('staffPagination', allStaff.length, page, paginationState.staff.pageSize, 'renderStaffPage');
 }
 
 function createStaffRow(member) {
@@ -503,30 +607,22 @@ function filterStaff(searchTerm) {
     const tbody = document.getElementById('staffTableBody');
     if (!tbody) return;
 
-    const filteredStaff = (window.allDoctors || mockData.staff).filter(member =>
+    allStaff = (window.allDoctors || mockData.staff).filter(member =>
         member.hoten.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    tbody.innerHTML = '';
-    filteredStaff.forEach(member => {
-        const row = createStaffRow(member);
-        tbody.appendChild(row);
-    });
+    renderStaffPage(1);
 }
 
 function filterStaffByRole(faculty) {
     const tbody = document.getElementById('staffTableBody');
     if (!tbody) return;
 
-    const filteredStaff = faculty ? 
+    allStaff = faculty ? 
         (window.allDoctors || mockData.staff).filter(member => member.khoa === faculty) : 
         (window.allDoctors || mockData.staff);
 
-    tbody.innerHTML = '';
-    filteredStaff.forEach(member => {
-        const row = createStaffRow(member);
-        tbody.appendChild(row);
-    });
+    renderStaffPage(1);
 }
 
 // Doctor Portal Functions
@@ -574,13 +670,22 @@ function createScheduleCard(appointment) {
     return card;
 }
 
+let allMyPatients = [];
+
 function loadMyPatients() {
+    allMyPatients = window.examinationsData || mockData.doctorPatients;
+    renderMyPatientsPage(1);
+}
+
+function renderMyPatientsPage(page) {
     const tbody = document.getElementById('myPatientsTableBody');
     if (!tbody) return;
 
-    const doctorPatients = window.examinationsData || mockData.doctorPatients;
+    paginationState.myPatients.currentPage = page;
+    const paginatedData = paginateData(allMyPatients, page, paginationState.myPatients.pageSize);
+    
     tbody.innerHTML = '';
-    doctorPatients.forEach(patient => {
+    paginatedData.forEach(patient => {
         const row = document.createElement('tr');
         const healthStatusClass = getHealthStatusClass(patient.health_status);
         
@@ -595,6 +700,8 @@ function loadMyPatients() {
         
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('myPatientsPagination', allMyPatients.length, page, paginationState.myPatients.pageSize, 'renderMyPatientsPage');
 }
 
 function loadFeedback() {
@@ -727,17 +834,27 @@ function loadPharmacyAlerts() {
     feather.replace();
 }
 
+let allPharmacyMedicines = [];
+
 function loadPharmacyTable() {
+    allPharmacyMedicines = window.inventoryStatusTable || mockData.medicines;
+    renderPharmacyPage(1);
+}
+
+function renderPharmacyPage(page) {
     const tbody = document.getElementById('pharmacyTableBody');
     if (!tbody) return;
 
+    paginationState.pharmacy.currentPage = page;
+    const paginatedData = paginateData(allPharmacyMedicines, page, paginationState.pharmacy.pageSize);
+    
     tbody.innerHTML = '';
-    // Use real data from backend if available, otherwise fallback to mockData
-    const medicinesData = window.inventoryStatusTable || mockData.medicines;
-    medicinesData.forEach(medicine => {
+    paginatedData.forEach(medicine => {
         const row = createPharmacyRow(medicine);
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('pharmacyPagination', allPharmacyMedicines.length, page, paginationState.pharmacy.pageSize, 'renderPharmacyPage');
 }
 
 function createPharmacyRow(medicine) {
@@ -772,27 +889,45 @@ function createPharmacyRow(medicine) {
 }
 
 // Prescription Functions
+let allPrescriptions = [];
+
 function loadPrescriptions() {
+    allPrescriptions = window.prescriptionsData || mockData.prescriptions;
+    renderPrescriptionsPage(1);
+}
+
+function renderPrescriptionsPage(page) {
     const tbody = document.getElementById('prescriptionsTableBody');
     if (!tbody) return;
 
+    paginationState.prescriptions.currentPage = page;
+    const paginatedData = paginateData(allPrescriptions, page, paginationState.prescriptions.pageSize);
+    
     tbody.innerHTML = '';
-    mockData.prescriptions.forEach(prescription => {
+    paginatedData.forEach(prescription => {
         const row = createPrescriptionRow(prescription);
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('prescriptionsPagination', allPrescriptions.length, page, paginationState.prescriptions.pageSize, 'renderPrescriptionsPage');
 }
 
 function createPrescriptionRow(prescription) {
     const row = document.createElement('tr');
     const statusClass = getPrescriptionStatusClass(prescription.status);
     
+    const patientName = prescription.patient_name;
+    const patientStatus = prescription.status || 'N/A';
+    const medications = prescription.medicine;
+    const dosageFrequency = prescription.dosage_frequency || `${prescription.dosage} - ${prescription.frequency}`;
+    const prescribing_doctor = prescription.prescribing_doctor || 'N/A';
+    
     row.innerHTML = `
-        <td>${prescription.patientName}</td>
-        <td>${prescription.medications.join(', ')}</td>
-        <td>${prescription.dosage} - ${prescription.frequency}</td>
-        <td>${prescription.instructions}</td>
-        <td><span class="badge ${statusClass}">${prescription.status}</span></td>
+        <td>${patientName}</td>
+        <td><span class="badge ${statusClass}">${patientStatus}</span></td>
+        <td>${medications}</td>
+        <td>${dosageFrequency}</td>
+        <td>${prescribing_doctor}</td>
         <td>${formatDate(prescription.date)}</td>
         <td>
             <button class="btn btn-sm btn-primary" onclick="viewPrescriptionDetails(${prescription.id})">
@@ -807,37 +942,54 @@ function createPrescriptionRow(prescription) {
 }
 
 function viewPrescriptionDetails(prescriptionId) {
-    const prescription = mockData.prescriptions.find(p => p.id === prescriptionId);
+    const prescriptions = window.prescriptionsData || mockData.prescriptions;
+    const prescription = prescriptions.find(p => p.id === prescriptionId);
     if (!prescription) return;
 
     const modalBody = document.getElementById('prescriptionModalBody');
+    
+    // Handle both backend data format and mock data format
+    const patientName = prescription.patient_name || prescription.patientName;
+    const medications = prescription.medicine || prescription.medications;
+    const dosageFrequency = prescription.dosage_frequency || `${prescription.dosage} - ${prescription.frequency}`;
+    const doctor = prescription.prescribing_doctor || 'N/A';
+    const instructions = prescription.instructions || 'N/A';
+    const prescriptionDate = prescription.date;
+    const prescriptionStatus = prescription.status;
+    
     modalBody.innerHTML = `
         <div class="prescription-details">
-            <h4>Prescription Details</h4>
+            <h4>Chi tiết đơn thuốc</h4>
             <div class="detail-grid">
                 <div class="detail-item">
-                    <strong>Patient:</strong> ${prescription.patientName}
+                    <strong>Bệnh nhân:</strong> ${patientName}
                 </div>
                 <div class="detail-item">
-                    <strong>Date:</strong> ${formatDate(prescription.date)}
+                    <strong>Ngày:</strong> ${formatDate(prescriptionDate)}
                 </div>
                 <div class="detail-item">
-                    <strong>Status:</strong> <span class="badge ${getPrescriptionStatusClass(prescription.status)}">${prescription.status}</span>
+                    <strong>Tình trạng:</strong> <span class="badge ${getPrescriptionStatusClass(prescriptionStatus)}">${prescriptionStatus}</span>
                 </div>
             </div>
             <div class="medications-section">
-                <h5>Medications:</h5>
+                <h5>Thuốc:</h5>
                 <ul>
-                    ${prescription.medications.map(med => `<li>${med}</li>`).join('')}
+                    ${Array.isArray(medications) ? medications.map(med => `<li>${med}</li>`).join('') : `<li>${medications}</li>`}
                 </ul>
             </div>
             <div class="dosage-section">
-                <h5>Dosage & Frequency:</h5>
-                <p>${prescription.dosage} - ${prescription.frequency}</p>
+                <h5>Liều lượng & Tần suất:</h5>
+                <p>${dosageFrequency}</p>
             </div>
+            ${instructions !== 'N/A' ? `
             <div class="instructions-section">
-                <h5>Instructions:</h5>
-                <p>${prescription.instructions}</p>
+                <h5>Hướng dẫn:</h5>
+                <p>${instructions}</p>
+            </div>
+            ` : ''}
+            <div class="instructions-section">
+                <h5>Bác sĩ kê đơn:</h5>
+                <p>${doctor}</p>
             </div>
         </div>
     `;
@@ -846,19 +998,31 @@ function viewPrescriptionDetails(prescriptionId) {
 }
 
 // Dispensing Functions
+let allDispensing = [];
+
 function loadDispensing() {
     loadDispensingTable();
 }
 
 function loadDispensingTable() {
+    allDispensing = mockData.dispensing;
+    renderDispensingPage(1);
+}
+
+function renderDispensingPage(page) {
     const tbody = document.getElementById('dispensingTableBody');
     if (!tbody) return;
 
+    paginationState.dispensing.currentPage = page;
+    const paginatedData = paginateData(allDispensing, page, paginationState.dispensing.pageSize);
+    
     tbody.innerHTML = '';
-    mockData.dispensing.forEach(transaction => {
+    paginatedData.forEach(transaction => {
         const row = createDispensingRow(transaction);
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('dispensingPagination', allDispensing.length, page, paginationState.dispensing.pageSize, 'renderDispensingPage');
 }
 
 function createDispensingRow(transaction) {
@@ -956,9 +1120,12 @@ function getAppointmentStatusClass(status) {
 
 function getPrescriptionStatusClass(status) {
     switch (status) {
-        case 'Active': return 'badge-blue';
-        case 'Dispensed': return 'badge-yellow';
-        case 'Completed': return 'badge-green';
+        case 'Ổn định': return 'badge-green';
+        case 'Đang tiến triển tốt': return 'badge-blue';
+        case 'Thuyên giảm': return 'badge-yellow';
+        case 'Nặng lên': return 'badge-orange';
+        case 'Tiên lượng dè dặt': return 'badge-red';
+        case 'Nguy kịch': return 'badge-darkred';
         default: return 'badge-blue';
     }
 }
@@ -1088,6 +1255,54 @@ const additionalStyles = `
     margin-top: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid #e5e7eb;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 1rem 0;
+}
+
+.pagination-btn {
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #3B82F6;
+    color: #3B82F6;
+}
+
+.pagination-btn.active {
+    background: #3B82F6;
+    border-color: #3B82F6;
+    color: white;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+    padding: 0.5rem;
+    color: #9ca3af;
 }
 `;
 

@@ -2,7 +2,7 @@ from backend.repositories.inventory_repository import InventoryRepository
 from backend.repositories.medicine_repository import MedicineRepository
 from backend.models.medicine import Medicine
 
-MEDICINES_PER_BATCH = 250
+MEDICINES_PER_BATCH = 500
 
 class PharmacyService:
     def __init__(self):
