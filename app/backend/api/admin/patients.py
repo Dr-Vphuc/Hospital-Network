@@ -20,7 +20,11 @@ def patient_detail(patient_id):
     examination_history_raw = ExaminationService().get_examination_by_patient_id(patient_id)
     relatives_raw = PatientService().get_relatives_by_patient_id(patient_id)
     
-    # Serialize examination history
+    data = json(examination_history_raw, relatives_raw)
+    return jsonify(data)
+
+def json(examination_history_raw, relatives_raw):
+     # Serialize examination history
     examination_history = []
     for exam in examination_history_raw:
         # Check if exam is already a dict or an object
@@ -56,5 +60,4 @@ def patient_detail(patient_id):
         'examination_history': examination_history,
         'relatives': relatives
     }
-    
-    return jsonify(data)
+    return data
