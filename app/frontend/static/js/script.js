@@ -337,16 +337,43 @@ function loadDashboard() {
     const departmentData = {
         labels: faculty_names,
         datasets: [{
+            label: 'Số bệnh nhân',
             data: total_patients_by_faculty,
             backgroundColor: departmentColors.slice(0, faculty_names.length),
             borderWidth: 0
         }]
     };
 
+    // Faculty patients column chart data
+    const facultyPatientsFaculties = window.backendData?.facultyPatients?.faculties || ['Tim Mạch', 'Nội Tổng Hợp', 'Ngoại Tổng Hợp', 'Sản', 'Nhi', 'Chấn Thương Chỉnh Hình', 'Mắt', 'Tai Mũi Họng', 'Da Liễu', 'Thần Kinh'];
+    const facultyPatientsData = window.backendData?.facultyPatients?.patientCounts || [142, 198, 165, 134, 176, 89, 67, 72, 54, 95];
+    const facultyExaminationsData = window.backendData?.facultyPatients?.examinationCounts || [215, 287, 234, 189, 256, 123, 98, 105, 78, 142];
+    
+    const facultyPatientsChartData = {
+        labels: facultyPatientsFaculties,
+        datasets: [
+            {
+                label: 'Số bệnh nhân',
+                data: facultyPatientsData,
+                backgroundColor: '#3B82F6',
+                borderRadius: 6,
+                borderWidth: 0
+            },
+            {
+                label: 'Lượt khám',
+                data: facultyExaminationsData,
+                backgroundColor: '#10B981',
+                borderRadius: 6,
+                borderWidth: 0
+            }
+        ]
+    };
+
     // Store chart data for later initialization
     window.dashboardCharts = {
         patientTrends: patientTrendsData,
-        department: departmentData
+        department: departmentData,
+        facultyPatients: facultyPatientsChartData
     };
 }
 
@@ -401,6 +428,40 @@ function initializeDashboardCharts() {
                 plugins: {
                     legend: {
                         position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    // Faculty Patients Column Chart
+    const facultyCtx = document.getElementById('facultyPatientsChart');
+    if (facultyCtx && !chartInstances.facultyPatients) {
+        chartInstances.facultyPatients = new Chart(facultyCtx, {
+            type: 'bar',
+            data: window.dashboardCharts.facultyPatients,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 20
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }

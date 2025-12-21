@@ -53,3 +53,21 @@ class OverviewService:
             faculty_names.append(faculty[0])
             
         return n_patients, faculty_names
+    
+    def get_total_patient_per_faculties(self):
+        faculties = self.faculty_repo.get_all_faculties()
+        patients_per_faculty = {}
+        for faculty_id, faculty_name in faculties:
+            patients_per_faculty[faculty_id] = (
+                self.examinations_repo.get_distinct_patients_by_faculty(faculty_id), 
+                self.examinations_repo.get_total_examinations_by_faculty(faculty_id))
+            
+        patient_counts = []
+        examination_counts = []
+        faculty_names = []
+        for faculty_id, faculty_name in faculties:
+            faculty_names.append(faculty_name)
+            patient_counts.append(len(patients_per_faculty[faculty_id][0]))
+            examination_counts.append(patients_per_faculty[faculty_id][1])
+            
+        return patient_counts, examination_counts, faculty_names

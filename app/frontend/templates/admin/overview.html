@@ -60,8 +60,16 @@
             <canvas id="patientTrendsChart"></canvas>
         </div>
         <div class="chart-card">
-            <h3>Bệnh nhân theo khoa</h3>
+            <h3>Bệnh nhân nhập viện theo khoa</h3>
             <canvas id="departmentChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Additional Chart -->
+    <div class="charts-container">
+        <div class="chart-card" style="grid-column: 1 / -1;">
+            <h3>Tổng số bệnh nhân và lượt khám theo khoa</h3>
+            <canvas id="facultyPatientsChart"></canvas>
         </div>
     </div>
 </section>
@@ -76,6 +84,11 @@
         departmentData: {
             faculty_names: {{ faculty_names | tojson | safe }},
             total_patients_by_faculty: {{ total_patients_by_faculty | tojson | safe }}
+        },
+        facultyPatients: {
+            faculties: {{ faculty_names_2 | tojson | safe }},
+            patientCounts: {{ total_patient_per_faculties | tojson | safe }},
+            examinationCounts: {{ total_examinations_per_faculties | tojson | safe }}
         }
     };
 </script>

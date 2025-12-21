@@ -106,3 +106,6 @@ class ExaminationRepository:
             result.append(exam_data)
             
         return result
+    
+    def get_total_examinations_by_faculty(self, faculty_id):
+        return Examination.query.filter_by(MAKHOA=faculty_id).count()
