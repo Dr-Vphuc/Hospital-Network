@@ -1,4 +1,7 @@
 from backend.models.room import Room
+from backend.models.faculty import Faculty
+from backend.models.building import Building
+from backend.models.bed import Bed
 from backend.db import db
 
 class RoomRepository:
@@ -28,3 +31,37 @@ class RoomRepository:
         db.session.delete(room)
         db.session.commit()
         return True
+    
+    def get_all_rooms_detail(self):
+        """
+        SQL :
+        select phongbenh.`MAPHG`, khoa.tenkhoa, toanha.tentoa, count(*) - sum(giuong.tinhtrang) as 'Số giường trống' from phongbenh
+        join khoa on phongbenh.makhoa = khoa.makhoa
+        join giuong on phongbenh.maphg = giuong.maphg
+        join toanha on phongbenh.`MAKHOA` = toanha.`MAKHOA`
+        group by phongbenh.maphg
+        """
+        room_detail = (
+            db.session.query(
+                Room.MAPHG,
+                Faculty.tenkhoa,
+                Building.tentoa,
+                (db.func.count(Bed.so) - db.func.sum(Bed.tinhtrang)).label('so_giuong_trong')
+            )
+            .join(Faculty, Room.MAKHOA == Faculty.MAKHOA)
+            .join(Bed, Room.MAPHG == Bed.MAPHG)
+            .join(Building, Room.MAKHOA == Building.MAKHOA)
+            .group_by(Room.MAPHG)
+            .all()
+        )
+        
+        result = []
+        for detail in room_detail:
+            result.append({
+                'MAPHG': detail.MAPHG,
+                'tenkhoa': detail.tenkhoa,
+                'tentoa': detail.tentoa,
+                'so_giuong_trong': detail.so_giuong_trong
+            })
+            
+        return result

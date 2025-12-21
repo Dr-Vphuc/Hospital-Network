@@ -718,11 +718,11 @@ function switchPatientTab(tabName) {
     }
 }
 
-// Appointment Functions
+// Room Functions (formerly Appointments)
 let allAppointments = [];
 
 function loadAppointments() {
-    allAppointments = mockData.appointments;
+    allAppointments = window.allRoomsDetail || [];
     renderAppointmentsPage(1);
 }
 
@@ -734,8 +734,8 @@ function renderAppointmentsPage(page) {
     const paginatedData = paginateData(allAppointments, page, paginationState.appointments.pageSize);
     
     tbody.innerHTML = '';
-    paginatedData.forEach(appointment => {
-        const row = createAppointmentRow(appointment);
+    paginatedData.forEach(room => {
+        const row = createAppointmentRow(room);
         tbody.appendChild(row);
     });
     
@@ -743,23 +743,19 @@ function renderAppointmentsPage(page) {
     createPaginationControls('appointmentsPagination', allAppointments.length, page, paginationState.appointments.pageSize, 'renderAppointmentsPage');
 }
 
-function createAppointmentRow(appointment) {
+function createAppointmentRow(room) {
     const row = document.createElement('tr');
-    const statusClass = getAppointmentStatusClass(appointment.status);
+    const statusClass = getAppointmentStatusClass(room.so_giuong_trong);
     
     row.innerHTML = `
-        <td>${formatDate(appointment.date)} ${appointment.time}</td>
-        <td>${appointment.patientName}</td>
-        <td>${appointment.doctor}</td>
-        <td><span class="badge ${statusClass}">${appointment.status}</span></td>
+        <td> ${room.MAPHG}</td>
+        <td>${room.tenkhoa}</td>
+        <td>${room.tentoa}</td>
+        <td><span class="badge ${statusClass}">${room.so_giuong_trong} / 4</span></td>
         <td>
             <button class="btn btn-sm btn-primary">
                 <i data-feather="eye"></i>
-                View
-            </button>
-            <button class="btn btn-sm btn-secondary">
-                <i data-feather="edit"></i>
-                Reschedule
+                Danh sách bệnh nhân
             </button>
         </td>
     `;
@@ -874,7 +870,7 @@ function createScheduleCard(appointment) {
     
     card.innerHTML = `
         <h4>${appointment.time} - ${appointment.patientName}</h4>
-        <p>Status: <span class="badge ${getAppointmentStatusClass(appointment.status)}">${appointment.status}</span></p>
+        <p>Status: <span class="badge ${getAppointmentStatusClass(appointment.so_giuong_trong)}">${appointment.so_giuong_trong} / 4</span></p>
         <div class="schedule-actions">
             <button class="btn btn-sm btn-success">
                 <i data-feather="check"></i>
@@ -1409,10 +1405,12 @@ function getStatusClass(status) {
 
 function getAppointmentStatusClass(status) {
     switch (status) {
-        case 'Scheduled': return 'badge-blue';
-        case 'Completed': return 'badge-green';
-        case 'Cancelled': return 'badge-red';
-        default: return 'badge-yellow';
+        case '4': return 'badge-green';
+        case '3': return 'badge-blue';
+        case '2': return 'badge-yellow';
+        case '1': return 'badge-yellow';
+        case '0': return 'badge-red';
+        default: return 'badge-orange';
     }
 }
 
@@ -1421,7 +1419,7 @@ function getPrescriptionStatusClass(status) {
         case 'Ổn định': return 'badge-green';
         case 'Đang tiến triển tốt': return 'badge-blue';
         case 'Thuyên giảm': return 'badge-yellow';
-        case 'Nặng lên': return 'badge-orange';
+        case 'Nặng lên': return 'badge-red';
         case 'Tiên lượng dè dặt': return 'badge-red';
         case 'Nguy kịch': return 'badge-darkred';
         default: return 'badge-blue';

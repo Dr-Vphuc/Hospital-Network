@@ -5,34 +5,39 @@
 {% block content %}
 
 <!-- Appointments Section -->
-        <section id="appointments" class="content-section active">
-            <div class="section-header">
-                <h2>Quản lí phòng bệnh</h2>
-                <div class="section-actions">
-                    <button class="btn btn-primary">
-                        <i data-feather="plus"></i>
-                        Thêm phòng bệnh mới
-                    </button>
-                </div>
-            </div>
+<section id="appointments" class="content-section active">
+    <div class="section-header">
+        <h2>Quản lí phòng bệnh</h2>
+        <div class="section-actions">
+            <button class="btn btn-primary">
+                <i data-feather="plus"></i>
+                Thêm phòng bệnh mới
+            </button>
+        </div>
+    </div>
 
-            <div class="appointments-grid">
-                <div class="appointments-table">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Phòng</th>
-                                <th>Khoa</th>
-                                <th>Tòa nhà</th>
-                                <th>Trạng thái</th>
-                                <th>Danh sách bệnh nhân</th>
-                            </tr>
-                        </thead>
-                        <tbody id="appointmentsTableBody">
-                            <!-- Populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+    <div class="appointments-grid">
+        <div class="appointments-table">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Phòng</th>
+                        <th>Khoa</th>
+                        <th>Tòa nhà</th>
+                        <th>Số giường trống</th>
+                        <th>Danh sách bệnh nhân</th>
+                    </tr>
+                </thead>
+                <tbody id="appointmentsTableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+            <div id="appointmentsPagination"></div>
+        </div>
+    </div>
+</section>
+
+<script>
+    window.allRoomsDetail = {{ all_rooms_detail | tojson }};
+</script>
 {% endblock %}
