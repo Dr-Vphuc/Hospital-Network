@@ -51,16 +51,20 @@ class PatientRepository:
         SQL equivalent:
         SELECT * FROM benhnhan
         LEFT JOIN xuatvien ON benhnhan.mabn = xuatvien.mabn
+        JOIN nhapvien ON benhnhan.mabn = nhapvien.mabn
         WHERE xuatvien.ngayxv IS NULL OR xuatvien.ngayxv > CURRENT_DATE
+        AND nhapvien.ngaynv <= CURRENT_DATE;
         """
         return (
             db.session.query(Patient)
             .outerjoin(XuatVien, Patient.MABN == XuatVien.MABN)
+            .join(NhapVien, Patient.MABN == NhapVien.MABN)
             .filter(
                 or_(
                     XuatVien.ngayxv == None,
                     XuatVien.ngayxv > date.today()
-                )
+                ),
+                NhapVien.ngaynv <= date.today()
             )
             .all()
         )
