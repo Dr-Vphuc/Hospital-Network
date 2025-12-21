@@ -473,7 +473,7 @@ function initializeDashboardCharts() {
 let allPatients = [];
 
 function loadPatients() {
-    allPatients = mockData.patients;
+    allPatients = window.patientsDetails || mockData.patients;
     renderPatientsPage(1);
 }
 
@@ -498,15 +498,15 @@ function createPatientRow(patient) {
     const statusClass = getStatusClass(patient.status);
     
     row.innerHTML = `
-        <td>${patient.id}</td>
-        <td>${patient.name}</td>
-        <td>${patient.age}</td>
-        <td>${patient.contact}</td>
-        <td>${formatDate(patient.admissionDate)}</td>
-        <td>${patient.department}</td>
+        <td>${patient.MABN}</td>
+        <td>${patient.hoten}</td>
+        <td>${patient.tuoi}</td>
+        <td>${patient.sdt}</td>
+        <td>${formatDate(patient.ngaykham)}</td>
+        <td>${patient.tenkhoa}</td>
         <td><span class="badge ${statusClass}">${patient.status}</span></td>
         <td>
-            <button class="btn btn-sm btn-primary" onclick="viewPatientDetails(${patient.id})">
+            <button class="btn btn-sm btn-primary" onclick="viewPatientDetails(${patient.MABN})">
                 <i data-feather="eye"></i>
                 Theo dõi
             </button>
@@ -522,15 +522,15 @@ function filterPatients(searchTerm) {
     const tbody = document.getElementById('patientsTableBody');
     if (!tbody) return;
 
-    allPatients = mockData.patients.filter(patient =>
-        patient.name.toLowerCase().includes(searchTerm.toLowerCase())
+    allPatients = (window.patientsDetails || mockData.patients).filter(patient =>
+        patient.hoten.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     renderPatientsPage(1);
 }
 
 function viewPatientDetails(patientId) {
-    const patient = mockData.patients.find(p => p.id === patientId);
+    const patient = window.patientsDetails.find(p => p.MABN === patientId);
     if (!patient) return;
 
     const modalBody = document.getElementById('patientModalBody');
@@ -1246,9 +1246,9 @@ function initializeDispensingCharts() {
 // Utility Functions
 function getStatusClass(status) {
     switch (status) {
-        case 'Active': return 'badge-green';
-        case 'Pending': return 'badge-yellow';
-        case 'Discharged': return 'badge-red';
+        case 'Đã xuất viện': return 'badge-green';
+        case 'Nội trú': return 'badge-yellow';
+        case 'Ngoại trú': return 'badge-blue';
         default: return 'badge-blue';
     }
 }

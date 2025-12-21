@@ -3,9 +3,10 @@ from backend.models.xuatvien import XuatVien
 from backend.models.examination import Examination
 from backend.models.nhapvien import NhapVien
 from backend.models.bill import Bill
+from backend.models.faculty import Faculty
 from datetime import timedelta
 from backend.db import db
-from datetime import date
+from datetime import date, datetime
 from sqlalchemy import or_
 
 class PatientRepository:
@@ -62,9 +63,9 @@ class PatientRepository:
             .filter(
                 or_(
                     XuatVien.ngayxv == None,
-                    XuatVien.ngayxv > date.today()
+                    XuatVien.ngayxv > datetime.now()
                 ),
-                NhapVien.ngaynv <= date.today()
+                NhapVien.ngaynv <= datetime.now()
             )
             .all()
         )
@@ -95,8 +96,30 @@ class PatientRepository:
 
     def get_total_patients_by_month(self, month):
         """Get total number of patients admitted in the 'month' month"""
-        # join the Patient and NhapVien tables
         patient_with_nhapvien = db.session.query(Patient).join(NhapVien, Patient.MABN == NhapVien.MABN)
-        # filter by the month of ngaynv
         patients_in_month = patient_with_nhapvien.filter(db.extract('month', NhapVien.ngaynv) == month).all()
+        
         return len(patients_in_month)
+    
+    def get_patients_info(self, patient_id):
+        patient_info = (
+            db.session.query(
+                Patient,
+                Examination,
+                Faculty,
+                NhapVien,
+                XuatVien
+            )
+            .filter(Patient.MABN == patient_id)
+            .outerjoin(Examination, Patient.MABN == Examination.MABN)
+            .join(Faculty, Examination.MAKHOA == Faculty.MAKHOA)
+            .outerjoin(NhapVien, Patient.MABN == NhapVien.MABN)
+            .outerjoin(XuatVien, Patient.MABN == XuatVien.MABN)
+            .order_by(Examination.ngaykham.desc())
+            .first()
+        )
+        return patient_info
+    
+    def get_all_patients_id(self):
+        patients = db.session.query(Patient.MABN).all()
+        return [patient.MABN for patient in patients]
