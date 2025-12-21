@@ -4,15 +4,19 @@ import datetime
 from decimal import Decimal
 from backend.services.admin.patient_service import PatientService
 from backend.services.admin.examination_service import ExaminationService
+from backend.repositories.faculty_repository import FacultyRepository
 
 @admin_bp.route('/patients', methods=['GET'])
 @admin_required
 def patients():
     patients_details = PatientService().get_patient_details()
-    print(len(patients_details))
+    all_faculty_names = FacultyRepository().get_all_faculties_names()
+    
     return render_template(
         'admin/patients.html',
-        patients_details=patients_details)
+        patients_details=patients_details,
+        all_faculty_names=all_faculty_names
+        )
     
 @admin_bp.route('/patients/<patient_id>', methods=['GET'])
 @admin_required

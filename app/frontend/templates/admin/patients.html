@@ -13,6 +13,18 @@
                 <i data-feather="search"></i>
                 <input type="text" id="patientSearch" placeholder="Tìm kiếm bệnh nhân...">
             </div>
+            <select id="facultyFilter" class="filter-select">
+                <option value="">Tất cả các khoa</option>
+                {% for name in all_faculty_names %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <select id="statusFilter" class="filter-select">
+                <option value="">Tất cả trạng thái</option>
+                {% for name in ['Đã xuất viện', 'Nội trú', 'Ngoại trú'] %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
         </div>
     </div>
 

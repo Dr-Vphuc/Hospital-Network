@@ -252,7 +252,23 @@ function setupSearchFunctionality() {
     const patientSearch = document.getElementById('patientSearch');
     if (patientSearch) {
         patientSearch.addEventListener('input', (e) => {
-            filterPatients(e.target.value);
+            applyPatientFilters();
+        });
+    }
+
+    // Patient faculty filter
+    const facultyFilter = document.getElementById('facultyFilter');
+    if (facultyFilter) {
+        facultyFilter.addEventListener('change', (e) => {
+            applyPatientFilters();
+        });
+    }
+
+    // Patient status filter
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', (e) => {
+            applyPatientFilters();
         });
     }
 
@@ -518,13 +534,26 @@ function createPatientRow(patient) {
     return row;
 }
 
-function filterPatients(searchTerm) {
+function applyPatientFilters() {
     const tbody = document.getElementById('patientsTableBody');
     if (!tbody) return;
 
-    allPatients = (window.patientsDetails || mockData.patients).filter(patient =>
-        patient.hoten.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const searchTerm = document.getElementById('patientSearch')?.value || '';
+    const facultyFilter = document.getElementById('facultyFilter')?.value || '';
+    const statusFilter = document.getElementById('statusFilter')?.value || '';
+
+    allPatients = (window.patientsDetails || mockData.patients).filter(patient => {
+        // Search filter
+        const matchesSearch = patient.hoten.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        // Faculty filter
+        const matchesFaculty = !facultyFilter || patient.tenkhoa === facultyFilter;
+        
+        // Status filter
+        const matchesStatus = !statusFilter || patient.status === statusFilter;
+        
+        return matchesSearch && matchesFaculty && matchesStatus;
+    });
 
     renderPatientsPage(1);
 }
