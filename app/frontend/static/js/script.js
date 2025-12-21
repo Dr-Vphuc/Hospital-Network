@@ -506,6 +506,9 @@ function renderPatientsPage(page) {
         tbody.appendChild(row);
     });
     
+    // Re-initialize Feather icons after all rows are added
+    feather.replace();
+    
     createPaginationControls('patientsPagination', allPatients.length, page, paginationState.patients.pageSize, 'renderPatientsPage');
 }
 
@@ -529,8 +532,6 @@ function createPatientRow(patient) {
         </td>
     `;
     
-    // Re-initialize Feather icons for the new content
-    feather.replace();
     return row;
 }
 
@@ -629,7 +630,7 @@ function viewPatientDetails(patientId) {
                     </tr>
                 `).join('');
             } else {
-                relativesRows = '<tr><td colspan="5" style="text-align: center;">Không có dữ liệu</td></tr>';
+                relativesRows = '<tr><td colspan="5" style="text-align: center;">Không có người giám hộ</td></tr>';
             }
             
             modalBody.innerHTML = `
@@ -738,6 +739,7 @@ function renderAppointmentsPage(page) {
         tbody.appendChild(row);
     });
     
+    feather.replace();
     createPaginationControls('appointmentsPagination', allAppointments.length, page, paginationState.appointments.pageSize, 'renderAppointmentsPage');
 }
 
@@ -762,7 +764,7 @@ function createAppointmentRow(appointment) {
         </td>
     `;
     
-    feather.replace();
+    
     return row;
 }
 
@@ -1128,6 +1130,7 @@ function renderPrescriptionsPage(page) {
         tbody.appendChild(row);
     });
     
+    feather.replace();
     createPaginationControls('prescriptionsPagination', allPrescriptions.length, page, paginationState.prescriptions.pageSize, 'renderPrescriptionsPage');
 }
 
@@ -1156,7 +1159,7 @@ function createPrescriptionRow(prescription) {
         </td>
     `;
     
-    feather.replace();
+    
     return row;
 }
 
