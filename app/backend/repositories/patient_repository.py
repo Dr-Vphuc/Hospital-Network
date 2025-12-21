@@ -4,6 +4,7 @@ from backend.models.examination import Examination
 from backend.models.nhapvien import NhapVien
 from backend.models.bill import Bill
 from backend.models.faculty import Faculty
+from backend.models.relative import Relative
 from datetime import timedelta
 from backend.db import db
 from datetime import date, datetime
@@ -123,3 +124,11 @@ class PatientRepository:
     def get_all_patients_id(self):
         patients = db.session.query(Patient.MABN).all()
         return [patient.MABN for patient in patients]
+    
+    def get_relatives_by_patient_id(self, patient_id):
+        relatives = (
+            db.session.query(Relative)
+            .filter(Relative.MABN == patient_id)
+            .all()
+        )
+        return relatives

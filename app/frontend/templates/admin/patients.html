@@ -38,6 +38,16 @@
     </div>
 </section>
 
+<!-- Patient Details Modal -->
+<div id="patientModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div id="patientModalBody">
+            <!-- Tabs will be inserted here by JavaScript -->
+        </div>
+    </div>
+</div>
+
 <script>
     window.patientsDetails = {{ patients_details | tojson }};
 </script>

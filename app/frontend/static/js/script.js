@@ -506,7 +506,7 @@ function createPatientRow(patient) {
         <td>${patient.tenkhoa}</td>
         <td><span class="badge ${statusClass}">${patient.status}</span></td>
         <td>
-            <button class="btn btn-sm btn-primary" onclick="viewPatientDetails(${patient.MABN})">
+            <button class="btn btn-sm btn-primary" onclick="viewPatientDetails('${patient.MABN}')">
                 <i data-feather="eye"></i>
                 Theo dõi
             </button>
@@ -530,40 +530,162 @@ function filterPatients(searchTerm) {
 }
 
 function viewPatientDetails(patientId) {
-    const patient = window.patientsDetails.find(p => p.MABN === patientId);
-    if (!patient) return;
+    console.log('viewPatientDetails called with:', patientId);
+    
+    // Convert patientId to string for comparison
+    const patient = window.patientsDetails.find(p => String(p.MABN) === String(patientId));
+    
+    if (!patient) {
+        console.error('Patient not found:', patientId);
+        alert('Không tìm thấy thông tin bệnh nhân');
+        return;
+    }
 
     const modalBody = document.getElementById('patientModalBody');
+    if (!modalBody) {
+        console.error('Modal body not found');
+        return;
+    }
+    
+    // Show loading state
     modalBody.innerHTML = `
-        <div class="patient-details">
-            <h4>Patient Information</h4>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <strong>ID:</strong> ${patient.id}
-                </div>
-                <div class="detail-item">
-                    <strong>Name:</strong> ${patient.name}
-                </div>
-                <div class="detail-item">
-                    <strong>Age:</strong> ${patient.age}
-                </div>
-                <div class="detail-item">
-                    <strong>Contact:</strong> ${patient.contact}
-                </div>
-                <div class="detail-item">
-                    <strong>Admission Date:</strong> ${formatDate(patient.admissionDate)}
-                </div>
-                <div class="detail-item">
-                    <strong>Department:</strong> ${patient.department}
-                </div>
-                <div class="detail-item">
-                    <strong>Status:</strong> <span class="badge ${getStatusClass(patient.status)}">${patient.status}</span>
-                </div>
-            </div>
+        <h3 style="margin-bottom: 1.5rem; margin-left: 1.5rem;">Thông tin bệnh nhân: ${patient.hoten}</h3>
+        <div style="text-align: center; padding: 2rem;">
+            <p>Đang tải dữ liệu...</p>
         </div>
     `;
+    
+    // Open modal immediately with loading state
+    const modal = document.getElementById('patientModal');
+    if (!modal) {
+        console.error('Modal not found');
+        return;
+    }
+    modal.classList.add('open');
+    
+    // Fetch data from backend
+    fetch(`/admin/patients/${patientId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const examinationHistory = data.examination_history || [];
+            const relatives = data.relatives || [];
+            
+            let examinationRows = '';
+            if (examinationHistory.length > 0) {
+                examinationRows = examinationHistory.map(exam => `
+                    <tr>
+                        <td>${formatDate(exam.date || exam.ngaykham)}</td>
+                        <td><span class="badge ${getPrescriptionStatusClass(exam.status || exam.tinhtrang)}">${exam.status || exam.tinhtrang || 'N/A'}</span></td>
+                        <td>${exam.thuoc || 'N/A'}</td>
+                        <td>${exam.bacsi || 'N/A'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                examinationRows = '<tr><td colspan="5" style="text-align: center;">Không có dữ liệu</td></tr>';
+            }
+            
+            let relativesRows = '';
+            if (relatives.length > 0) {
+                relativesRows = relatives.map(rel => `
+                    <tr>
+                        <td>${rel.name || rel.hoten}</td>
+                        <td>${rel.relationship || rel.quanhe}</td>
+                        <td>${rel.phone || rel.sdt}</td>
+                        <td>${rel.address || rel.diachi || 'N/A'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                relativesRows = '<tr><td colspan="5" style="text-align: center;">Không có dữ liệu</td></tr>';
+            }
+            
+            modalBody.innerHTML = `
+                <div class="patient-details">
+                    <h3 style="margin-bottom: 1.5rem;">Thông tin bệnh nhân: ${patient.hoten}</h3>
+                    
+                    <!-- Tabs -->
+                    <div class="medicine-tabs">
+                        <button class="medicine-tab active" onclick="switchPatientTab('history')">
+                            Lịch sử khám chữa
+                        </button>
+                        <button class="medicine-tab" onclick="switchPatientTab('relatives')">
+                            Người giám hộ
+                        </button>
+                    </div>
 
-    document.getElementById('patientModal').classList.add('open');
+                    <!-- Examination History Tab -->
+                    <div id="historyTab" class="medicine-form-container active">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày khám</th>
+                                        <th>Tình trạng</th>
+                                        <th>Thuốc</th>
+                                        <th>Bác sĩ kê đơn</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${examinationRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Relatives Tab -->
+                    <div id="relativesTab" class="medicine-form-container">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Họ tên</th>
+                                        <th>Quan hệ</th>
+                                        <th>Số điện thoại</th>
+                                        <th>Địa chỉ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${relativesRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            feather.replace();
+        })
+        .catch(error => {
+            console.error('Error fetching patient details:', error);
+            modalBody.innerHTML = `
+                <h3 style="margin-bottom: 1.5rem;">Thông tin bệnh nhân: ${patient.hoten}</h3>
+                <div style="text-align: center; padding: 2rem; color: #EF4444;">
+                    <p>Lỗi khi tải dữ liệu. Vui lòng thử lại.</p>
+                </div>
+            `;
+        });
+}
+
+function switchPatientTab(tabName) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('#patientModal .medicine-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Update tab containers
+    document.getElementById('historyTab').classList.remove('active');
+    document.getElementById('relativesTab').classList.remove('active');
+    
+    if (tabName === 'history') {
+        tabs[0].classList.add('active');
+        document.getElementById('historyTab').classList.add('active');
+    } else {
+        tabs[1].classList.add('active');
+        document.getElementById('relativesTab').classList.add('active');
+    }
 }
 
 // Appointment Functions

@@ -109,3 +109,7 @@ class ExaminationRepository:
     
     def get_total_examinations_by_faculty(self, faculty_id):
         return Examination.query.filter_by(MAKHOA=faculty_id).count()
+    
+    def get_total_patients_by_faculty(self, faculty_id):
+        all_patients_in_faculty = self.get_distinct_patients_by_faculty(faculty_id)
+        return len(all_patients_in_faculty)

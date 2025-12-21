@@ -35,3 +35,7 @@ class PatientService:
                 })
         
         return patients_details
+    
+    def get_relatives_by_patient_id(self, patient_id):
+        relative = self.patients_repo.get_relatives_by_patient_id(patient_id)
+        return relative
