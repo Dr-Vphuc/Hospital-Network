@@ -45,6 +45,7 @@ class PrescriptionRepository:
             .join(ChiTietDH, ChiTietDH.MADT == Prescription.MADT)
             .join(Medicine, Medicine.MATHUOC == ChiTietDH.MATHUOC)
             .join(Doctor, Doctor.MABS == Prescription.MABS)
+            .order_by(Examination.ngaykham.desc())
             .all()
         )
         
