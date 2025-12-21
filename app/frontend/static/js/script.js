@@ -327,11 +327,18 @@ function loadDashboard() {
     const faculty_names = window.backendData?.departmentData?.faculty_names || ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'Emergency'];
     const total_patients_by_faculty = window.backendData?.departmentData?.total_patients_by_faculty || [25, 20, 15, 20, 20];
     
+    // Generate colors for all departments
+    const departmentColors = [
+        '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444',
+        '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#84CC16',
+        '#06B6D4', '#A855F7', '#EAB308', '#F43F5E', '#22D3EE'
+    ];
+    
     const departmentData = {
         labels: faculty_names,
         datasets: [{
             data: total_patients_by_faculty,
-            backgroundColor: ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'],
+            backgroundColor: departmentColors.slice(0, faculty_names.length),
             borderWidth: 0
         }]
     };
