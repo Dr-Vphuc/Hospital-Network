@@ -753,7 +753,7 @@ function createAppointmentRow(room) {
         <td>${room.tentoa}</td>
         <td><span class="badge ${statusClass}">${room.so_giuong_trong} / 4</span></td>
         <td>
-            <button class="btn btn-sm btn-primary">
+            <button class="btn btn-sm btn-primary" onclick="viewRoomPatients('${room.MAPHG}', '${room.tentoa}')">
                 <i data-feather="eye"></i>
                 Danh sách bệnh nhân
             </button>
@@ -762,6 +762,85 @@ function createAppointmentRow(room) {
     
     
     return row;
+}
+
+function viewRoomPatients(roomId, roomName) {
+    const modalBody = document.getElementById('roomPatientsModalBody');
+    if (!modalBody) {
+        console.error('Room patients modal not found');
+        return;
+    }
+    
+    // Show loading state
+    modalBody.innerHTML = `
+        <h3 style="margin-left: 1rem;">Danh sách bệnh nhân - Phòng ${roomId} (${roomName})</h3>
+        <div style="text-align: center; padding: 2rem;">
+            <p>Đang tải dữ liệu...</p>
+        </div>
+    `;
+    
+    // Open modal immediately with loading state
+    const modal = document.getElementById('roomPatientsModal');
+    if (!modal) {
+        console.error('Modal not found');
+        return;
+    }
+    modal.classList.add('open');
+    
+    // Fetch data from backend
+    fetch(`/admin/room/${roomId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            let tableRows = '';
+            if (data.length > 0) {
+                tableRows = data.map(patient => {
+                    const statusClass = getPrescriptionStatusClass(patient.tinhtrang || 'N/A');
+                    return `
+                        <tr>
+                            <td>${patient.hoten}</td>
+                            <td>${patient.sdt || 'N/A'}</td>
+                            <td>${patient.sdt_nguoidk || 'N/A'}</td>
+                            <td><span class="badge ${statusClass}">${patient.tinhtrang || 'N/A'}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tableRows = '<tr><td colspan="4" style="text-align: center;">Phòng không có bệnh nhân</td></tr>';
+            }
+            
+            modalBody.innerHTML = `
+                <h3 style="margin-bottom: 1.5rem;">Danh sách bệnh nhân - Phòng ${roomId} (${roomName})</h3>
+                <div class="table-container" style="margin-top: 1rem;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Họ tên</th>
+                                <th>Số điện thoại</th>
+                                <th>Số điện thoại người thân</th>
+                                <th>Tình trạng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error fetching room patients:', error);
+            modalBody.innerHTML = `
+                <h3 style="margin-bottom: 1.5rem;">Danh sách bệnh nhân - Phòng ${roomId} (${roomName})</h3>
+                <div style="text-align: center; padding: 2rem; color: #EF4444;">
+                    <p>Lỗi khi tải dữ liệu. Vui lòng thử lại.</p>
+                </div>
+            `;
+        });
 }
 
 // Staff Functions
@@ -1417,8 +1496,8 @@ function getAppointmentStatusClass(status) {
 function getPrescriptionStatusClass(status) {
     switch (status) {
         case 'Ổn định': return 'badge-green';
-        case 'Đang tiến triển tốt': return 'badge-blue';
-        case 'Thuyên giảm': return 'badge-yellow';
+        case 'Theo dõi': return 'badge-blue';
+        case 'Điều trị': return 'badge-yellow';
         case 'Nặng lên': return 'badge-red';
         case 'Tiên lượng dè dặt': return 'badge-red';
         case 'Nguy kịch': return 'badge-darkred';

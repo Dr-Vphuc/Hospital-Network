@@ -2,7 +2,15 @@ from backend.models.room import Room
 from backend.models.faculty import Faculty
 from backend.models.building import Building
 from backend.models.bed import Bed
+from backend.models.patient import Patient
+from backend.models.nhapvien import NhapVien
+from backend.models.xuatvien import XuatVien
+from backend.models.relative import Relative
+from backend.models.examination import Examination
 from backend.db import db
+from datetime import datetime
+from sqlalchemy import or_
+from sqlalchemy import and_, func
 
 class RoomRepository:
     def get_room_by_id(self, room_id):
@@ -65,3 +73,45 @@ class RoomRepository:
             })
             
         return result
+    
+    def get_patients_in_room(self, room_id):
+        """
+        Get all patients currently admitted in the specified room.
+        """
+
+        # subquery: latest ngaykham per patient
+        latest_exam_subq = (
+            db.session.query(
+            Examination.MABN.label('MABN'),
+            func.max(Examination.ngaykham).label('max_ngaykham')
+            )
+            .group_by(Examination.MABN)
+            .subquery()
+        )
+
+        patients = (
+            db.session.query(Patient, Relative, Examination, NhapVien)
+            .join(NhapVien, Patient.MABN == NhapVien.MABN)
+            .outerjoin(XuatVien, Patient.MABN == XuatVien.MABN)
+            .outerjoin(Relative, Patient.MABN == Relative.MABN)
+            # join to the subquery to restrict to the latest examination per patient
+            .join(latest_exam_subq, latest_exam_subq.c.MABN == Patient.MABN)
+            .join(
+            Examination,
+            and_(
+                Examination.MABN == Patient.MABN,
+                Examination.ngaykham == latest_exam_subq.c.max_ngaykham
+            )
+            )
+            .filter(
+            NhapVien.MAPHG == room_id,
+            or_(
+                XuatVien.ngayxv == None,
+                XuatVien.ngayxv > datetime.now()
+            ),
+            NhapVien.ngaynv <= datetime.now()
+            )
+            .all()
+        )
+        
+        return patients
