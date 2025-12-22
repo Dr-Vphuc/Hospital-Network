@@ -1941,3 +1941,124 @@ function submitExistingMedicine(event) {
         alert('Lỗi kết nối: ' + error.message);
     });
 }
+
+// Add Prescription Modal Functions
+function openAddPrescriptionModal() {
+    const modal = document.getElementById('addPrescriptionModal');
+    modal.classList.add('open');
+    
+    // Reset to first tab
+    switchPrescriptionTab('existing');
+    
+    // Reset forms
+    document.getElementById('existingPatientPrescriptionFormElement').reset();
+    document.getElementById('newPatientPrescriptionFormElement').reset();
+    
+    // Re-initialize icons
+    feather.replace();
+}
+
+function closeAddPrescriptionModal() {
+    const modal = document.getElementById('addPrescriptionModal');
+    modal.classList.remove('open');
+}
+
+function switchPrescriptionTab(tabName) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('#addPrescriptionModal .medicine-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Update form containers
+    document.getElementById('existingPatientPrescriptionForm').classList.remove('active');
+    document.getElementById('newPatientPrescriptionForm').classList.remove('active');
+    
+    if (tabName === 'existing') {
+        tabs[0].classList.add('active');
+        document.getElementById('existingPatientPrescriptionForm').classList.add('active');
+    } else {
+        tabs[1].classList.add('active');
+        document.getElementById('newPatientPrescriptionForm').classList.add('active');
+    }
+}
+
+function submitExistingPatientPrescription(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    const prescriptionData = {
+        MABN: formData.get('MABN'),
+        tenbenh: formData.get('tenbenh'),
+        giaidoan: formData.get('giaidoan'),
+        tinhtrang: formData.get('tinhtrang'),
+        tenthuoc: formData.get('tenthuoc'),
+        soluong: parseInt(formData.get('soluong')),
+        songayuong: parseInt(formData.get('songayuong'))
+    };
+    
+    console.log('Submitting prescription for existing patient:', prescriptionData);
+    
+    // TODO: Send data to backend API
+    // fetch('/doctor/prescriptions/add-existing', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(prescriptionData)
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //     alert('Đã thêm đơn thuốc thành công!');
+    //     closeAddPrescriptionModal();
+    //     window.location.reload();
+    // })
+    // .catch(error => {
+    //     console.error('Error:', error);
+    //     alert('Lỗi khi thêm đơn thuốc: ' + error.message);
+    // });
+    
+    alert('Đã thêm đơn thuốc cho bệnh nhân ' + prescriptionData.MABN + '\n(TODO: Kết nối backend API)');
+    closeAddPrescriptionModal();
+}
+
+function submitNewPatientPrescription(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    const prescriptionData = {
+        // Patient info
+        hoten: formData.get('hoten'),
+        sdt: formData.get('sdt'),
+        loaibenhnhan: formData.get('loaibenhnhan'),
+        // Prescription info
+        tenbenh: formData.get('tenbenh'),
+        giaidoan: formData.get('giaidoan'),
+        tinhtrang: formData.get('tinhtrang'),
+        tenthuoc: formData.get('tenthuoc'),
+        soluong: parseInt(formData.get('soluong')),
+        songayuong: parseInt(formData.get('songayuong'))
+    };
+    
+    console.log('Submitting prescription for new patient:', prescriptionData);
+    
+    // TODO: Send data to backend API
+    // fetch('/doctor/prescriptions/add-new', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(prescriptionData)
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //     alert('Đã thêm bệnh nhân và đơn thuốc thành công!');
+    //     closeAddPrescriptionModal();
+    //     window.location.reload();
+    // })
+    // .catch(error => {
+    //     console.error('Error:', error);
+    //     alert('Lỗi khi thêm đơn thuốc: ' + error.message);
+    // });
+    
+    alert('Đã thêm bệnh nhân mới: ' + prescriptionData.hoten + '\nvà đơn thuốc\n(TODO: Kết nối backend API)');
+    closeAddPrescriptionModal();
+}
