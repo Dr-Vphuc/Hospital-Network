@@ -46,3 +46,12 @@ class UserRepository:
         )
         
         return doctor.makhoa if doctor else None
+    
+    def get_doctor_id_by_username(self, username):
+        user = (
+            db.session.query(User.ref_id)
+            .filter_by(username=username)
+            .first()
+        )
+        
+        return user.ref_id if user else None

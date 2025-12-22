@@ -18,6 +18,12 @@
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
         <div class="nav-container">
+            <a href="{{ url_for('doctor.doctor_examinations', username=username, doctor_faculty_id=doctor_faculty_id, doctor_faculty_name=doctor_faculty_name, doctor_name=doctor_name) }}" 
+               class="nav-tab {% if request.endpoint == 'doctor.doctor_examinations' %}active{% endif %}"
+               style="text-decoration: none;">
+                <i data-feather="user-check"></i>
+                <span>Hồ sơ của tôi</span>
+            </a>
             <a href="{{ url_for('doctor.patients', username=username, doctor_faculty_id=doctor_faculty_id, doctor_faculty_name=doctor_faculty_name, doctor_name=doctor_name) }}" 
                class="nav-tab {% if request.endpoint == 'doctor.patients' %}active{% endif %}"
                style="text-decoration: none;">
