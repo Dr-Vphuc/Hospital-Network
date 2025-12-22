@@ -71,8 +71,8 @@ class PatientRepository:
             .all()
         )
 
-    def add_patient(self, hoten, ngaysinh, sdt, diachi, loaibn):
-        new_patient = Patient(hoten, ngaysinh, sdt, diachi, loaibn)
+    def add_patient(self, MABN, hoten, sdt, loaibn):
+        new_patient = Patient(MABN, hoten, sdt, loaibn)
         db.session.add(new_patient)
         db.session.commit()
         return new_patient
@@ -143,3 +143,9 @@ class PatientRepository:
             .all()
         )
         return relatives
+    
+    def get_next_patient_id(self):
+        """Get the next available patient ID
+        """
+        max_id = db.session.query(db.func.max(Patient.MABN)).scalar()
+        return max_id[:2] + str(int(max_id[2:]) + 1).zfill(3)

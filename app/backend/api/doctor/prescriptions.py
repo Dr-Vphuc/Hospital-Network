@@ -4,6 +4,8 @@ from flask_login import current_user
 from backend.services.admin.examination_service import ExaminationService
 from backend.repositories.faculty_repository import FacultyRepository
 from backend.repositories.user_repository import UserRepository
+from backend.services.admin.patient_service import PatientService
+from backend.repositories.medicine_repository import MedicineRepository
 
 
 @doctor_bp.route('/prescriptions', methods=['GET'])
@@ -47,4 +49,38 @@ def patient_monitoring(patient_id):
     
     return jsonify({'monitoring_data': monitoring_data})
     
+@doctor_bp.route('/prescriptions/add-new', methods=['POST'])
+@doctor_required
+def add_new_prescription():
+    data = request.get_json()
     
+    current_docter_id = UserRepository().get_doctor_id_by_username(current_user.username)
+    data['MABS'] = current_docter_id
+    data['MAKHOA'] = UserRepository().get_faculty_id_by_doctor_username(current_user.username)
+    data['MATHUOC'] = MedicineRepository().get_medicine_id_by_name(data['tenthuoc'])
+    
+    MABN = PatientService().add_patient(data)
+    data['MABN'] = MABN
+    MADT = ExaminationService().add_prescription(data)
+    data['MADT'] = MADT
+    ExaminationService().add_examination(data)
+    ExaminationService().add_chitiet_dh(data)
+    
+    return jsonify({'message': 'New prescription and examination added successfully.'}), 201
+
+@doctor_bp.route('/prescriptions/add-existing', methods=['POST'])
+@doctor_required
+def add_existing_prescription():
+    data = request.get_json()
+    
+    current_docter_id = UserRepository().get_doctor_id_by_username(current_user.username)
+    data['MABS'] = current_docter_id
+    data['MAKHOA'] = UserRepository().get_faculty_id_by_doctor_username(current_user.username)
+    data['MATHUOC'] = MedicineRepository().get_medicine_id_by_name(data['tenthuoc'])
+    
+    MADT = ExaminationService().add_prescription(data)
+    data['MADT'] = MADT
+    ExaminationService().add_examination(data)
+    ExaminationService().add_chitiet_dh(data)
+    
+    return jsonify({'message': 'New prescription and examination added successfully.'}), 201

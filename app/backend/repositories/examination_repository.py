@@ -113,3 +113,15 @@ class ExaminationRepository:
     def get_total_patients_by_faculty(self, faculty_id):
         all_patients_in_faculty = self.get_distinct_patients_by_faculty(faculty_id)
         return len(all_patients_in_faculty)
+    
+    def get_next_donthuoc_id(self):
+        """Get the next available donthuoc ID
+        """
+        max_id = db.session.query(db.func.max(Prescription.MADT)).scalar()
+        return max_id[:2] + str(int(max_id[2:]) + 1).zfill(4)
+    
+    def get_next_examination_id(self):
+        """Get the next available examination ID
+        """
+        max_id = db.session.query(db.func.max(Examination.MASKB)).scalar()
+        return max_id[:3] + str(int(max_id[3:]) + 1).zfill(4)

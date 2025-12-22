@@ -1999,22 +1999,22 @@ function submitExistingPatientPrescription(event) {
     
     console.log('Submitting prescription for existing patient:', prescriptionData);
     
-    // TODO: Send data to backend API
-    // fetch('/doctor/prescriptions/add-existing', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(prescriptionData)
-    // })
-    // .then(response => response.json())
-    // .then(data => {
-    //     alert('Đã thêm đơn thuốc thành công!');
-    //     closeAddPrescriptionModal();
-    //     window.location.reload();
-    // })
-    // .catch(error => {
-    //     console.error('Error:', error);
-    //     alert('Lỗi khi thêm đơn thuốc: ' + error.message);
-    // });
+    // Send data to backend API
+    fetch('/doctor/prescriptions/add-existing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prescriptionData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Đã thêm đơn thuốc thành công!');
+        closeAddPrescriptionModal();
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Lỗi khi thêm đơn thuốc: ' + error.message);
+    });
     
     alert('Đã thêm đơn thuốc cho bệnh nhân ' + prescriptionData.MABN + '\n(TODO: Kết nối backend API)');
     closeAddPrescriptionModal();
@@ -2042,22 +2042,22 @@ function submitNewPatientPrescription(event) {
     
     console.log('Submitting prescription for new patient:', prescriptionData);
     
-    // TODO: Send data to backend API
-    // fetch('/doctor/prescriptions/add-new', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(prescriptionData)
-    // })
-    // .then(response => response.json())
-    // .then(data => {
-    //     alert('Đã thêm bệnh nhân và đơn thuốc thành công!');
-    //     closeAddPrescriptionModal();
-    //     window.location.reload();
-    // })
-    // .catch(error => {
-    //     console.error('Error:', error);
-    //     alert('Lỗi khi thêm đơn thuốc: ' + error.message);
-    // });
+    // Send data to backend API
+    fetch('/doctor/prescriptions/add-new', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prescriptionData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Đã thêm bệnh nhân và đơn thuốc thành công!');
+        closeAddPrescriptionModal();
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Lỗi khi thêm đơn thuốc: ' + error.message);
+    });
     
     alert('Đã thêm bệnh nhân mới: ' + prescriptionData.hoten + '\nvà đơn thuốc\n(TODO: Kết nối backend API)');
     closeAddPrescriptionModal();

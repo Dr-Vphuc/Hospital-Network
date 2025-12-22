@@ -1,3 +1,4 @@
+from backend.models.patient import Patient
 from backend.repositories.patient_repository import PatientRepository
 from backend.db import db
 from datetime import date
@@ -41,3 +42,20 @@ class PatientService:
     
     def get_relatives_by_patient_id(self, patient_id):
         return self.patients_repo.get_relatives_by_patient_id(patient_id)
+    
+    def add_patient(self, data):
+        MABN = self.patients_repo.get_next_patient_id()
+        new_patient = self.patients_repo.add_patient(
+            MABN=MABN,
+            hoten=data['hoten'],
+            sdt=data['sdt'],
+            loaibn=data['loaibenhnhan']
+        )
+        return MABN
+    
+    def get_next_patient_id(self):
+        return self.patients_repo.get_next_patient_id()
+    
+    def get_last_patient_id(self):
+        max_id = db.session.query(db.func.max(Patient.MABN)).scalar()
+        return max_id

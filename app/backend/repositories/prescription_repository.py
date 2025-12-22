@@ -10,8 +10,8 @@ class PrescriptionRepository:
     def get_prescription_by_madt(self, madt):
         return Prescription.query.filter_by(MADT=madt).first()
 
-    def add_prescription(self, MADT, MABS):
-        new_prescription = Prescription(MADT, MABS)
+    def add_prescription(self, MADT, MABS, MABN):
+        new_prescription = Prescription(MADT, MABS, MABN)
         db.session.add(new_prescription)
         db.session.commit()
         return new_prescription
@@ -71,3 +71,9 @@ class PrescriptionRepository:
             results.append(record)
         
         return results
+    
+    def add_chitiet_dh(self, madhd, mathuoc, soluong, songayuong):
+        new_chitiet_dh = ChiTietDH(MADT=madhd, MATHUOC=mathuoc, soluong=soluong, songayuong=songayuong)
+        db.session.add(new_chitiet_dh)
+        db.session.commit()
+        return new_chitiet_dh

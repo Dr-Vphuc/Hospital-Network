@@ -36,7 +36,23 @@ class MedicineRepository:
     def get_next_medicine_id(self):
         last_medicine = Medicine.query.order_by(Medicine.MATHUOC.desc()).first()
         if not last_medicine:
-            return 'T001'
-        last_id_num = int(last_medicine.MATHUOC[1:])
+            return 'DT001' 
+        last_id_num = int(last_medicine.MATHUOC[2:])
         next_id_num = last_id_num + 1
-        return f'T{next_id_num:03d}'
+        return f'DT{next_id_num:04d}'
+    
+    def get_id_by_name(self, tenthuoc):
+        medicine = Medicine.query.filter_by(tenthuoc=tenthuoc).first()
+        return medicine.MATHUOC if medicine else None
+    
+    def get_next_medicine_id(self):
+        last_medicine = Medicine.query.order_by(Medicine.MATHUOC.desc()).first()
+        if not last_medicine:
+            return 'TH001'
+        last_id_num = int(last_medicine.MATHUOC[2:])
+        next_id_num = last_id_num + 1
+        return f'TH{next_id_num:03d}'
+    
+    def get_medicine_id_by_name(self, tenthuoc):
+        medicine = Medicine.query.filter_by(tenthuoc=tenthuoc).first()
+        return medicine.MATHUOC if medicine else None
