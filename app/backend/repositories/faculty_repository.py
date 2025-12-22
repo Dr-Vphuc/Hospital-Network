@@ -52,3 +52,9 @@ class FacultyRepository:
         if faculty:
             return faculty.MAKHOA
         return None
+    
+    def get_faculty_name_by_id(self, faculty_id):
+        faculty = Faculty.query.filter_by(MAKHOA=faculty_id).first()
+        if faculty:
+            return faculty.tenkhoa
+        return None

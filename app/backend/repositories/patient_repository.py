@@ -124,6 +124,17 @@ class PatientRepository:
     def get_all_patients_id(self):
         patients = db.session.query(Patient.MABN).order_by(Patient.MABN.desc()).all()
         return [patient.MABN for patient in patients]
+
+    def get_patients_id_by_faculty(self, faculty_id):
+        patients = (
+            db.session.query(Patient)
+            .join(Examination, Patient.MABN == Examination.MABN)
+            .filter(Examination.MAKHOA == faculty_id)
+            .order_by(Patient.MABN.desc())
+            .distinct()
+            .all()
+        )
+        return [patient.MABN for patient in patients]    
     
     def get_relatives_by_patient_id(self, patient_id):
         relatives = (

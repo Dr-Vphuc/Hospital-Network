@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hospital Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/styles.css')}}">
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.jpg') }}">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Feather Icons CDN -->
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+    {% include 'doctor/base/header.html' %}
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <div class="nav-container">
+            <a href="{{ url_for('doctor.patients', username=username, doctor_faculty_id=doctor_faculty_id, doctor_faculty_name=doctor_faculty_name, doctor_name=doctor_name) }}" 
+               class="nav-tab {% if request.endpoint == 'doctor.patients' %}active{% endif %}"
+               style="text-decoration: none;">
+                <i data-feather="users"></i>
+                <span>Bệnh nhân</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include 'doctor/base/footer.html' %}
+
+    <script src="{{ url_for('static', filename='js/script.js', v=range(1, 10000)|random) }}"></script>
+</body>
+</html>

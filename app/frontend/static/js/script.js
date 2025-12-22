@@ -593,8 +593,13 @@ function viewPatientDetails(patientId) {
     }
     modal.classList.add('open');
     
+    // Determine the correct endpoint based on current page
+    const isAdminPage = window.location.pathname.startsWith('/admin');
+    const isDoctorPage = window.location.pathname.startsWith('/doctor');
+    const endpoint = isDoctorPage ? `/doctor/patients/${patientId}` : `/admin/patients/${patientId}`;
+    
     // Fetch data from backend
-    fetch(`/admin/patients/${patientId}`)
+    fetch(endpoint)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');

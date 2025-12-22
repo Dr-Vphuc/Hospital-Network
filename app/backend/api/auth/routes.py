@@ -33,7 +33,12 @@ def login():
         return redirect(url_for('user.login_page', error=1))
 
     login_user(user)
-    return redirect(url_for('admin.overview'))
+    
+    role = user.role
+    if role == 'DOCTOR':
+        return redirect(url_for('doctor.patients', username=user.username))
+    elif role == 'ADMIN':
+        return redirect(url_for('admin.overview'))
 
 @auth_bp.route('/register_doctor', methods=['POST'])
 def register_doctor():

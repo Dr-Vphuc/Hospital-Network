@@ -10,8 +10,11 @@ class PatientService:
     def __init__(self):
         self.patients_repo = PatientRepository()
     
-    def get_patient_details(self):
-        patient_ids = self.patients_repo.get_all_patients_id()
+    def get_patient_details(self, faculty_id=None):
+        if faculty_id:
+            patient_ids = self.patients_repo.get_patients_id_by_faculty(faculty_id)
+        else:
+            patient_ids = self.patients_repo.get_all_patients_id()
         patients_details = []
         for patient_id in patient_ids:
             patient_info = self.patients_repo.get_patients_info(patient_id)

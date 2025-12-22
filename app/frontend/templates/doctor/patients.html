@@ -1,0 +1,66 @@
+{% extends 'doctor/base/base.html' %}
+
+{% block title %}My Patients{% endblock %}
+
+{% block content %}
+
+<!-- Patients Section -->
+<section id="patients" class="content-section active">
+    <div class="section-header">
+        <h2>Bệnh nhân khoa {{ doctor_faculty_name }}</h2>
+        <div class="section-actions">
+            <div class="search-box">
+                <i data-feather="search"></i>
+                <input type="text" id="patientSearch" placeholder="Tìm kiếm bệnh nhân...">
+            </div>
+            <select id="statusFilter" class="filter-select">
+                <option value="">Tất cả trạng thái</option>
+                {% for name in ['Đã xuất viện', 'Nội trú', 'Ngoại trú'] %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <div class="section-actions">
+                <button class="btn btn-primary" onclick="openAddPatientModal()">
+                    <i data-feather="plus"></i>
+                    Thêm bệnh nhân mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table" id="patientsTable">
+            <thead>
+                <tr>
+                    <th>MABN</th>
+                    <th>Tên</th>
+                    <th>Tuổi</th>
+                    <th>Liên hệ</th>
+                    <th>Ngày khám gần nhất</th>
+                    <th>Khoa</th>
+                    <th>Trạng thái</th>
+                    <th>Thông tin liên quan</th>
+                </tr>
+            </thead>
+            <tbody id="patientsTableBody">
+                <!-- Populated by JavaScript -->
+            </tbody>
+        </table>
+        <div id="patientsPagination"></div>
+    </div>
+</section>
+
+<!-- Patient Details Modal -->
+<div id="patientModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div id="patientModalBody">
+            <!-- Tabs will be inserted here by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    window.patientsDetails = {{ patients_details | tojson }};
+</script>
+{% endblock %}

@@ -1,24 +1,40 @@
-from . import admin_bp, admin_required
-from flask import render_template, jsonify
+from . import doctor_bp, doctor_required
+from flask import render_template, jsonify, request
 from decimal import Decimal
 from backend.services.admin.patient_service import PatientService
 from backend.services.admin.examination_service import ExaminationService
 from backend.repositories.faculty_repository import FacultyRepository
+from backend.repositories.user_repository import UserRepository
+from backend.db import db
 
-@admin_bp.route('/patients', methods=['GET'])
-@admin_required
+@doctor_bp.route('/patients', methods=['GET'])
+@doctor_required
 def patients():
-    patients_details = PatientService().get_patient_details()
-    all_faculty_names = FacultyRepository().get_all_faculties_names()
+    username = request.args.get('username')
+    doctor_faculty_id = request.args.get('doctor_faculty_id')
+    doctor_name = request.args.get('doctor_name')
+    doctor_faculty_name = request.args.get('doctor_faculty_name')
+    
+    if not doctor_faculty_id:
+        doctor_faculty_id = UserRepository().get_faculty_id_by_doctor_username(username)
+    if not doctor_name:
+        doctor_name = UserRepository().get_doctorname_by_username(username)
+    if not doctor_faculty_name:
+        doctor_faculty_name = FacultyRepository().get_faculty_name_by_id(doctor_faculty_id)
+        
+    patients_details = PatientService().get_patient_details(faculty_id=doctor_faculty_id)
     
     return render_template(
-        'admin/patients.html',
+        'doctor/patients.html',
         patients_details=patients_details,
-        all_faculty_names=all_faculty_names
+        doctor_name=doctor_name,
+        username=username,
+        doctor_faculty_id=doctor_faculty_id,
+        doctor_faculty_name=doctor_faculty_name
         )
     
-@admin_bp.route('/patients/<patient_id>', methods=['GET'])
-@admin_required
+@doctor_bp.route('/patients/<patient_id>', methods=['GET'])
+@doctor_required
 def patient_detail(patient_id):
     examination_history_raw = ExaminationService().get_examination_by_patient_id(patient_id)
     relatives_raw = PatientService().get_relatives_by_patient_id(patient_id)
