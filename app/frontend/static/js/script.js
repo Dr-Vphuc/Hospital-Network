@@ -976,8 +976,9 @@ function submitAddDoctor(event) {
         return response.json();
     })
     .then(data => {
-        // Show success message
-        alert('Thêm bác sĩ mới thành công!');
+        // Show success message with credentials
+        const message = `Thêm bác sĩ mới thành công!\n\nThông tin đăng nhập:\nTên đăng nhập: ${data.username}\nMật khẩu: ${data.password}\n\nVui lòng lưu lại thông tin này!`;
+        alert(message);
         
         // Close modal
         closeAddDoctorModal();

@@ -1,9 +1,13 @@
 from . import admin_bp, admin_required
-from flask import render_template, request
+from flask import render_template, request, jsonify
 from backend.services.admin.doctor_service import DoctorService
 from backend.services.admin.doctor_portal_service import DoctorPortalService
 from backend.repositories.faculty_repository import FacultyRepository
 from backend.repositories.doctor_repository import DoctorRepository
+from backend.models.user import User
+from backend.db import db
+from werkzeug.security import generate_password_hash
+from backend.api.auth.routes import register_doctor
 
 @admin_bp.route('/doctors', methods=['GET'])
 @admin_required
@@ -65,4 +69,5 @@ def add_doctor():
     data = request.get_json()
     
     DoctorService().add_doctor(data)
-    return {'success': True, 'message': f'Added new doctor successfully.'}, 200
+    _, username, password = register_doctor()
+    return {'success': True, 'message': f'Added new doctor successfully.', 'username': username, 'password': password}, 200

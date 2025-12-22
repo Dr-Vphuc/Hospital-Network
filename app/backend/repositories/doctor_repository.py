@@ -51,3 +51,9 @@ class DoctorRepository:
         """
         max_id = db.session.query(db.func.max(Doctor.MABS)).scalar()
         return max_id[:2] + str(int(max_id[2:]) + 1).zfill(3)
+    
+    def get_last_doctor_id(self):
+        """Get the last assigned doctor ID
+        """
+        max_id = db.session.query(db.func.max(Doctor.MABS)).scalar()
+        return max_id
