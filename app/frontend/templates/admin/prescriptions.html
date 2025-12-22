@@ -8,6 +8,16 @@
     <section id="prescriptions" class="content-section active">
         <div class="section-header">
             <h2>Đơn thuốc</h2>
+            <div class="section-actions">
+                <div class="search-box">
+                    <i data-feather="search"></i>
+                    <input type="text" id="prescriptionPatientSearch" placeholder="Tìm kiếm bệnh nhân..." onkeyup="filterPrescriptionsByPatient(this.value)">
+                </div>
+                <div class="search-box">
+                    <i data-feather="search"></i>
+                    <input type="text" id="prescriptionDoctorSearch" placeholder="Tìm kiếm bác sĩ..." onkeyup="filterPrescriptionsByDoctor(this.value)">
+                </div>
+            </div>
         </div>
 
         <div class="table-container">

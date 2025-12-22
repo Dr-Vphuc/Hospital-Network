@@ -1374,6 +1374,44 @@ function viewPrescriptionDetails(prescriptionId) {
     document.getElementById('prescriptionModal').classList.add('open');
 }
 
+function filterPrescriptionsByPatient(searchTerm) {
+    const prescriptionsData = window.prescriptionsData || mockData.prescriptions;
+    
+    // Get current doctor filter value if it exists
+    const doctorSearch = document.getElementById('prescriptionDoctorSearch')?.value || '';
+    
+    allPrescriptions = prescriptionsData.filter(prescription => {
+        const patientName = prescription.patient_name || prescription.patientName || '';
+        const doctorName = prescription.prescribing_doctor || '';
+        
+        const matchesPatient = patientName.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesDoctor = doctorName.toLowerCase().includes(doctorSearch.toLowerCase());
+        
+        return matchesPatient && matchesDoctor;
+    });
+    
+    renderPrescriptionsPage(1);
+}
+
+function filterPrescriptionsByDoctor(searchTerm) {
+    const prescriptionsData = window.prescriptionsData || mockData.prescriptions;
+    
+    // Get current patient filter value if it exists
+    const patientSearch = document.getElementById('prescriptionPatientSearch')?.value || '';
+    
+    allPrescriptions = prescriptionsData.filter(prescription => {
+        const patientName = prescription.patient_name || prescription.patientName || '';
+        const doctorName = prescription.prescribing_doctor || '';
+        
+        const matchesPatient = patientName.toLowerCase().includes(patientSearch.toLowerCase());
+        const matchesDoctor = doctorName.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        return matchesPatient && matchesDoctor;
+    });
+    
+    renderPrescriptionsPage(1);
+}
+
 function viewPatientMonitoring(patientID, patientName) {
     const modalBody = document.getElementById('patientMonitoringModalBody');
     if (!modalBody) {
