@@ -46,3 +46,9 @@ class FacultyRepository:
         
         resulting_patients_id = list(set(all_patients_in_faculty_id) & set(all_current_patients_id))
         return len(resulting_patients_id)
+    
+    def get_id_by_name(self, tenkhoa):
+        faculty = Faculty.query.filter_by(tenkhoa=tenkhoa).first()
+        if faculty:
+            return faculty.MAKHOA
+        return None

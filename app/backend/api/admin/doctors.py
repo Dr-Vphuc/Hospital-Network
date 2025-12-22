@@ -1,5 +1,5 @@
 from . import admin_bp, admin_required
-from flask import render_template
+from flask import render_template, request
 from backend.services.admin.doctor_service import DoctorService
 from backend.services.admin.doctor_portal_service import DoctorPortalService
 from backend.repositories.faculty_repository import FacultyRepository
@@ -58,3 +58,11 @@ def doctor_performent(doctor_id):
         consultation_last_6_months=consultation_last_6_months,
         string_months=string_months
     )
+    
+@admin_bp.route('/doctors/add', methods=['POST'])
+@admin_required
+def add_doctor():
+    data = request.get_json()
+    
+    DoctorService().add_doctor(data)
+    return {'success': True, 'message': f'Added new doctor successfully.'}, 200

@@ -6,8 +6,8 @@ class DoctorRepository:
     def get_doctor_by_id(self, doctor_id):
         return Doctor.query.filter_by(MABS=doctor_id).first()
 
-    def add_doctor(self, hoten, gioitinh, ngaysinh, sdt, phongkham, bangcap, makhoa):
-        new_doctor = Doctor(hoten, gioitinh, ngaysinh, sdt, phongkham, bangcap, makhoa)
+    def add_doctor(self, MABS, hoten, sdt, phongkham, bangcap, makhoa):
+        new_doctor = Doctor(MABS, hoten, sdt, phongkham, bangcap, makhoa)
         db.session.add(new_doctor)
         db.session.commit()
         return new_doctor
@@ -45,3 +45,9 @@ class DoctorRepository:
         """
         return db.session.query(Doctor, Faculty.tenkhoa.label('tenkhoa'))\
             .join(Faculty, Doctor.makhoa == Faculty.MAKHOA).all()
+            
+    def get_next_doctor_id(self):
+        """Get the next available doctor ID
+        """
+        max_id = db.session.query(db.func.max(Doctor.MABS)).scalar()
+        return max_id[:2] + str(int(max_id[2:]) + 1).zfill(3)

@@ -58,7 +58,7 @@ class PharmacyService:
         congdung = data['congdung']
         giatien = data['giatien'] 
         
-        new_medicine = self.medicine_repo.add_medicine(MATHUOC, tenthuoc, congdung, giatien)
+        self.medicine_repo.add_medicine(MATHUOC, tenthuoc, congdung, giatien)
         
         soluong = MEDICINES_PER_BATCH
         hsd = data['hsd']

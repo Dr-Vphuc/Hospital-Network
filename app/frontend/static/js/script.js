@@ -921,6 +921,80 @@ function filterStaffByRole(faculty) {
     renderStaffPage(1);
 }
 
+// Add Doctor Modal Functions
+function openAddDoctorModal() {
+    const modal = document.getElementById('addDoctorModal');
+    modal.classList.add('open');
+    
+    // Reset form
+    document.getElementById('addDoctorForm').reset();
+    
+    // Re-initialize icons
+    feather.replace();
+}
+
+function closeAddDoctorModal() {
+    const modal = document.getElementById('addDoctorModal');
+    modal.classList.remove('open');
+}
+
+function submitAddDoctor(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    const doctorData = {
+        hoten: formData.get('hoten'),        
+        bangcap: formData.get('bangcap'),
+        khoa: formData.get('khoa'),
+        phongkham: formData.get('phongkham'),
+        sdt: formData.get('sdt'),
+        trangthai: true
+    };
+    
+    // Disable submit button to prevent double submission
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang thêm...';
+    
+    // Send data to backend API
+    fetch('/admin/doctors/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(doctorData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.message || 'Có lỗi xảy ra khi thêm bác sĩ');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Show success message
+        alert('Thêm bác sĩ mới thành công!');
+        
+        // Close modal
+        closeAddDoctorModal();
+        
+        // Reload the page to show updated data
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error adding doctor:', error);
+        alert('Lỗi: ' + error.message);
+        
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    });
+}
+
 // Doctor Portal Functions
 function loadDoctorPortal() {
     loadSchedule();

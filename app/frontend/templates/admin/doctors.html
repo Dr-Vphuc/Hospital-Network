@@ -19,6 +19,10 @@
                     <option value="{{ name }}">{{ name }}</option>
                 {% endfor %}
             </select>
+            <button class="btn btn-primary" onclick="openAddDoctorModal()">
+                <i data-feather="plus"></i>
+                Thêm bác sĩ mới
+            </button>
         </div>
     </div>
 
@@ -40,6 +44,57 @@
         </table>
     </div>
 </section>
+
+<!-- Add Doctor Modal -->
+<div id="addDoctorModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3>Thêm bác sĩ mới</h3>
+            <button class="modal-close" onclick="closeAddDoctorModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="addDoctorForm" onsubmit="submitAddDoctor(event)">
+                <div class="form-group">
+                    <label for="doctorName">Tên bác sĩ *</label>
+                    <input type="text" id="doctorName" name="hoten" required class="form-control" placeholder="Nhập họ và tên bác sĩ">
+                </div>
+                <div class="form-group">
+                    <label for="doctorQualification">Bằng cấp *</label>
+                    <select id="doctorQualification" name="bangcap" required class="form-control">
+                        <option value="">-- Chọn bằng cấp --</option>
+                        <option value="Bác sĩ">Bác sĩ</option>
+                        <option value="Thạc sĩ">Thạc sĩ</option>
+                        <option value="Tiến sĩ">Tiến sĩ</option>
+                        <option value="Bác sĩ chuyên khoa I">Bác sĩ chuyên khoa I</option>
+                        <option value="Bác sĩ chuyên khoa II">Bác sĩ chuyên khoa II</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="doctorFaculty">Khoa *</label>
+                    <select id="doctorFaculty" name="khoa" required class="form-control">
+                        <option value="">-- Chọn khoa --</option>
+                        {% for name in all_faculty_names %}
+                            <option value="{{ name }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="doctorRoom">Phòng khám *</label>
+                    <input type="text" id="doctorRoom" name="phongkham" required class="form-control" placeholder="Nhập phòng khám (VD: P101)">
+                </div>
+                <div class="form-group">
+                    <label for="doctorPhone">Số điện thoại *</label>
+                    <input type="tel" id="doctorPhone" name="sdt" required class="form-control" placeholder="Nhập số điện thoại" pattern="[0-9]{10,11}">
+                    <small class="form-text">Nhập 10-11 chữ số</small>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddDoctorModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm bác sĩ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script>
     window.allDoctors = {{ all_doctors | tojson | safe }};

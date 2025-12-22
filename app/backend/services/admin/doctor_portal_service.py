@@ -82,7 +82,7 @@ class DoctorPortalService:
         
         total_stable_patients = self.examination_repository.get_stable_patients_count_by_doctor(doctor_id)
         
-        return total_stable_patients / total_patients
+        return round(total_stable_patients / total_patients, 2)
     
     def get_consultation_last_6_months(self, doctor_id):
         current_month = datetime.now().month
