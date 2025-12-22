@@ -1,5 +1,6 @@
 from . import doctor_bp, doctor_required
 from flask import render_template, request, jsonify
+from flask_login import current_user
 from backend.services.admin.doctor_service import DoctorService
 from backend.services.admin.doctor_portal_service import DoctorPortalService
 from backend.repositories.faculty_repository import FacultyRepository
@@ -22,22 +23,13 @@ def doctors():
 @doctor_bp.route('/doctors/examinations', methods=['GET'])
 @doctor_required
 def doctor_examinations():
-    doctor_id = request.args.get('doctor_id')
+    # Use current_user from Flask-Login session, not URL parameters
+    username = current_user.username
+    doctor_faculty_id = UserRepository().get_faculty_id_by_doctor_username(username)
+    doctor_name = UserRepository().get_doctorname_by_username(username)
+    doctor_faculty_name = FacultyRepository().get_faculty_name_by_id(doctor_faculty_id)
+    doctor_id = UserRepository().get_doctor_id_by_username(username)
     
-    username = request.args.get('username')
-    doctor_faculty_id = request.args.get('doctor_faculty_id')
-    doctor_name = request.args.get('doctor_name')
-    doctor_faculty_name = request.args.get('doctor_faculty_name')
-    
-    if not doctor_faculty_id:
-        doctor_faculty_id = UserRepository().get_faculty_id_by_doctor_username(username)
-    if not doctor_name:
-        doctor_name = UserRepository().get_doctorname_by_username(username)
-    if not doctor_faculty_name:
-        doctor_faculty_name = FacultyRepository().get_faculty_name_by_id(doctor_faculty_id)
-    
-    if not doctor_id:
-        doctor_id = UserRepository().get_doctor_id_by_username(username)
     examinations_data = DoctorPortalService().get_patients_examinations_of_doctor(doctor_id)
     
     return render_template(
@@ -51,7 +43,6 @@ def doctor_examinations():
         stable_patients_ratio=None,
         consultation_last_6_months=None,
         string_months=None,
-        username=username,
         doctor_faculty_id=doctor_faculty_id,
         doctor_faculty_name=doctor_faculty_name,
     )
@@ -59,22 +50,12 @@ def doctor_examinations():
 @doctor_bp.route('/doctors/performance', methods=['GET'])
 @doctor_required
 def doctor_performance():
-    doctor_id = request.args.get('doctor_id')
-    
-    username = request.args.get('username')
-    doctor_faculty_id = request.args.get('doctor_faculty_id')
-    doctor_name = request.args.get('doctor_name')
-    doctor_faculty_name = request.args.get('doctor_faculty_name')
-    
-    if not doctor_faculty_id:
-        doctor_faculty_id = UserRepository().get_faculty_id_by_doctor_username(username)
-    if not doctor_name:
-        doctor_name = UserRepository().get_doctorname_by_username(username)
-    if not doctor_faculty_name:
-        doctor_faculty_name = FacultyRepository().get_faculty_name_by_id(doctor_faculty_id)
-    
-    if not doctor_id:
-        doctor_id = UserRepository().get_doctor_id_by_username(username)
+    # Use current_user from Flask-Login session, not URL parameters
+    username = current_user.username
+    doctor_faculty_id = UserRepository().get_faculty_id_by_doctor_username(username)
+    doctor_name = UserRepository().get_doctorname_by_username(username)
+    doctor_faculty_name = FacultyRepository().get_faculty_name_by_id(doctor_faculty_id)
+    doctor_id = UserRepository().get_doctor_id_by_username(username)
         
     service = DoctorPortalService()
     total_patients = service.get_total_patients_of_doctor(doctor_id)
@@ -93,7 +74,6 @@ def doctor_performance():
         stable_patients_ratio=stable_patients_ratio,
         consultation_last_6_months=consultation_last_6_months,
         string_months=string_months,
-        username=username,
         doctor_faculty_id=doctor_faculty_id,
         doctor_faculty_name=doctor_faculty_name,
     )

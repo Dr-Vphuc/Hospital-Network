@@ -1,5 +1,6 @@
 from . import doctor_bp, doctor_required
 from flask import render_template, jsonify, request
+from flask_login import current_user
 from backend.services.admin.examination_service import ExaminationService
 from backend.repositories.faculty_repository import FacultyRepository
 from backend.repositories.user_repository import UserRepository
@@ -8,17 +9,11 @@ from backend.repositories.user_repository import UserRepository
 @doctor_bp.route('/prescriptions', methods=['GET'])
 @doctor_required
 def prescriptions():
-    username = request.args.get('username')
-    doctor_faculty_id = request.args.get('doctor_faculty_id')
-    doctor_name = request.args.get('doctor_name')
-    doctor_faculty_name = request.args.get('doctor_faculty_name')
-    
-    if not doctor_faculty_id:
-        doctor_faculty_id = UserRepository().get_faculty_id_by_doctor_username(username)
-    if not doctor_name:
-        doctor_name = UserRepository().get_doctorname_by_username(username)
-    if not doctor_faculty_name:
-        doctor_faculty_name = FacultyRepository().get_faculty_name_by_id(doctor_faculty_id)
+    # Use current_user from Flask-Login session, not URL parameters
+    username = current_user.username
+    doctor_faculty_id = UserRepository().get_faculty_id_by_doctor_username(username)
+    doctor_name = UserRepository().get_doctorname_by_username(username)
+    doctor_faculty_name = FacultyRepository().get_faculty_name_by_id(doctor_faculty_id)
         
     examination_service = ExaminationService()
     prescriptions = examination_service.get_all_prescriptions_with_patients(doctor_faculty_id)

@@ -36,7 +36,7 @@ def login():
     
     role = user.role
     if role == 'DOCTOR':
-        return redirect(url_for('doctor.doctor_examinations', username=user.username))
+        return redirect(url_for('doctor.doctor_examinations'))
     elif role == 'ADMIN':
         return redirect(url_for('admin.overview'))
 

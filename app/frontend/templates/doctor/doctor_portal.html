@@ -6,8 +6,8 @@
 
 <!-- Doctor Portal Sub-tabs -->
 <div class="sub-tabs">
-    <a href="{{ url_for('doctor.doctor_examinations', username=username, doctor_faculty_id=doctor_faculty_id, doctor_faculty_name=doctor_faculty_name, doctor_name=doctor_name) }}" class="sub-tab {% if active_tab == 'my-patients' %}active{% endif %}" data-subsection="my-patients">Các lượt khám chữa</a>
-    <a href="{{ url_for('doctor.doctor_performance', username=username, doctor_faculty_id=doctor_faculty_id, doctor_faculty_name=doctor_faculty_name, doctor_name=doctor_name) }}" class="sub-tab {% if active_tab == 'performance' %}active{% endif %}" data-subsection="performance">Hiệu suất làm việc</a>
+    <a href="{{ url_for('doctor.doctor_examinations') }}" class="sub-tab {% if active_tab == 'my-patients' %}active{% endif %}" data-subsection="my-patients">Các lượt khám chữa</a>
+    <a href="{{ url_for('doctor.doctor_performance') }}" class="sub-tab {% if active_tab == 'performance' %}active{% endif %}" data-subsection="performance">Hiệu suất làm việc</a>
 </div>
 
 <!-- Sub-sections -->
