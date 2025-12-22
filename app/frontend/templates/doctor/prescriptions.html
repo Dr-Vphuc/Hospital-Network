@@ -9,17 +9,24 @@
         <div class="section-header">
             <h2>Đơn thuốc khoa {{ doctor_faculty_name }}</h2>
             <div class="section-actions">
-                <div class="search-box">
-                    <i data-feather="search"></i>
-                    <input type="text" id="prescriptionPatientSearch" placeholder="Tìm kiếm bệnh nhân..." onkeyup="filterPrescriptionsByPatient(this.value)">
-                </div>
-                <div class="search-box">
-                    <i data-feather="search"></i>
-                    <input type="text" id="prescriptionDoctorSearch" placeholder="Tìm kiếm bác sĩ..." onkeyup="filterPrescriptionsByDoctor(this.value)">
-                </div>
+                <button class="btn btn-primary" onclick="openAddMedicineModal()">
+                    <i data-feather="plus"></i>
+                    Thêm đơn thuốc mới
+                </button>
             </div>
+            
         </div>
 
+        <div class="section-actions" style="align-items:rights">
+            <div class="search-box">
+                <i data-feather="search"></i>
+                <input type="text" id="prescriptionPatientSearch" placeholder="Tìm kiếm bệnh nhân..." onkeyup="filterPrescriptionsByPatient(this.value)">
+            </div>
+            <div class="search-box">
+                <i data-feather="search"></i>
+                <input type="text" id="prescriptionDoctorSearch" placeholder="Tìm kiếm bác sĩ..." onkeyup="filterPrescriptionsByDoctor(this.value)">
+            </div>
+        </div>
         <div class="table-container">
             <table class="data-table" id="prescriptionsTable">
                 <thead>

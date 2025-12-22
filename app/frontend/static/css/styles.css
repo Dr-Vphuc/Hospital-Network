@@ -900,3 +900,13 @@ body {
         transform: translateX(0);
     }
 }
+
+.section-actions {
+    display: flex;
+    justify-content: flex-end; /* đẩy sang phải */
+    gap: 12px;                 /* khoảng cách giữa 2 ô search */
+}
+.search-box {
+    flex-grow: 1;              /* chiếm toàn bộ không gian còn lại */
+    max-width: 300px;         /* giới hạn chiều rộng tối đa */
+}
