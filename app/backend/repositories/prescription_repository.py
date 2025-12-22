@@ -37,7 +37,7 @@ class PrescriptionRepository:
     def get_all_prescriptions(self):
         return Prescription.query.all()
     
-    def get_all_prescriptions_with_patients(self):
+    def get_all_prescriptions_with_patients(self, doctor_faculty_id=None):
         prescriptions_with_patients = (
             db.session.query(Prescription, Patient, Examination, ChiTietDH, Medicine, Doctor)
             .join(Patient, Prescription.MABN == Patient.MABN)
@@ -48,6 +48,13 @@ class PrescriptionRepository:
             .order_by(Examination.ngaykham.desc())
             .all()
         )
+        
+        if doctor_faculty_id:
+            prescriptions_with_patients = [
+                (prescription, patient, examination, chitietdh, medicine, doctor)
+                for (prescription, patient, examination, chitietdh, medicine, doctor) in prescriptions_with_patients
+                if examination.MAKHOA == doctor_faculty_id
+            ]
         
         results = []
         for prescription, patient, examination, chitietdh, medicine, doctor in prescriptions_with_patients:

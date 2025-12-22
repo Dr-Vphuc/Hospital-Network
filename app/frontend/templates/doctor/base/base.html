@@ -24,6 +24,12 @@
                 <i data-feather="users"></i>
                 <span>Bệnh nhân</span>
             </a>
+            <a href="{{ url_for('doctor.prescriptions', username=username, doctor_faculty_id=doctor_faculty_id, doctor_faculty_name=doctor_faculty_name, doctor_name=doctor_name) }}" 
+               class="nav-tab {% if request.endpoint == 'doctor.prescriptions' %}active{% endif %}"
+               style="text-decoration: none;">
+                <i data-feather="file-text"></i>
+                <span>Đơn thuốc</span>
+            </a>
         </div>
     </nav>
 

@@ -15,4 +15,4 @@ def doctor_required(f):
         return f(*args, **kwargs)
     return decorated
 
-from . import patients
+from . import patients, prescriptions

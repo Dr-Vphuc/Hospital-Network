@@ -1392,8 +1392,12 @@ function viewPatientMonitoring(patientID, patientName) {
     // Open modal immediately with loading state
     document.getElementById('patientMonitoringModal').classList.add('open');
     
+    const isAdminPage = window.location.pathname.startsWith('/admin');
+    const isDoctorPage = window.location.pathname.startsWith('/doctor');
+    const endpoint = isDoctorPage ? `/doctor/prescriptions/${patientID}` : `/admin/prescriptions/${patientID}`;
+
     // Fetch data from backend
-    fetch(`/admin/prescriptions/${patientID}`)
+    fetch(endpoint)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
