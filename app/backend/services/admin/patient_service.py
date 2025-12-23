@@ -77,3 +77,9 @@ class PatientService:
         if patient:
             patient.loaibenhnhan = data['loaibenhnhan']
             db.session.commit()
+            
+    def get_loaibenhnhan_by_id(self, patient_id):
+        patient = db.session.query(Patient).filter_by(MABN=patient_id).first()
+        if patient:
+            return patient.loaibn
+        return None

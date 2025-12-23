@@ -99,3 +99,12 @@ def check_existing_patient(patient_id):
     patient = PatientService().patients_repo.get_patient_by_id(patient_id)
     exists = patient is not None
     return jsonify({'exists': exists, 'patient_id': patient_id})
+
+@doctor_bp.route('/prescriptions/check-loaibn/<string:patient_id>', methods=['GET'])
+@doctor_required
+def check_loaibenhnhan_for_form(patient_id):
+    loaibenhnhan = PatientService().get_loaibenhnhan_by_id(patient_id)
+    if loaibenhnhan == 'Noi tru':
+        return jsonify({'loaibenhnhan': "Ngoại trú"})
+    else:
+        return jsonify({'loaibenhnhan': "Nội trú"})

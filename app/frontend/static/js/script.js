@@ -2011,6 +2011,7 @@ let patientCheckTimeout = null;
 function checkPatientExists(patientId) {
     const icon = document.getElementById('patientValidationIcon');
     const message = document.getElementById('patientValidationMessage');
+    const typeSelect = document.getElementById('existingPatientType');
     
     // Clear previous timeout
     if (patientCheckTimeout) {
@@ -2021,6 +2022,8 @@ function checkPatientExists(patientId) {
     if (!patientId || patientId.trim() === '') {
         icon.style.display = 'none';
         message.style.display = 'none';
+        // Reset patient type select to default options
+        resetPatientTypeSelect();
         return;
     }
     
@@ -2038,10 +2041,30 @@ function checkPatientExists(patientId) {
                     icon.innerHTML = '<i data-feather="check-circle" style="color: #10B981; width: 20px; height: 20px;"></i>';
                     message.innerHTML = '<span style="color: #10B981;">✓ Bệnh nhân tồn tại</span>';
                     message.style.display = 'block';
+                    
+                    // Fetch patient type and update select options
+                    fetch(`/doctor/prescriptions/check-loaibn/${patientId}`)
+                        .then(response => response.json())
+                        .then(loaibnData => {
+                            const loaibenhnhan = loaibnData.loaibenhnhan;
+                            const value = loaibenhnhan === 'Nội trú' ? 'noitru' : 'ngoaitru';
+                            
+                            // Update select with dynamic option
+                            typeSelect.innerHTML = `
+                                <option value="">-- Chọn loại --</option>
+                                <option value="duytri">Duy trì hình thức cũ</option>
+                                <option value="${value}">${loaibenhnhan}</option>
+                            `;
+                        })
+                        .catch(error => {
+                            console.error('Error fetching patient type:', error);
+                            resetPatientTypeSelect();
+                        });
                 } else {
                     icon.innerHTML = '<i data-feather="x-circle" style="color: #EF4444; width: 20px; height: 20px;"></i>';
                     message.innerHTML = '<span style="color: #EF4444;">✗ Không tìm thấy bệnh nhân</span>';
                     message.style.display = 'block';
+                    resetPatientTypeSelect();
                 }
                 feather.replace();
             })
@@ -2050,9 +2073,22 @@ function checkPatientExists(patientId) {
                 icon.innerHTML = '<i data-feather="alert-circle" style="color: #F59E0B; width: 20px; height: 20px;"></i>';
                 message.innerHTML = '<span style="color: #F59E0B;">⚠ Lỗi kiểm tra</span>';
                 message.style.display = 'block';
+                resetPatientTypeSelect();
                 feather.replace();
             });
     }, 500); // Wait 500ms after user stops typing
+}
+
+function resetPatientTypeSelect() {
+    const typeSelect = document.getElementById('existingPatientType');
+    if (typeSelect) {
+        typeSelect.innerHTML = `
+            <option value="">-- Chọn loại --</option>
+            <option value="duytri">Duy trì hình thức cũ</option>
+            <option value="ngoaitru">Ngoại trú</option>
+            <option value="noitru">Nội trú</option>
+        `;
+    }
 }
 
 function openAddPrescriptionModal() {
@@ -2071,6 +2107,9 @@ function openAddPrescriptionModal() {
     const message = document.getElementById('patientValidationMessage');
     if (icon) icon.style.display = 'none';
     if (message) message.style.display = 'none';
+    
+    // Reset patient type select to default
+    resetPatientTypeSelect();
     
     // Re-initialize icons
     feather.replace();
