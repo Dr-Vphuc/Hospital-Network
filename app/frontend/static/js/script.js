@@ -1227,16 +1227,20 @@ function loadPharmacyAlerts() {
 
     alertsContainer.innerHTML = '';
     const today = new Date();
+    
+    // Track which medicine names have already shown alerts to avoid duplicates
+    const lowStockAlerted = new Set();
+    const expiryAlerted = new Set();
 
     medicines.forEach(med => {
         const name = med.name || med.product_name || 'Unknown Medicine';
-        const quantity = Number(med.quantity ?? med.total_quantity ?? med.available_quantity ?? 0);
-        const maxQty = Number(med.maxQuantity ?? med.max_quantity ?? med.max ?? 1);
+        const quantity = Number(med.total_quantity ?? med.total_quantity ?? med.available_quantity ?? 0);
+        const maxQty = Number(med.total_stock_level ?? med.max_quantity ?? med.max ?? 1);
         const expiryRaw = med.expiryDate ?? med.expiry_date ?? med.expiry;
 
-        // Low stock alert
+        // Low stock alert - only show once per medicine name
         const stockRatio = maxQty > 0 ? (quantity / maxQty) : 0;
-        if (stockRatio < 0.2) {
+        if (stockRatio < 0.2 && !lowStockAlerted.has(name)) {
             const alert = document.createElement('div');
             alert.className = 'alert alert-warning';
             alert.innerHTML = `
@@ -1244,22 +1248,24 @@ function loadPharmacyAlerts() {
                 Tồn kho thấp: ${name} (${quantity}/${maxQty})
             `;
             alertsContainer.appendChild(alert);
+            lowStockAlerted.add(name);
         }
 
-        // Near expiry alert
-        if (expiryRaw) {
+        // Near expiry alert - only show once per medicine name
+        if (expiryRaw && !expiryAlerted.has(name)) {
             const expiryDate = new Date(expiryRaw);
             if (!isNaN(expiryDate)) {
                 const diffTime = expiryDate - today;
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                if (diffDays <= 30 && diffDays > 0) {
+                if (diffDays <= 60 && diffDays > 0) {
                     const alert = document.createElement('div');
                     alert.className = 'alert alert-danger';
                     alert.innerHTML = `
                         <i data-feather="alert-circle"></i>
-                        Near expiry: ${name} expires on ${formatDate(expiryDate)}
+                        Sắp hết hạn: ${name} (Mã lô: ${med.malo}) hết hạn vào ${formatDate(expiryDate)}
                     `;
                     alertsContainer.appendChild(alert);
+                    expiryAlerted.add(name);
                 }
             }
         }

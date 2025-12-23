@@ -53,3 +53,16 @@ class InventoryRepository:
     def total_quantity_by_medicine(self, mathuoc):
         total = db.session.query(db.func.sum(Inventory.soluong)).filter_by(MATHUOC=mathuoc).scalar()
         return total if total else 0
+    
+    def divestiture_inventory_by_medicine_id(self, mathuoc, soluong_change):
+        inventories = Inventory.query.filter_by(MATHUOC=mathuoc).order_by(Inventory.hsd.asc()).all()
+        if not inventories:
+            return False
+        for inventory in inventories:
+            inventory.soluong -= soluong_change
+            if inventory.soluong < 0:
+                inventory.soluong += soluong_change  # revert change
+            else:
+                break
+        db.session.commit()
+        return True

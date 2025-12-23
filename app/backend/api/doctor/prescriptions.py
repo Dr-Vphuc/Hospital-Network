@@ -6,6 +6,7 @@ from backend.repositories.faculty_repository import FacultyRepository
 from backend.repositories.user_repository import UserRepository
 from backend.services.admin.patient_service import PatientService
 from backend.repositories.medicine_repository import MedicineRepository
+from backend.repositories.inventory_repository import InventoryRepository
 
 
 @doctor_bp.route('/prescriptions', methods=['GET'])
@@ -66,6 +67,8 @@ def add_new_prescription():
     ExaminationService().add_examination(data)
     ExaminationService().add_chitiet_dh(data)
     
+    InventoryRepository().divestiture_inventory_by_medicine_id(data['MATHUOC'], data['soluong'] * data['songayuong'])
+    
     return jsonify({'message': 'New prescription and examination added successfully.'}), 201
 
 @doctor_bp.route('/prescriptions/add-existing', methods=['POST'])
@@ -82,5 +85,7 @@ def add_existing_prescription():
     data['MADT'] = MADT
     ExaminationService().add_examination(data)
     ExaminationService().add_chitiet_dh(data)
+    
+    InventoryRepository().divestiture_inventory_by_medicine_id(data['MATHUOC'], data['soluong'] * data['songayuong'])
     
     return jsonify({'message': 'New prescription and examination added successfully.'}), 201

@@ -16,6 +16,7 @@ class PharmacyService:
             medicine = self.medicine_repo.get_medicine_by_id(inventory.MATHUOC)
             if medicine:
                 table_data.append({
+                    'malo': inventory.MALO,
                     "name": medicine.tenthuoc,
                     "quantity": inventory.soluong,
                     "max_quantity": MEDICINES_PER_BATCH,
@@ -24,7 +25,7 @@ class PharmacyService:
                     "total_quantity": self.inventory_repo.total_quantity_by_medicine(inventory.MATHUOC),
                     "total_stock_level": MEDICINES_PER_BATCH * self.inventory_repo.count_batches_by_medicine(inventory.MATHUOC)
                 })
-        table_data.sort(key=lambda x: x['name'])
+        table_data.sort(key=lambda x: (x['name'], x['expiry_date']))
         return table_data    
         
     def get_total_price(self):
