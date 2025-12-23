@@ -59,10 +59,12 @@ class InventoryRepository:
         if not inventories:
             return False
         for inventory in inventories:
-            inventory.soluong -= soluong_change
-            if inventory.soluong < 0:
-                inventory.soluong += soluong_change  # revert change
+            if inventory.soluong < soluong_change:
+                soluong_change -= inventory.soluong
+                db.session.delete(inventory)
             else:
+                inventory.soluong -= soluong_change
+                soluong_change = 0
                 break
         db.session.commit()
         return True
