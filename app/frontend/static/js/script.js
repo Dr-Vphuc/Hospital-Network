@@ -516,8 +516,11 @@ function createPatientRow(patient) {
     const row = document.createElement('tr');
     const statusClass = getStatusClass(patient.status);
     
-    // Check if patient is inpatient (Nội trú)
-    const dischargeButton = patient.status === 'Nội trú' 
+    // Check if current user is a doctor (based on URL path)
+    const isDoctorPage = window.location.pathname.startsWith('/doctor');
+    
+    // Check if patient is inpatient (Nội trú) and user is a doctor
+    const dischargeButton = (patient.status === 'Nội trú' && isDoctorPage)
         ? `<button class="btn btn-sm" style="background-color: #10B981; color: white; margin-left: 0.5rem;" onclick="confirmDischargePatient('${patient.MABN}', '${patient.hoten}')">
                 <i data-feather="log-out"></i>
                 Xuất viện
@@ -766,8 +769,8 @@ function dischargePatient(patientId) {
     .then(data => {
         if (data.success) {
             alert('Xuất viện thành công!');
-            // Reload the patients table
-            loadPatients();
+            // Reload the page to refresh the data
+            window.location.reload();
         } else {
             alert('Lỗi: ' + (data.message || 'Không thể xuất viện'));
         }
