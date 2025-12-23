@@ -81,6 +81,9 @@ def add_existing_prescription():
     data['MAKHOA'] = UserRepository().get_faculty_id_by_doctor_username(current_user.username)
     data['MATHUOC'] = MedicineRepository().get_medicine_id_by_name(data['tenthuoc'])
     
+    if data['loaibenhnhan'] != 'duytri':
+        PatientService().update_loai_patient(data)
+    
     MADT = ExaminationService().add_prescription(data)
     data['MADT'] = MADT
     ExaminationService().add_examination(data)
@@ -89,3 +92,10 @@ def add_existing_prescription():
     InventoryRepository().divestiture_inventory_by_medicine_id(data['MATHUOC'], data['soluong'] * data['songayuong'])
     
     return jsonify({'message': 'New prescription and examination added successfully.'}), 201
+
+@doctor_bp.route('/prescriptions/check-patient/<string:patient_id>', methods=['GET'])
+@doctor_required
+def check_existing_patient(patient_id):
+    patient = PatientService().patients_repo.get_patient_by_id(patient_id)
+    exists = patient is not None
+    return jsonify({'exists': exists, 'patient_id': patient_id})
