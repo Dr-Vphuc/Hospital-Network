@@ -54,7 +54,8 @@ class RoomRepository:
                 Room.MAPHG,
                 Faculty.tenkhoa,
                 Building.tentoa,
-                (db.func.count(Bed.so) - db.func.sum(Bed.tinhtrang)).label('so_giuong_trong')
+                (db.func.sum(Bed.tinhtrang)).label('so_giuong_trong'),
+                Room.sogiuong
             )
             .join(Faculty, Room.MAKHOA == Faculty.MAKHOA)
             .join(Bed, Room.MAPHG == Bed.MAPHG)
@@ -69,7 +70,8 @@ class RoomRepository:
                 'MAPHG': detail.MAPHG,
                 'tenkhoa': detail.tenkhoa,
                 'tentoa': detail.tentoa,
-                'so_giuong_trong': detail.so_giuong_trong
+                'so_giuong_trong': detail.so_giuong_trong,
+                'tong_giuong': db.session.query(Bed).filter(Bed.MAPHG == detail.MAPHG).count()
             })
             
         return result

@@ -37,3 +37,6 @@ class NhapVienRepository:
         # minus discharged patients
         current_inpatients_id = list(set(all_nhapvien_id) - set(all_discharged_patients_id))
         return current_inpatients_id
+    
+    # def add_inpatient_auto_pick_bed(self, MABN, ngaynv):
+        

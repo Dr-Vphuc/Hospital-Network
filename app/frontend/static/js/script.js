@@ -808,13 +808,13 @@ function renderAppointmentsPage(page) {
 
 function createAppointmentRow(room) {
     const row = document.createElement('tr');
-    const statusClass = getAppointmentStatusClass(room.so_giuong_trong);
+    const statusClass = getAppointmentStatusClass(room.so_giuong_trong, room.tong_giuong);
     
     row.innerHTML = `
         <td> ${room.MAPHG}</td>
         <td>${room.tenkhoa}</td>
         <td>${room.tentoa}</td>
-        <td><span class="badge ${statusClass}">${room.so_giuong_trong} / 4</span></td>
+        <td><span class="badge ${statusClass}">${room.so_giuong_trong} / ${room.tong_giuong}</span></td>
         <td>
             <button class="btn btn-sm btn-primary" onclick="viewRoomPatients('${room.MAPHG}', '${room.tentoa}')">
                 <i data-feather="eye"></i>
@@ -1087,7 +1087,7 @@ function createScheduleCard(appointment) {
     
     card.innerHTML = `
         <h4>${appointment.time} - ${appointment.patientName}</h4>
-        <p>Status: <span class="badge ${getAppointmentStatusClass(appointment.so_giuong_trong)}">${appointment.so_giuong_trong} / 4</span></p>
+        <p>Status: <span class="badge ${getAppointmentStatusClass(appointment.so_giuong_trong, appointment.tong_giuong)}">${appointment.so_giuong_trong} / 4</span></p>
         <div class="schedule-actions">
             <button class="btn btn-sm btn-success">
                 <i data-feather="check"></i>
@@ -1668,14 +1668,13 @@ function getStatusClass(status) {
     }
 }
 
-function getAppointmentStatusClass(status) {
-    switch (status) {
-        case '4': return 'badge-green';
-        case '3': return 'badge-blue';
-        case '2': return 'badge-yellow';
-        case '1': return 'badge-yellow';
-        case '0': return 'badge-red';
-        default: return 'badge-orange';
+function getAppointmentStatusClass(so_giuong_trong, tong_giuong) {
+    if (so_giuong_trong == tong_giuong) {
+        return 'badge-red';
+    } else if (so_giuong_trong < tong_giuong / 2) {
+        return 'badge-green';
+    } else {
+        return 'badge-yellow';
     }
 }
 
