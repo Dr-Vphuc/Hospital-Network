@@ -62,3 +62,9 @@ class PatientService:
     
     def discharge_patient(self, patient_id):
         return self.patients_repo.discharge_patient(patient_id)
+    
+    def update_loai_patient(self, data):
+        patient = db.session.query(Patient).filter_by(MABN=data['MABN']).first()
+        if patient:
+            patient.loaibenhnhan = data['loaibenhnhan']
+            db.session.commit()

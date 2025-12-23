@@ -78,7 +78,13 @@
                 <form id="existingPatientPrescriptionFormElement" onsubmit="submitExistingPatientPrescription(event)">
                     <div class="form-group">
                         <label for="existingPatientMABN">Mã bệnh nhân *</label>
-                        <input type="text" id="existingPatientMABN" name="MABN" class="form-control" required>
+                        <div style="position: relative;">
+                            <input type="text" id="existingPatientMABN" name="MABN" class="form-control" required oninput="checkPatientExists(this.value)">
+                            <span id="patientValidationIcon" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: none;">
+                                <!-- Will be populated by JavaScript -->
+                            </span>
+                        </div>
+                        <small id="patientValidationMessage" style="display: none; margin-top: 0.25rem;"></small>
                     </div>
                     
                     <div class="form-group">
@@ -106,6 +112,16 @@
                         </select>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="existingPatientType">Hình thức điều trị *</label>
+                        <select id="existingPatientType" name="loaibenhnhan" class="form-control" required>
+                            <option value="">-- Chọn loại --</option>
+                            <option value="duytri">Duy trì hình thức cũ</option>
+                            <option value="ngoaitru">Ngoại trú</option>
+                            <option value="noitru">Nội trú</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label for="existingPatientMedicine">Tên thuốc *</label>
                         <input type="text" id="existingPatientMedicine" name="tenthuoc" class="form-control" required>
@@ -147,7 +163,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="newPatientType">Loại bệnh nhân *</label>
+                        <label for="newPatientType">Hình thức điều trị *</label>
                         <select id="newPatientType" name="loaibenhnhan" class="form-control" required>
                             <option value="">-- Chọn loại --</option>
                             <option value="ngoaitru">Ngoại trú</option>

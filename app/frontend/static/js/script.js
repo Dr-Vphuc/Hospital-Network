@@ -2007,6 +2007,55 @@ function submitExistingMedicine(event) {
 }
 
 // Add Prescription Modal Functions
+// Check if patient exists in database
+let patientCheckTimeout = null;
+function checkPatientExists(patientId) {
+    const icon = document.getElementById('patientValidationIcon');
+    const message = document.getElementById('patientValidationMessage');
+    
+    // Clear previous timeout
+    if (patientCheckTimeout) {
+        clearTimeout(patientCheckTimeout);
+    }
+    
+    // Hide icon and message if input is empty
+    if (!patientId || patientId.trim() === '') {
+        icon.style.display = 'none';
+        message.style.display = 'none';
+        return;
+    }
+    
+    // Show loading state
+    icon.style.display = 'inline';
+    icon.innerHTML = '<span style="color: #6B7280;">...</span>';
+    message.style.display = 'none';
+    
+    // Debounce the API call
+    patientCheckTimeout = setTimeout(() => {
+        fetch(`/doctor/prescriptions/check-patient/${patientId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    icon.innerHTML = '<i data-feather="check-circle" style="color: #10B981; width: 20px; height: 20px;"></i>';
+                    message.innerHTML = '<span style="color: #10B981;">✓ Bệnh nhân tồn tại</span>';
+                    message.style.display = 'block';
+                } else {
+                    icon.innerHTML = '<i data-feather="x-circle" style="color: #EF4444; width: 20px; height: 20px;"></i>';
+                    message.innerHTML = '<span style="color: #EF4444;">✗ Không tìm thấy bệnh nhân</span>';
+                    message.style.display = 'block';
+                }
+                feather.replace();
+            })
+            .catch(error => {
+                console.error('Error checking patient:', error);
+                icon.innerHTML = '<i data-feather="alert-circle" style="color: #F59E0B; width: 20px; height: 20px;"></i>';
+                message.innerHTML = '<span style="color: #F59E0B;">⚠ Lỗi kiểm tra</span>';
+                message.style.display = 'block';
+                feather.replace();
+            });
+    }, 500); // Wait 500ms after user stops typing
+}
+
 function openAddPrescriptionModal() {
     const modal = document.getElementById('addPrescriptionModal');
     modal.classList.add('open');
@@ -2017,6 +2066,12 @@ function openAddPrescriptionModal() {
     // Reset forms
     document.getElementById('existingPatientPrescriptionFormElement').reset();
     document.getElementById('newPatientPrescriptionFormElement').reset();
+    
+    // Reset validation indicators
+    const icon = document.getElementById('patientValidationIcon');
+    const message = document.getElementById('patientValidationMessage');
+    if (icon) icon.style.display = 'none';
+    if (message) message.style.display = 'none';
     
     // Re-initialize icons
     feather.replace();
@@ -2053,6 +2108,7 @@ function submitExistingPatientPrescription(event) {
     
     const prescriptionData = {
         MABN: formData.get('MABN'),
+        loaibenhnhan: formData.get('loaibenhnhan'),
         tenbenh: formData.get('tenbenh'),
         giaidoan: formData.get('giaidoan'),
         tinhtrang: formData.get('tinhtrang'),

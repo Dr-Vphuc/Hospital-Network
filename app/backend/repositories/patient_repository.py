@@ -12,7 +12,7 @@ from sqlalchemy import or_
 
 class PatientRepository:
     def get_patient_by_id(self, patient_id):
-        return Patient.query.filter_by(__id=patient_id).first()
+        return Patient.query.filter_by(MABN=patient_id).first()
     
     def get_all_patients(self):
         return Patient.query.all()
