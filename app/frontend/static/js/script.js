@@ -1692,9 +1692,9 @@ function getPrescriptionStatusClass(status) {
 
 function getHealthStatusClass(status) {
     switch (status) {
-        case 'Ổn định': return 'badge-green';
-        case 'Đang tiến triển tốt': return 'badge-blue';
-        case 'Thuyên giảm': return 'badge-yellow';
+        case 'Nhẹ': return 'badge-green';
+        case 'Trung bình': return 'badge-blue';
+        case 'Nặng': return 'badge-yellow';
         case 'Nặng lên': return 'badge-orange';
         case 'Tiên lượng dè dặt': return 'badge-red';
         case 'Nguy kịch': return 'badge-darkred';
