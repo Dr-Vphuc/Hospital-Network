@@ -516,6 +516,14 @@ function createPatientRow(patient) {
     const row = document.createElement('tr');
     const statusClass = getStatusClass(patient.status);
     
+    // Check if patient is inpatient (Nội trú)
+    const dischargeButton = patient.status === 'Nội trú' 
+        ? `<button class="btn btn-sm" style="background-color: #10B981; color: white; margin-left: 0.5rem;" onclick="confirmDischargePatient('${patient.MABN}', '${patient.hoten}')">
+                <i data-feather="log-out"></i>
+                Xuất viện
+            </button>`
+        : '';
+    
     row.innerHTML = `
         <td>${patient.MABN}</td>
         <td>${patient.hoten}</td>
@@ -529,6 +537,7 @@ function createPatientRow(patient) {
                 <i data-feather="eye"></i>
                 Theo dõi
             </button>
+            ${dischargeButton}
         </td>
     `;
     
@@ -721,6 +730,52 @@ function switchPatientTab(tabName) {
         tabs[1].classList.add('active');
         document.getElementById('relativesTab').classList.add('active');
     }
+}
+
+// Discharge Patient Confirmation
+function confirmDischargePatient(patientId, patientName) {
+    const confirmed = confirm(`Bạn có chắc chắn muốn xuất viện cho bệnh nhân "${patientName}" (Mã: ${patientId}) không?\n\nHành động này sẽ chuyển trạng thái bệnh nhân từ Nội trú sang Ngoại trú.`);
+    
+    if (confirmed) {
+        dischargePatient(patientId);
+    }
+}
+
+// Discharge Patient Function
+function dischargePatient(patientId) {
+    // Determine the correct endpoint based on current page
+    const isAdminPage = window.location.pathname.startsWith('/admin');
+    const isDoctorPage = window.location.pathname.startsWith('/doctor');
+    const endpoint = isDoctorPage ? `/doctor/patients/${patientId}/discharge` : `/admin/patients/${patientId}/discharge`;
+    
+    fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            patientId: patientId
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Xuất viện thành công!');
+            // Reload the patients table
+            loadPatients();
+        } else {
+            alert('Lỗi: ' + (data.message || 'Không thể xuất viện'));
+        }
+    })
+    .catch(error => {
+        console.error('Error discharging patient:', error);
+        alert('Có lỗi xảy ra khi xuất viện. Vui lòng thử lại.');
+    });
 }
 
 // Room Functions (formerly Appointments)

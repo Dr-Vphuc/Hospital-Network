@@ -149,3 +149,14 @@ class PatientRepository:
         """
         max_id = db.session.query(db.func.max(Patient.MABN)).scalar()
         return max_id[:2] + str(int(max_id[2:]) + 1).zfill(3)
+    
+    def discharge_patient(self, patient_id):
+        """Discharge a patient by creating a XuatVien record with current date
+        """
+        discharged_patient = XuatVien(
+            MABN=patient_id,
+            ngayxv=datetime.now()
+        )
+        db.session.add(discharged_patient)
+        db.session.commit()
+        return discharged_patient

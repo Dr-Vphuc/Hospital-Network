@@ -64,3 +64,12 @@ def json(examination_history_raw, relatives_raw):
         'relatives': relatives
     }
     return data
+
+@admin_bp.route('/patients/<patient_id>/discharge', methods=['POST'])
+@admin_required
+def discharge_patient(patient_id):
+    try:
+        PatientService().discharge_patient(patient_id)
+        return jsonify({'success': True, 'message': 'Xuất viện thành công'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400

@@ -59,3 +59,6 @@ class PatientService:
     def get_last_patient_id(self):
         max_id = db.session.query(db.func.max(Patient.MABN)).scalar()
         return max_id
+    
+    def discharge_patient(self, patient_id):
+        return self.patients_repo.discharge_patient(patient_id)
