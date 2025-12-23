@@ -1617,9 +1617,9 @@ function getAppointmentStatusClass(status) {
 
 function getPrescriptionStatusClass(status) {
     switch (status) {
-        case 'Ổn định': return 'badge-green';
-        case 'Theo dõi': return 'badge-blue';
-        case 'Điều trị': return 'badge-yellow';
+        case 'Nhẹ': return 'badge-green';
+        case 'Trung bình': return 'badge-blue';
+        case 'Nặng': return 'badge-yellow';
         case 'Nặng lên': return 'badge-red';
         case 'Tiên lượng dè dặt': return 'badge-red';
         case 'Nguy kịch': return 'badge-darkred';

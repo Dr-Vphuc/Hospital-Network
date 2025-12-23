@@ -88,17 +88,21 @@
                     
                     <div class="form-group">
                         <label for="existingPatientStage">Giai đoạn *</label>
-                        <input type="text" id="existingPatientStage" name="giaidoan" class="form-control" required>
+                        <select id="existingPatientStage" name="giaidoan" class="form-control" required>
+                            <option value="">-- Chọn giai đoạn --</option>
+                            <option value="Theo dõi">Theo dõi</option>
+                            <option value="Điều trị">Điều trị</option>
+                            <option value="Ổn định">Ổn định</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="existingPatientStatus">Tình trạng *</label>
                         <select id="existingPatientStatus" name="tinhtrang" class="form-control" required>
                             <option value="">-- Chọn tình trạng --</option>
-                            <option value="Stable">Ổn định</option>
-                            <option value="Improving">Đang cải thiện</option>
-                            <option value="Critical">Nguy kịch</option>
-                            <option value="Recovering">Đang hồi phục</option>
+                            <option value="Nặng">Nặng</option>
+                            <option value="Trung bình">Trung bình</option>
+                            <option value="Nhẹ">Nhẹ</option>
                         </select>
                     </div>
                     
@@ -163,17 +167,21 @@
                     
                     <div class="form-group">
                         <label for="newPatientStage">Giai đoạn *</label>
-                        <input type="text" id="newPatientStage" name="giaidoan" class="form-control" required>
+                        <select id="newPatientStatus" name="giaidoan" class="form-control" required>
+                            <option value="">-- Chọn giai đoạn --</option>
+                            <option value="Theo dõi">Theo dõi</option>
+                            <option value="Điều trị">Điều trị</option>
+                            <option value="Ổn định">Ổn định</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="newPatientStatus">Tình trạng *</label>
                         <select id="newPatientStatus" name="tinhtrang" class="form-control" required>
                             <option value="">-- Chọn tình trạng --</option>
-                            <option value="Stable">Ổn định</option>
-                            <option value="Improving">Đang cải thiện</option>
-                            <option value="Critical">Nguy kịch</option>
-                            <option value="Recovering">Đang hồi phục</option>
+                            <option value="Nặng">Nặng</option>
+                            <option value="Trung bình">Trung bình</option>
+                            <option value="Nhẹ">Nhẹ</option>
                         </select>
                     </div>
                     
