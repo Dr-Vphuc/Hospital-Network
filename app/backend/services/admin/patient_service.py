@@ -1,5 +1,8 @@
 from backend.models.patient import Patient
 from backend.repositories.patient_repository import PatientRepository
+from backend.models.nhapvien import NhapVien
+from backend.repositories.room_repository import RoomRepository
+from backend.repositories.bed_repository import BedRepository
 from backend.db import db
 from datetime import date
 from datetime import datetime
@@ -61,8 +64,14 @@ class PatientService:
         return max_id
     
     def discharge_patient(self, patient_id):
-        return self.patients_repo.discharge_patient(patient_id)
-    
+        self.patients_repo.discharge_patient(patient_id)
+        
+        nhapvien = db.session.query(NhapVien.MAPHG, NhapVien.sogiuong).filter(NhapVien.MABN == patient_id).order_by(NhapVien.ngaynv.desc()).first()
+        maphg = nhapvien[0]
+        so = nhapvien[1]
+        
+        BedRepository().update_bed(maphg, so, tinhtrang=0)
+        
     def update_loai_patient(self, data):
         patient = db.session.query(Patient).filter_by(MABN=data['MABN']).first()
         if patient:

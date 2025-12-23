@@ -737,7 +737,7 @@ function switchPatientTab(tabName) {
 
 // Discharge Patient Confirmation
 function confirmDischargePatient(patientId, patientName) {
-    const confirmed = confirm(`Bạn có chắc chắn muốn xuất viện cho bệnh nhân "${patientName}" (Mã: ${patientId}) không?\n\nHành động này sẽ chuyển trạng thái bệnh nhân từ Nội trú sang Ngoại trú.`);
+    const confirmed = confirm(`Bạn có chắc chắn muốn xuất viện cho bệnh nhân "${patientName}" (Mã: ${patientId}) không?\n\nHành động này sẽ chuyển trạng thái bệnh nhân từ Nội trú sang Đã xuất viện.`);
     
     if (confirmed) {
         dischargePatient(patientId);
