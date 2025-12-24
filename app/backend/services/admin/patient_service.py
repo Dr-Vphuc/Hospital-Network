@@ -22,21 +22,7 @@ class PatientService:
         patients_details = []
         for patient_id in patient_ids:
             patient_info = self.patients_repo.get_patients_info(patient_id)
-            if patient_info:
-                status = ''
-                # Get latest examination date
-                latest_exam_date = patient_info.Examination.ngaykham.date() if patient_info.Examination and patient_info.Examination.ngaykham else None
-                
-                # Check if patient is discharged: discharge date must be <= current date AND > latest examination date
-                if (patient_info.XuatVien and patient_info.XuatVien.ngayxv and 
-                    patient_info.XuatVien.ngayxv.date() <= CURRENT_DATE and
-                    (latest_exam_date is None or patient_info.XuatVien.ngayxv.date() > latest_exam_date)):
-                    status = 'Đã xuất viện'
-                elif patient_info.NhapVien and patient_info.NhapVien.ngaynv and patient_info.NhapVien.ngaynv.date() <= CURRENT_DATE:
-                    status = 'Nội trú'
-                else:
-                    status = 'Ngoại trú'
-                    
+            if patient_info:                    
                 patients_details.append({
                     'MABN': patient_info.Patient.MABN,
                     'hoten': patient_info.Patient.hoten,
@@ -44,7 +30,7 @@ class PatientService:
                     'sdt': patient_info.Patient.sdt,
                     'ngaykham': patient_info.Examination.ngaykham.strftime('%Y-%m-%d') if patient_info.Examination and patient_info.Examination.ngaykham else None,
                     'tenkhoa': patient_info.Faculty.tenkhoa if patient_info.Faculty else None,
-                    'status': status
+                    'status': patient_info.Patient.loaibn
                 })
         
         return patients_details

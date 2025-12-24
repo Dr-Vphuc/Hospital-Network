@@ -41,11 +41,8 @@ class FacultyRepository:
     
     def get_total_patients_by_faculty(self, faculty_id):
         all_patients_in_faculty = ExaminationRepository().get_distinct_patients_by_faculty(faculty_id)
-        all_patients_in_faculty_id = [patient.MABN for patient in all_patients_in_faculty]
-        all_current_patients_id = NhapVienRepository().get_all_current_inpatients_id()
         
-        resulting_patients_id = list(set(all_patients_in_faculty_id) & set(all_current_patients_id))
-        return len(resulting_patients_id)
+        return len(all_patients_in_faculty)
     
     def get_id_by_name(self, tenkhoa):
         faculty = Faculty.query.filter_by(tenkhoa=tenkhoa).first()

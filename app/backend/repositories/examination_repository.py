@@ -1,3 +1,4 @@
+from backend.repositories.nhapvien_repository import NhapVienRepository
 from backend.models.examination import Examination
 from backend.models.prescription import Prescription
 from backend.models.patient import Patient
@@ -38,7 +39,25 @@ class ExaminationRepository:
         return len(Examination.query.filter_by(ngaykham=db.func.current_date()).all())
     
     def get_distinct_patients_by_faculty(self, faculty_id):
-        return Examination.query.filter_by(MAKHOA=faculty_id).distinct(Examination.MABN).all()
+        return (
+            db.session.query(Patient)
+            .filter(Patient.loaibn == 'Nội trú')
+            .join(Examination, Patient.MABN == Examination.MABN)
+            .filter(Examination.MAKHOA == faculty_id)
+            .distinct()
+            .all()
+        )
+        
+    def get_distinct_patients_by_faculties(self, faculty_id):
+        all_patients_in_faculty = (
+            db.session.query(Patient)
+            .join(Examination, Patient.MABN == Examination.MABN)
+            .filter(Examination.MAKHOA == faculty_id)
+            .distinct()
+            .all()
+        )
+        
+        return all_patients_in_faculty
     
     def get_stable_patients_count_by_doctor(self, doctor_id):
         """Get count of stable patients for a given doctor

@@ -59,7 +59,7 @@ class OverviewService:
         patients_per_faculty = {}
         for faculty_id, faculty_name in faculties:
             patients_per_faculty[faculty_id] = (
-                self.examinations_repo.get_distinct_patients_by_faculty(faculty_id), 
+                self.examinations_repo.get_distinct_patients_by_faculties(faculty_id), 
                 self.examinations_repo.get_total_examinations_by_faculty(faculty_id))
             
         patient_counts = []

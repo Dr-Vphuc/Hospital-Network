@@ -59,15 +59,7 @@ class PatientRepository:
         """
         return (
             db.session.query(Patient)
-            .outerjoin(XuatVien, Patient.MABN == XuatVien.MABN)
-            .join(NhapVien, Patient.MABN == NhapVien.MABN)
-            .filter(
-                or_(
-                    XuatVien.ngayxv == None,
-                    XuatVien.ngayxv > datetime.now()
-                ),
-                NhapVien.ngaynv <= datetime.now()
-            )
+            .filter(Patient.loaibn == 'Nội trú')
             .all()
         )
 
