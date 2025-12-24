@@ -157,3 +157,7 @@ class PatientRepository:
         db.session.add(discharged_patient)
         db.session.commit()
         return discharged_patient
+    
+    def get_last_patient_id(self):
+        max_id = db.session.query(db.func.max(Patient.MABN)).scalar()
+        return max_id

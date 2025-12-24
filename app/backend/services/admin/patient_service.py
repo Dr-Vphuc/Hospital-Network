@@ -3,6 +3,7 @@ from backend.repositories.patient_repository import PatientRepository
 from backend.models.nhapvien import NhapVien
 from backend.repositories.room_repository import RoomRepository
 from backend.repositories.bed_repository import BedRepository
+from backend.repositories.user_repository import UserRepository
 from backend.db import db
 from datetime import date
 from datetime import datetime

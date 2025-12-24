@@ -11,6 +11,7 @@ from backend.repositories.nhapvien_repository import NhapVienRepository
 from backend.repositories.patient_repository import PatientRepository
 from backend.repositories.bed_repository import BedRepository
 from backend.repositories.nhapvien_repository import NhapVienRepository
+from backend.api.auth.routes import register_patient
 from datetime import datetime
 
 @doctor_bp.route('/prescriptions', methods=['GET'])
@@ -65,6 +66,7 @@ def add_new_prescription():
     data['MATHUOC'] = MedicineRepository().get_medicine_id_by_name(data['tenthuoc'])
     
     MABN = PatientService().add_patient(data)
+    _, username, password = register_patient(MABN)
     data['MABN'] = MABN
     
         # If patient is being admitted as inpatient (Nội trú)
@@ -94,7 +96,12 @@ def add_new_prescription():
     
     InventoryRepository().divestiture_inventory_by_medicine_id(data['MATHUOC'], data['soluong'] * data['songayuong'])
     
-    return jsonify({'message': 'New prescription and examination added successfully.'}), 201
+    return jsonify({
+        'message': 'New prescription and examination added successfully.',
+        'account_created': True,
+        'username': username,
+        'password': password
+    }), 201
 
 @doctor_bp.route('/prescriptions/add-existing', methods=['POST'])
 @doctor_required

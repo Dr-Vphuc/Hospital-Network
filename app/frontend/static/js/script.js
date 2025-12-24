@@ -2207,7 +2207,13 @@ function submitNewPatientPrescription(event) {
     })
     .then(response => response.json())
     .then(data => {
-        alert('Đã thêm bệnh nhân và đơn thuốc thành công!');
+        let message = 'Đã thêm bệnh nhân và đơn thuốc thành công!';
+        if (data.account_created && data.username && data.password) {
+            message += '\n\n📋 Thông tin tài khoản bệnh nhân:\n';
+            message += '👤 Tên đăng nhập: ' + data.username + '\n';
+            message += '🔑 Mật khẩu: ' + data.password;
+        }
+        alert(message);
         closeAddPrescriptionModal();
         window.location.reload();
     })
