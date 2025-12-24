@@ -1,0 +1,564 @@
+{% extends 'patient/base/base.html' %}
+
+{% block title %}Hồ sơ của tôi{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Page Header -->
+    <div class="section-header">
+        <div>
+            <h2>Hồ sơ bệnh nhân</h2>
+            <p>Thông tin cá nhân và lịch sử khám bệnh</p>
+        </div>
+        <button class="btn btn-primary" onclick="openChangePasswordModal()">
+            <i data-feather="lock"></i>
+            Đổi mật khẩu
+        </button>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                <i data-feather="shield"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{% if bhyt %}Có{% else %}Không{% endif %}</h3>
+                <p>Bảo hiểm y tế</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #8B5CF6, #6D28D9);">
+                <i data-feather="users"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ relatives|length }}</h3>
+                <p>Thân nhân</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Information -->
+    <div class="profile-sections">
+        <!-- Personal Information -->
+        <div class="profile-card-section">
+            <div class="profile-card-header">
+                <h3><i data-feather="user"></i> Thông tin cá nhân</h3>
+            </div>
+            <div class="profile-card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Mã bệnh nhân:</span>
+                        <span class="info-value">{{ patient_id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Họ và tên:</span>
+                        <span class="info-value">{{ patient.hoten if patient else 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ngày sinh:</span>
+                        <span class="info-value">{{ patient.ngaysinh.strftime('%d/%m/%Y') if patient and patient.ngaysinh else 'Chưa cập nhật' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Số điện thoại:</span>
+                        <span class="info-value">{{ patient.sdt if patient else 'N/A' }}</span>
+                    </div>
+                    <div class="info-item full-width">
+                        <span class="info-label">Địa chỉ:</span>
+                        <span class="info-value">{{ patient.diachi if patient and patient.diachi else 'Chưa cập nhật' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Loại bệnh nhân:</span>
+                        <span class="badge {% if patient and patient.loaibn == 'Nội trú' %}badge-blue{% else %}badge-green{% endif %}">
+                            {{ patient.loaibn if patient else 'N/A' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Insurance Information -->
+        <div class="profile-card-section">
+            <div class="profile-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3><i data-feather="shield"></i> Thông tin bảo hiểm y tế</h3>
+                <button class="btn btn-sm btn-primary" onclick="openBHYTModal()">
+                    <i data-feather="{% if bhyt %}edit-2{% else %}plus{% endif %}"></i>
+                    {% if bhyt %}Chỉnh sửa{% else %}Thêm BHYT{% endif %}
+                </button>
+            </div>
+        {% if bhyt %}
+            <div class="profile-card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Mã BHYT:</span>
+                        <span class="info-value">{{ bhyt.MABHYT }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ngày bắt đầu:</span>
+                        <span class="info-value">{{ bhyt.ngaydk.strftime('%d/%m/%Y') if bhyt.ngaydk else 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ngày kết thúc:</span>
+                        <span class="info-value">{{ bhyt.ngayhh.strftime('%d/%m/%Y') if bhyt.ngayhh else 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Trạng thái:</span>
+                        {% if bhyt.ngayhh and bhyt.ngayhh.date() >= current_date.date() %}
+                            <span class="badge badge-green">Còn hạn</span>
+                        {% else %}
+                            <span class="badge badge-red">Hết hạn</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="profile-card-body">
+                <p style="text-align: center; color: #6b7280; padding: 2rem;">Chưa có thông tin bảo hiểm y tế</p>
+            </div>
+        {% endif %}
+        </div>
+
+        <!-- Relatives Information -->
+        <div class="profile-card-section">
+            <div class="profile-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3><i data-feather="users"></i> Thông tin thân nhân</h3>
+                <button class="btn btn-sm btn-success" onclick="openRelativeModal()">
+                    <i data-feather="user-plus"></i>
+                    Thêm thân nhân
+                </button>
+            </div>
+        {% if relatives %}
+            <div class="profile-card-body">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Họ và tên</th>
+                                <th>Quan hệ</th>
+                                <th>Số điện thoại</th>
+                                <th>Địa chỉ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for relative in relatives %}
+                            <tr>
+                                <td>{{ relative.hoten }}</td>
+                                <td>{{ relative.quanhe }}</td>
+                                <td>{{ relative.sdt if relative.sdt else 'N/A' }}</td>
+                                <td>{{ relative.diachi if relative.diachi else 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="profile-card-body">
+                <p style="text-align: center; color: #6b7280; padding: 2rem;">Chưa có thông tin thân nhân</p>
+            </div>
+        {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Đổi mật khẩu</h3>
+            <button class="modal-close" onclick="closeChangePasswordModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="currentPassword">Mật khẩu hiện tại</label>
+                    <input type="password" id="currentPassword" name="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Mật khẩu mới</label>
+                    <input type="password" id="newPassword" name="newPassword" required minlength="4">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Xác nhận mật khẩu mới</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required minlength="4">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- BHYT Modal -->
+<div id="bhytModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{% if bhyt %}Chỉnh sửa{% else %}Thêm{% endif %} bảo hiểm y tế</h3>
+            <button class="modal-close" onclick="closeBHYTModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="bhytForm">
+                <div class="form-group">
+                    <label for="mabhyt">Mã BHYT <span style="color: red;">*</span></label>
+                    <input type="text" id="mabhyt" name="mabhyt" required 
+                           value="{% if bhyt %}{{ bhyt.MABHYT }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label for="ngaydk">Ngày đăng ký <span style="color: red;">*</span></label>
+                    <input type="date" id="ngaydk" name="ngaydk" required
+                           value="{% if bhyt %}{{ bhyt.ngaybatdau.strftime('%Y-%m-%d') if bhyt.ngaybatdau else '' }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label for="ngayhh">Ngày hết hạn <span style="color: red;">*</span></label>
+                    <input type="date" id="ngayhh" name="ngayhh" required
+                           value="{% if bhyt %}{{ bhyt.ngayketthuc.strftime('%Y-%m-%d') if bhyt.ngayketthuc else '' }}{% endif %}">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeBHYTModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Relative Modal -->
+<div id="relativeModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Thêm thân nhân</h3>
+            <button class="modal-close" onclick="closeRelativeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="relativeForm">
+                <div class="form-group">
+                    <label for="relativeHoten">Họ và tên <span style="color: red;">*</span></label>
+                    <input type="text" id="relativeHoten" name="hoten" required>
+                </div>
+                <div class="form-group">
+                    <label for="relativeQuanhe">Quan hệ <span style="color: red;">*</span></label>
+                    <input type="text" id="relativeQuanhe" name="quanhe" required 
+                           placeholder="Ví dụ: Cha, Mẹ, Vợ, Chồng, Con">
+                </div>
+                <div class="form-group">
+                    <label for="relativeSdt">Số điện thoại</label>
+                    <input type="tel" id="relativeSdt" name="sdt" pattern="[0-9]{10,11}"
+                           placeholder="Nhập 10-11 số">
+                </div>
+                <div class="form-group">
+                    <label for="relativeDiachi">Địa chỉ</label>
+                    <textarea id="relativeDiachi" name="diachi" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeRelativeModal()">Hủy</button>
+                    <button type="submit" class="btn btn-success">Thêm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.profile-sections {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.profile-card-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.profile-card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%);
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-card-header h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-card-header h3 i {
+    width: 20px;
+    height: 20px;
+    color: #3B82F6;
+}
+
+.profile-card-body {
+    padding: 1.5rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.info-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-item.full-width {
+        grid-column: 1;
+    }
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+</style>
+
+<script>
+    feather.replace();
+
+    function openChangePasswordModal() {
+        document.getElementById('changePasswordModal').classList.add('open');
+        document.getElementById('changePasswordForm').reset();
+    }
+
+    function closeChangePasswordModal() {
+        document.getElementById('changePasswordModal').classList.remove('open');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('changePasswordModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeChangePasswordModal();
+        }
+    });
+
+    // BHYT Modal Functions
+    function openBHYTModal() {
+        document.getElementById('bhytModal').classList.add('open');
+    }
+
+    function closeBHYTModal() {
+        document.getElementById('bhytModal').classList.remove('open');
+    }
+
+    document.getElementById('bhytModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeBHYTModal();
+        }
+    });
+
+    // Relative Modal Functions
+    function openRelativeModal() {
+        document.getElementById('relativeModal').classList.add('open');
+        document.getElementById('relativeForm').reset();
+    }
+
+    function closeRelativeModal() {
+        document.getElementById('relativeModal').classList.remove('open');
+    }
+
+    document.getElementById('relativeModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeRelativeModal();
+        }
+    });
+
+    // Handle password change form submission
+    document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // Validate passwords match
+        if (newPassword !== confirmPassword) {
+            alert('Mật khẩu mới và xác nhận mật khẩu không khớp!');
+            return;
+        }
+        
+        // Validate new password is different from current
+        if (currentPassword === newPassword) {
+            alert('Mật khẩu mới phải khác mật khẩu hiện tại!');
+            return;
+        }
+        
+        // Send request to backend
+        fetch('/patient/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đổi mật khẩu thành công!');
+                closeChangePasswordModal();
+            } else {
+                alert(data.message || 'Đổi mật khẩu thất bại!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi đổi mật khẩu!');
+        });
+    });
+
+    // Handle BHYT form submission
+    document.getElementById('bhytForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = {
+            mabhyt: formData.get('mabhyt'),
+            ngaydk: formData.get('ngaydk'),
+            ngayhh: formData.get('ngayhh')
+        };
+        
+        // Validate dates
+        const startDate = new Date(data.ngaydk);
+        const endDate = new Date(data.ngayhh);
+        
+        if (endDate <= startDate) {
+            alert('Ngày hết hạn phải sau ngày đăng ký!');
+            return;
+        }
+        
+        fetch('/patient/bhyt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Lưu thông tin BHYT thành công!');
+                location.reload();
+            } else {
+                alert(data.message || 'Lưu thông tin BHYT thất bại!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi lưu thông tin BHYT!');
+        });
+    });
+
+    // Handle Relative form submission
+    document.getElementById('relativeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = {
+            hoten: formData.get('hoten'),
+            quanhe: formData.get('quanhe'),
+            sdt: formData.get('sdt') || null,
+            diachi: formData.get('diachi') || null
+        };
+        
+        fetch('/patient/relative', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Thêm thân nhân thành công!');
+                location.reload();
+            } else {
+                alert(data.message || 'Thêm thân nhân thất bại!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi thêm thân nhân!');
+        });
+    });
+</script>
+{% endblock %}

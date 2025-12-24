@@ -25,6 +25,12 @@
                 <i data-feather="file-text"></i>
                 <span>Đơn thuốc</span>
             </a>
+            <a href="{{ url_for('patient.profile') }}" 
+               class="nav-tab {% if request.endpoint == 'patient.profile' %}active{% endif %}"
+               style="text-decoration: none;">
+                <i data-feather="user"></i>
+                <span>Hồ sơ của tôi</span>
+            </a>
         </div>
     </nav>
 

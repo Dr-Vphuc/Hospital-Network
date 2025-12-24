@@ -1,5 +1,6 @@
 from backend.models.user import User
 from backend.models.doctor import Doctor
+from backend.models.patient import Patient
 from backend.db import db
 
 class UserRepository:
@@ -36,6 +37,16 @@ class UserRepository:
         )
         
         return doctor.hoten if doctor else None
+    
+    def get_patientname_by_username(self, username):
+        patient = (
+            db.session.query(User, Patient.hoten)
+            .filter_by(username=username)
+            .join(Patient, User.ref_id == Patient.MABN)
+            .first()
+        )
+        
+        return patient.hoten if patient else None
     
     def get_faculty_id_by_doctor_username(self, username):
         doctor = (

@@ -1370,12 +1370,7 @@ function createPrescriptionRow(prescription) {
         <td>${dosageFrequency}</td>
         <td>${prescribing_doctor}</td>
         <td>${formatDate(prescription.date)}</td>
-        <td>
-            <button class="btn btn-sm btn-primary" onclick="viewPatientMonitoring('${patientID}', '${patientName}')">
-                <i data-feather="eye"></i>
-                Theo dõi
-            </button>
-        </td>
+        
     `;
     
     

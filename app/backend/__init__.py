@@ -26,6 +26,8 @@ def create_app():
     app.register_blueprint(user_bp)
     from .api.doctor import doctor_bp
     app.register_blueprint(doctor_bp)
+    from .api.patient import patient_bp
+    app.register_blueprint(patient_bp)
 
     db.init_app(app)
     login_manager.init_app(app)

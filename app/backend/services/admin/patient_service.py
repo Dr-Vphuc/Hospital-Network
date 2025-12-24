@@ -4,6 +4,7 @@ from backend.models.nhapvien import NhapVien
 from backend.repositories.room_repository import RoomRepository
 from backend.repositories.bed_repository import BedRepository
 from backend.repositories.user_repository import UserRepository
+from backend.repositories.prescription_repository import PrescriptionRepository
 from backend.db import db
 from datetime import date
 from datetime import datetime

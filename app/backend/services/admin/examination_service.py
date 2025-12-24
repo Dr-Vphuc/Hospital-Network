@@ -13,8 +13,8 @@ class ExaminationService:
         self.prescription_repository = PrescriptionRepository()
         self.medicine_repository = MedicineRepository()
         
-    def get_all_prescriptions_with_patients(self, doctor_faculty_id=None):
-        return self.prescription_repository.get_all_prescriptions_with_patients(doctor_faculty_id)
+    def get_all_prescriptions_with_patients(self, doctor_faculty_id=None, patient_id=None):
+        return self.prescription_repository.get_all_prescriptions_with_patients(doctor_faculty_id, patient_id)
     
     def get_examination_by_patient_id(self, patient_id):
         return self.examination_repository.get_all_examinations_by_patient(patient_id)
