@@ -40,6 +40,8 @@ def login():
         return redirect(url_for('doctor.doctor_examinations'))
     elif role == 'ADMIN':
         return redirect(url_for('admin.overview'))
+    elif role == 'BENHNHAN':
+        return redirect(url_for('patient.prescriptions'))
 
 @auth_bp.route('/register_doctor', methods=['POST'])
 def register_doctor():
