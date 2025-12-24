@@ -148,7 +148,7 @@ class PatientRepository:
         (
             db.session.query(Patient)
             .filter(Patient.MABN == patient_id)
-            .update({'loaibn': 'Ngoại trú'})
+            .update({'loaibn': 'Đã xuất viện'})
         )
         discharged_patient = XuatVien(
             MABN=patient_id,
