@@ -24,7 +24,13 @@ class PatientService:
             patient_info = self.patients_repo.get_patients_info(patient_id)
             if patient_info:
                 status = ''
-                if patient_info.XuatVien and patient_info.XuatVien.ngayxv and patient_info.XuatVien.ngayxv.date() <= CURRENT_DATE:
+                # Get latest examination date
+                latest_exam_date = patient_info.Examination.ngaykham.date() if patient_info.Examination and patient_info.Examination.ngaykham else None
+                
+                # Check if patient is discharged: discharge date must be <= current date AND > latest examination date
+                if (patient_info.XuatVien and patient_info.XuatVien.ngayxv and 
+                    patient_info.XuatVien.ngayxv.date() <= CURRENT_DATE and
+                    (latest_exam_date is None or patient_info.XuatVien.ngayxv.date() > latest_exam_date)):
                     status = 'Đã xuất viện'
                 elif patient_info.NhapVien and patient_info.NhapVien.ngaynv and patient_info.NhapVien.ngaynv.date() <= CURRENT_DATE:
                     status = 'Nội trú'
@@ -75,7 +81,7 @@ class PatientService:
     def update_loai_patient(self, data):
         patient = db.session.query(Patient).filter_by(MABN=data['MABN']).first()
         if patient:
-            patient.loaibenhnhan = data['loaibenhnhan']
+            patient.loaibn = data['loaibenhnhan']
             db.session.commit()
             
     def get_loaibenhnhan_by_id(self, patient_id):

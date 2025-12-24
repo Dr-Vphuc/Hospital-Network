@@ -113,6 +113,7 @@ class RoomRepository:
             ),
             NhapVien.ngaynv <= datetime.now()
             )
+            .group_by(Patient.MABN)
             .all()
         )
         

@@ -7,7 +7,11 @@ from backend.repositories.user_repository import UserRepository
 from backend.services.admin.patient_service import PatientService
 from backend.repositories.medicine_repository import MedicineRepository
 from backend.repositories.inventory_repository import InventoryRepository
-
+from backend.repositories.nhapvien_repository import NhapVienRepository
+from backend.repositories.patient_repository import PatientRepository
+from backend.repositories.bed_repository import BedRepository
+from backend.repositories.nhapvien_repository import NhapVienRepository
+from datetime import datetime
 
 @doctor_bp.route('/prescriptions', methods=['GET'])
 @doctor_required
@@ -62,6 +66,27 @@ def add_new_prescription():
     
     MABN = PatientService().add_patient(data)
     data['MABN'] = MABN
+    
+        # If patient is being admitted as inpatient (Nội trú)
+    if data['loaibenhnhan'] == 'Nội trú':
+        
+        # Find an available bed in the same faculty
+        bed = BedRepository().get_first_available_bed(makhoa=data['MAKHOA'])
+        
+        if bed:
+            # Create nhapvien record
+            NhapVienRepository().add_nhapvien(
+                MABN=data['MABN'],
+                ngaynv=datetime.now(),
+                MAPHG=bed.MAPHG,
+                sogiuong=bed.so
+            )
+            
+            # Mark bed as occupied
+            BedRepository().update_bed(bed.MAPHG, bed.so, tinhtrang=1)
+        else:
+            return jsonify({'success': False, 'message': 'Không có giường trống'}), 400
+    
     MADT = ExaminationService().add_prescription(data)
     data['MADT'] = MADT
     ExaminationService().add_examination(data)
@@ -80,9 +105,28 @@ def add_existing_prescription():
     data['MABS'] = current_docter_id
     data['MAKHOA'] = UserRepository().get_faculty_id_by_doctor_username(current_user.username)
     data['MATHUOC'] = MedicineRepository().get_medicine_id_by_name(data['tenthuoc'])
-    
-    if data['loaibenhnhan'] != 'duytri':
-        PatientService().update_loai_patient(data)
+        
+    # If patient is being admitted as inpatient (Nội trú)
+    if (data['loaibenhnhan'] == 'Nội trú') & (PatientRepository().get_patient_by_id(data['MABN']).loaibn == "Ngoại trú"):
+        
+        # Find an available bed in the same faculty
+        bed = BedRepository().get_first_available_bed(makhoa=data['MAKHOA'])
+        
+        if bed:
+            # Create nhapvien record
+            NhapVienRepository().add_nhapvien(
+                MABN=data['MABN'],
+                ngaynv=datetime.now(),
+                MAPHG=bed.MAPHG,
+                sogiuong=bed.so
+            )
+            
+            # Mark bed as occupied
+            BedRepository().update_bed(bed.MAPHG, bed.so, tinhtrang=1)
+        else:
+            return jsonify({'success': False, 'message': 'Không có giường trống'}), 400
+        
+    PatientService().update_loai_patient(data)
     
     MADT = ExaminationService().add_prescription(data)
     data['MADT'] = MADT
@@ -104,7 +148,7 @@ def check_existing_patient(patient_id):
 @doctor_required
 def check_loaibenhnhan_for_form(patient_id):
     loaibenhnhan = PatientService().get_loaibenhnhan_by_id(patient_id)
-    if loaibenhnhan == 'Noi tru':
+    if loaibenhnhan == 'Nội trú':
         return jsonify({'loaibenhnhan': "Ngoại trú"})
     else:
         return jsonify({'loaibenhnhan': "Nội trú"})

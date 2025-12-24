@@ -5,7 +5,7 @@ class NhapVien(db.Model):
 
     MABN = db.Column(db.String(50), db.ForeignKey('benhnhan.MABN'), primary_key=True)
     ngaynv = db.Column(db.Date, nullable=False)
-    MAPHG = db.Column(db.String(50), db.ForeignKey('phong.MAPHG'), nullable=False)
+    MAPHG = db.Column(db.String(50), db.ForeignKey('phongbenh.MAPHG'), nullable=False)
     sogiuong = db.Column(db.Integer, nullable=False)
 
     def __init__(self, MABN, ngaynv, MAPHG, sogiuong):

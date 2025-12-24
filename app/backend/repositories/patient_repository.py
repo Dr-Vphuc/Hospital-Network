@@ -153,6 +153,11 @@ class PatientRepository:
     def discharge_patient(self, patient_id):
         """Discharge a patient by creating a XuatVien record with current date
         """
+        (
+            db.session.query(Patient)
+            .filter(Patient.MABN == patient_id)
+            .update({'loaibn': 'Ngoại trú'})
+        )
         discharged_patient = XuatVien(
             MABN=patient_id,
             ngayxv=datetime.now()

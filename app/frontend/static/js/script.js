@@ -2043,23 +2043,23 @@ function checkPatientExists(patientId) {
                     message.style.display = 'block';
                     
                     // Fetch patient type and update select options
-                    fetch(`/doctor/prescriptions/check-loaibn/${patientId}`)
-                        .then(response => response.json())
-                        .then(loaibnData => {
-                            const loaibenhnhan = loaibnData.loaibenhnhan;
-                            const value = loaibenhnhan === 'Nội trú' ? 'noitru' : 'ngoaitru';
+                    // fetch(`/doctor/prescriptions/check-loaibn/${patientId}`)
+                    //     .then(response => response.json())
+                    //     .then(loaibnData => {
+                    //         const loaibenhnhan = loaibnData.loaibenhnhan;
+                    //         const value = loaibenhnhan === 'Nội trú' ? 'noitru' : 'ngoaitru';
                             
-                            // Update select with dynamic option
-                            typeSelect.innerHTML = `
-                                <option value="">-- Chọn loại --</option>
-                                <option value="duytri">Duy trì hình thức cũ</option>
-                                <option value="${value}">${loaibenhnhan}</option>
-                            `;
-                        })
-                        .catch(error => {
-                            console.error('Error fetching patient type:', error);
-                            resetPatientTypeSelect();
-                        });
+                    //         // Update select with dynamic option
+                    //         typeSelect.innerHTML = `
+                    //             <option value="">-- Chọn loại --</option>
+                    //             <option value="duytri">Duy trì hình thức cũ</option>
+                    //             <option value="${loaibenhnhan}">${loaibenhnhan}</option>
+                    //         `;
+                    //     })
+                    //     .catch(error => {
+                    //         console.error('Error fetching patient type:', error);
+                    //         resetPatientTypeSelect();
+                    //     });
                 } else {
                     icon.innerHTML = '<i data-feather="x-circle" style="color: #EF4444; width: 20px; height: 20px;"></i>';
                     message.innerHTML = '<span style="color: #EF4444;">✗ Không tìm thấy bệnh nhân</span>';
@@ -2084,9 +2084,8 @@ function resetPatientTypeSelect() {
     if (typeSelect) {
         typeSelect.innerHTML = `
             <option value="">-- Chọn loại --</option>
-            <option value="duytri">Duy trì hình thức cũ</option>
-            <option value="ngoaitru">Ngoại trú</option>
-            <option value="noitru">Nội trú</option>
+            <option value="Ngoại trú">Ngoại trú</option>
+            <option value="Nội trú">Nội trú</option>
         `;
     }
 }

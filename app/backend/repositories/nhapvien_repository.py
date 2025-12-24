@@ -1,6 +1,13 @@
 from backend.models.nhapvien import NhapVien
 from backend.repositories.xuatvien_repository import XuatVienRepository
+from backend.models.room import Room
+from backend.models.bed import Bed
+from backend.models.faculty import Faculty
+from backend.services.admin.patient_service import PatientService
 from backend.db import db
+from datetime import datetime
+
+CURRENT_DATE_TIME = datetime.today()
 
 class NhapVienRepository:
     def get_nhapvien_by_mabn(self, MABN):
@@ -37,6 +44,3 @@ class NhapVienRepository:
         # minus discharged patients
         current_inpatients_id = list(set(all_nhapvien_id) - set(all_discharged_patients_id))
         return current_inpatients_id
-    
-    # def add_inpatient_auto_pick_bed(self, MABN, ngaynv):
-        
