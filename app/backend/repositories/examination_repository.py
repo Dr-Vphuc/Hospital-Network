@@ -36,7 +36,7 @@ class ExaminationRepository:
         return True
     
     def get_all_examinations_today(self):
-        return len(Examination.query.filter_by(ngaykham=db.func.current_date()).all())
+        return len(Examination.query.filter(db.func.date(Examination.ngaykham) == db.func.current_date()).all())
     
     def get_distinct_patients_by_faculty(self, faculty_id):
         return (
