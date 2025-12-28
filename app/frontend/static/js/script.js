@@ -202,11 +202,17 @@ function initializeApp() {
     loadPrescriptions();
     loadDispensing();
     
-    // Initialize charts for the currently active section
+    // Initialize lazy loading for charts
+    setupLazyLoadingCharts();
+    
+    // Initialize charts for the currently active section (if not using lazy loading)
     const activeSection = document.querySelector('.content-section.active');
     if (activeSection) {
         const sectionId = activeSection.id;
-        initializeCharts(sectionId);
+        // Don't auto-initialize dashboard charts - they'll be lazy loaded
+        if (sectionId !== 'dashboard') {
+            initializeCharts(sectionId);
+        }
     }
     
     // Initialize doctor portal charts if on doctor portal page
@@ -404,10 +410,84 @@ function initializeCharts(section) {
     }
 }
 
+// Lazy Loading Setup for Charts
+function setupLazyLoadingCharts() {
+    // Check if IntersectionObserver is supported
+    if (!('IntersectionObserver' in window)) {
+        // Fallback: load all charts immediately if IntersectionObserver is not supported
+        console.log('IntersectionObserver not supported, loading charts immediately');
+        initializeDashboardCharts();
+        return;
+    }
+
+    // Create an intersection observer
+    const observerOptions = {
+        root: null, // Use viewport as root
+        rootMargin: '50px', // Start loading 50px before element is visible
+        threshold: 0.1 // Trigger when 10% of element is visible
+    };
+
+    const chartObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const chartCard = entry.target;
+                const chartType = chartCard.getAttribute('data-lazy-chart');
+                
+                // Load the specific chart
+                loadSpecificChart(chartType);
+                
+                // Mark as loaded
+                chartCard.classList.add('loaded');
+                
+                // Stop observing this element
+                observer.unobserve(chartCard);
+            }
+        });
+    }, observerOptions);
+
+    // Observe all chart cards with lazy loading
+    const lazyCharts = document.querySelectorAll('[data-lazy-chart]');
+    lazyCharts.forEach(chartCard => {
+        chartObserver.observe(chartCard);
+    });
+}
+
+// Load a specific chart based on type
+function loadSpecificChart(chartType) {
+    console.log('Loading chart:', chartType);
+    
+    switch(chartType) {
+        case 'patientTrends':
+            initializePatientTrendsChart();
+            break;
+        case 'department':
+            initializeDepartmentChart();
+            break;
+        case 'facultyPatients':
+            initializeFacultyPatientsChart();
+            break;
+        default:
+            console.warn('Unknown chart type:', chartType);
+    }
+}
+
 function initializeDashboardCharts() {
+    initializePatientTrendsChart();
+    initializeDepartmentChart();
+    initializeFacultyPatientsChart();
+}
+
+function initializePatientTrendsChart() {
     // Patient Trends Chart
     const trendsCtx = document.getElementById('patientTrendsChart');
     if (trendsCtx && !chartInstances.patientTrends) {
+        // Show canvas, hide placeholder
+        trendsCtx.style.display = 'block';
+        const chartCard = trendsCtx.closest('[data-lazy-chart]');
+        if (chartCard) {
+            chartCard.classList.add('loaded');
+        }
+        
         chartInstances.patientTrends = new Chart(trendsCtx, {
             type: 'line',
             data: window.dashboardCharts.patientTrends,
@@ -431,10 +511,19 @@ function initializeDashboardCharts() {
             }
         });
     }
+}
 
+function initializeDepartmentChart() {
     // Department Chart
     const deptCtx = document.getElementById('departmentChart');
     if (deptCtx && !chartInstances.department) {
+        // Show canvas, hide placeholder
+        deptCtx.style.display = 'block';
+        const chartCard = deptCtx.closest('[data-lazy-chart]');
+        if (chartCard) {
+            chartCard.classList.add('loaded');
+        }
+        
         chartInstances.department = new Chart(deptCtx, {
             type: 'pie',
             data: window.dashboardCharts.department,
@@ -449,10 +538,19 @@ function initializeDashboardCharts() {
             }
         });
     }
+}
 
+function initializeFacultyPatientsChart() {
     // Faculty Patients Column Chart
     const facultyCtx = document.getElementById('facultyPatientsChart');
     if (facultyCtx && !chartInstances.facultyPatients) {
+        // Show canvas, hide placeholder
+        facultyCtx.style.display = 'block';
+        const chartCard = facultyCtx.closest('[data-lazy-chart]');
+        if (chartCard) {
+            chartCard.classList.add('loaded');
+        }
+        
         chartInstances.facultyPatients = new Chart(facultyCtx, {
             type: 'bar',
             data: window.dashboardCharts.facultyPatients,

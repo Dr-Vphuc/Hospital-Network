@@ -54,22 +54,34 @@
     </div>
 
     <!-- Charts Container -->
-    <div class="charts-container">
-        <div class="chart-card">
+    <div class="charts-container" data-lazy-load="chart-section-1">
+        <div class="chart-card" data-lazy-chart="patientTrends">
             <h3>Lượng bệnh nhân nhập viện (6 tháng)</h3>
-            <canvas id="patientTrendsChart"></canvas>
+            <div class="chart-placeholder">
+                <div class="loading-spinner"></div>
+                <p>Đang tải biểu đồ...</p>
+            </div>
+            <canvas id="patientTrendsChart" style="display: none;"></canvas>
         </div>
-        <div class="chart-card">
+        <div class="chart-card" data-lazy-chart="department">
             <h3>Bệnh nhân đang điều trị theo khoa</h3>
-            <canvas id="departmentChart"></canvas>
+            <div class="chart-placeholder">
+                <div class="loading-spinner"></div>
+                <p>Đang tải biểu đồ...</p>
+            </div>
+            <canvas id="departmentChart" style="display: none;"></canvas>
         </div>
     </div>
 
     <!-- Additional Chart -->
-    <div class="charts-container">
-        <div class="chart-card" style="grid-column: 1 / -1;">
+    <div class="charts-container" data-lazy-load="chart-section-2">
+        <div class="chart-card" style="grid-column: 1 / -1;" data-lazy-chart="facultyPatients">
             <h3>Tổng số bệnh nhân và lượt khám theo khoa</h3>
-            <canvas id="facultyPatientsChart"></canvas>
+            <div class="chart-placeholder">
+                <div class="loading-spinner"></div>
+                <p>Đang tải biểu đồ...</p>
+            </div>
+            <canvas id="facultyPatientsChart" style="display: none;"></canvas>
         </div>
     </div>
 </section>
