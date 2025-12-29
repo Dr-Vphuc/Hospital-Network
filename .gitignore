@@ -1,0 +1,39 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ===== Virtual Environment =====
+.venv/
+venv/
+ENV/
+env/
+
+# ===== Environment variables =====
+.env
+.env.*
+
+# ===== Editor / OS =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*.save.*
+.DS_Store
+Thumbs.db
+
+# ===== Logs =====
+*.log
+
+# ===== Docker =====
+*.tar
+docker-data/
+
+# ===== Git =====
+.gitignore
+
+# ===== Tests / Coverage =====
+.pytest_cache/
+.coverage
+htmlcov/
