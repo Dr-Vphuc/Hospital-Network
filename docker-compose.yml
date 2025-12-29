@@ -1,0 +1,39 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: hospital_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: hospital
+      MYSQL_USER: hospital_user
+      MYSQL_PASSWORD: hospital123
+      MYSQL_ROOT_PASSWORD: root12345
+      TZ: Asia/Bangkok
+    volumes:
+      - db_data:/val/lib/mysql
+    ports:
+      - "127.0.0.1:3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot12345"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  hospital:
+    build: .
+    container_name: hospital_app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: hospital
+      DB_USER: hospital_user
+      DB_PASS: hospital123
+      TZ: Asia/Bangkok
+volumes:
+  db_data:
