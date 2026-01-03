@@ -37,3 +37,4 @@ docker-data/
 .pytest_cache/
 .coverage
 htmlcov/
+dump/state.json
