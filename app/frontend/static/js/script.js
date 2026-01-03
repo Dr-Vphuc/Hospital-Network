@@ -114,6 +114,79 @@ const mockData = {
 // Chart instances storage
 let chartInstances = {};
 
+// Pagination state management
+const paginationState = {
+    patients: { currentPage: 1, pageSize: 25 },
+    appointments: { currentPage: 1, pageSize: 25 },
+    staff: { currentPage: 1, pageSize: 25 },
+    myPatients: { currentPage: 1, pageSize: 25 },
+    pharmacy: { currentPage: 1, pageSize: 25 },
+    prescriptions: { currentPage: 1, pageSize: 25 },
+    dispensing: { currentPage: 1, pageSize: 25 }
+};
+
+// Generic pagination function
+function paginateData(data, page, pageSize) {
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return data.slice(startIndex, endIndex);
+}
+
+// Create pagination controls
+function createPaginationControls(containerId, totalItems, currentPage, pageSize, onPageChange) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    const totalPages = Math.ceil(totalItems / pageSize);
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = '<div class="pagination">';
+    
+    // Previous button
+    paginationHTML += `<button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="${onPageChange}(${currentPage - 1})">
+        <i data-feather="chevron-left"></i>
+    </button>`;
+    
+    // Page numbers
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    if (startPage > 1) {
+        paginationHTML += `<button class="pagination-btn" onclick="${onPageChange}(1)">1</button>`;
+        if (startPage > 2) {
+            paginationHTML += '<span class="pagination-ellipsis">...</span>';
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="${onPageChange}(${i})">${i}</button>`;
+    }
+    
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML += '<span class="pagination-ellipsis">...</span>';
+        }
+        paginationHTML += `<button class="pagination-btn" onclick="${onPageChange}(${totalPages})">${totalPages}</button>`;
+    }
+    
+    // Next button
+    paginationHTML += `<button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="${onPageChange}(${currentPage + 1})">
+        <i data-feather="chevron-right"></i>
+    </button>`;
+    
+    paginationHTML += '</div>';
+    container.innerHTML = paginationHTML;
+    feather.replace();
+}
+
 // Initialize the application
 function initializeApp() {
     setupTabNavigation();
@@ -128,6 +201,25 @@ function initializeApp() {
     loadPharmacy();
     loadPrescriptions();
     loadDispensing();
+    
+    // Initialize lazy loading for charts
+    setupLazyLoadingCharts();
+    
+    // Initialize charts for the currently active section (if not using lazy loading)
+    const activeSection = document.querySelector('.content-section.active');
+    if (activeSection) {
+        const sectionId = activeSection.id;
+        // Don't auto-initialize dashboard charts - they'll be lazy loaded
+        if (sectionId !== 'dashboard') {
+            initializeCharts(sectionId);
+        }
+    }
+    
+    // Initialize doctor portal charts if on doctor portal page
+    const performanceSection = document.getElementById('performance');
+    if (performanceSection && performanceSection.classList.contains('active')) {
+        initializeDoctorPortalCharts();
+    }
 }
 
 // Tab Navigation
@@ -155,22 +247,9 @@ function setupTabNavigation() {
 
 // Sub-tab Navigation for Doctor Portal
 function setupSubTabNavigation() {
-    const subTabs = document.querySelectorAll('.sub-tab');
-    const subSections = document.querySelectorAll('.sub-section');
-
-    subTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetSubSection = tab.getAttribute('data-subsection');
-            
-            // Remove active class from all sub-tabs and sub-sections
-            subTabs.forEach(t => t.classList.remove('active'));
-            subSections.forEach(s => s.classList.remove('active'));
-            
-            // Add active class to clicked sub-tab and corresponding sub-section
-            tab.classList.add('active');
-            document.getElementById(targetSubSection).classList.add('active');
-        });
-    });
+    // Sub-tabs are now links that navigate to different routes
+    // The active state is controlled by the server-side template
+    // No JavaScript click handling needed - just let the links work naturally
 }
 
 // Search Functionality
@@ -179,7 +258,23 @@ function setupSearchFunctionality() {
     const patientSearch = document.getElementById('patientSearch');
     if (patientSearch) {
         patientSearch.addEventListener('input', (e) => {
-            filterPatients(e.target.value);
+            applyPatientFilters();
+        });
+    }
+
+    // Patient faculty filter
+    const facultyFilter = document.getElementById('facultyFilter');
+    if (facultyFilter) {
+        facultyFilter.addEventListener('change', (e) => {
+            applyPatientFilters();
+        });
+    }
+
+    // Patient status filter
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', (e) => {
+            applyPatientFilters();
         });
     }
 
@@ -233,11 +328,15 @@ function setupModals() {
 // Dashboard Functions
 function loadDashboard() {
     // Patient trends chart data (6 months)
+    // Use backend data if available, otherwise use mock data
+    const patients_by_month_labels = window.backendData?.patientTrends?.patients_by_month_labels || ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'];
+    const patients_by_month_data = window.backendData?.patientTrends?.patients_by_month_data || [45, 52, 48, 61, 58, 67];
+    
     const patientTrendsData = {
-        labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'],
+        labels: patients_by_month_labels,
         datasets: [{
-            label: 'New Patients',
-            data: [45, 52, 48, 61, 58, 67],
+            label: 'Bệnh nhân mới',
+            data: patients_by_month_data,
             borderColor: '#3B82F6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.4,
@@ -246,19 +345,57 @@ function loadDashboard() {
     };
 
     // Department distribution data
+    // Use backend data if available, otherwise use mock data
+    const faculty_names = window.backendData?.departmentData?.faculty_names || ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'Emergency'];
+    const total_patients_by_faculty = window.backendData?.departmentData?.total_patients_by_faculty || [25, 20, 15, 20, 20];
+    
+    // Generate colors for all departments
+    const departmentColors = [
+        '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444',
+        '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#84CC16',
+        '#06B6D4', '#A855F7', '#EAB308', '#F43F5E', '#22D3EE'
+    ];
+    
     const departmentData = {
-        labels: ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'Emergency'],
+        labels: faculty_names,
         datasets: [{
-            data: [25, 20, 15, 20, 20],
-            backgroundColor: ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'],
+            label: 'Số bệnh nhân',
+            data: total_patients_by_faculty,
+            backgroundColor: departmentColors.slice(0, faculty_names.length),
             borderWidth: 0
         }]
+    };
+
+    // Faculty patients column chart data
+    const facultyPatientsFaculties = window.backendData?.facultyPatients?.faculties || ['Tim Mạch', 'Nội Tổng Hợp', 'Ngoại Tổng Hợp', 'Sản', 'Nhi', 'Chấn Thương Chỉnh Hình', 'Mắt', 'Tai Mũi Họng', 'Da Liễu', 'Thần Kinh'];
+    const facultyPatientsData = window.backendData?.facultyPatients?.patientCounts || [142, 198, 165, 134, 176, 89, 67, 72, 54, 95];
+    const facultyExaminationsData = window.backendData?.facultyPatients?.examinationCounts || [215, 287, 234, 189, 256, 123, 98, 105, 78, 142];
+    
+    const facultyPatientsChartData = {
+        labels: facultyPatientsFaculties,
+        datasets: [
+            {
+                label: 'Số bệnh nhân',
+                data: facultyPatientsData,
+                backgroundColor: '#3B82F6',
+                borderRadius: 6,
+                borderWidth: 0
+            },
+            {
+                label: 'Lượt khám',
+                data: facultyExaminationsData,
+                backgroundColor: '#10B981',
+                borderRadius: 6,
+                borderWidth: 0
+            }
+        ]
     };
 
     // Store chart data for later initialization
     window.dashboardCharts = {
         patientTrends: patientTrendsData,
-        department: departmentData
+        department: departmentData,
+        facultyPatients: facultyPatientsChartData
     };
 }
 
@@ -273,16 +410,94 @@ function initializeCharts(section) {
     }
 }
 
+// Lazy Loading Setup for Charts
+function setupLazyLoadingCharts() {
+    // Check if IntersectionObserver is supported
+    if (!('IntersectionObserver' in window)) {
+        // Fallback: load all charts immediately if IntersectionObserver is not supported
+        console.log('IntersectionObserver not supported, loading charts immediately');
+        initializeDashboardCharts();
+        return;
+    }
+
+    // Create an intersection observer
+    const observerOptions = {
+        root: null, // Use viewport as root
+        rootMargin: '50px', // Start loading 50px before element is visible
+        threshold: 0.1 // Trigger when 10% of element is visible
+    };
+
+    const chartObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const chartCard = entry.target;
+                const chartType = chartCard.getAttribute('data-lazy-chart');
+                
+                // Load the specific chart
+                loadSpecificChart(chartType);
+                
+                // Mark as loaded
+                chartCard.classList.add('loaded');
+                
+                // Stop observing this element
+                observer.unobserve(chartCard);
+            }
+        });
+    }, observerOptions);
+
+    // Observe all chart cards with lazy loading
+    const lazyCharts = document.querySelectorAll('[data-lazy-chart]');
+    lazyCharts.forEach(chartCard => {
+        chartObserver.observe(chartCard);
+    });
+}
+
+// Load a specific chart based on type
+function loadSpecificChart(chartType) {
+    console.log('Loading chart:', chartType);
+    
+    switch(chartType) {
+        case 'patientTrends':
+            initializePatientTrendsChart();
+            break;
+        case 'department':
+            initializeDepartmentChart();
+            break;
+        case 'facultyPatients':
+            initializeFacultyPatientsChart();
+            break;
+        default:
+            console.warn('Unknown chart type:', chartType);
+    }
+}
+
 function initializeDashboardCharts() {
+    initializePatientTrendsChart();
+    initializeDepartmentChart();
+    initializeFacultyPatientsChart();
+}
+
+function initializePatientTrendsChart() {
     // Patient Trends Chart
     const trendsCtx = document.getElementById('patientTrendsChart');
     if (trendsCtx && !chartInstances.patientTrends) {
+        // Show canvas, hide placeholder
+        trendsCtx.style.display = 'block';
+        const chartCard = trendsCtx.closest('[data-lazy-chart]');
+        if (chartCard) {
+            chartCard.classList.add('loaded');
+        }
+        
         chartInstances.patientTrends = new Chart(trendsCtx, {
             type: 'line',
             data: window.dashboardCharts.patientTrends,
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
                     legend: {
                         display: false
@@ -296,10 +511,19 @@ function initializeDashboardCharts() {
             }
         });
     }
+}
 
+function initializeDepartmentChart() {
     // Department Chart
     const deptCtx = document.getElementById('departmentChart');
     if (deptCtx && !chartInstances.department) {
+        // Show canvas, hide placeholder
+        deptCtx.style.display = 'block';
+        const chartCard = deptCtx.closest('[data-lazy-chart]');
+        if (chartCard) {
+            chartCard.classList.add('loaded');
+        }
+        
         chartInstances.department = new Chart(deptCtx, {
             type: 'pie',
             data: window.dashboardCharts.department,
@@ -316,155 +540,522 @@ function initializeDashboardCharts() {
     }
 }
 
+function initializeFacultyPatientsChart() {
+    // Faculty Patients Column Chart
+    const facultyCtx = document.getElementById('facultyPatientsChart');
+    if (facultyCtx && !chartInstances.facultyPatients) {
+        // Show canvas, hide placeholder
+        facultyCtx.style.display = 'block';
+        const chartCard = facultyCtx.closest('[data-lazy-chart]');
+        if (chartCard) {
+            chartCard.classList.add('loaded');
+        }
+        
+        chartInstances.facultyPatients = new Chart(facultyCtx, {
+            type: 'bar',
+            data: window.dashboardCharts.facultyPatients,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 20
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
 // Patient Functions
+let allPatients = [];
+
 function loadPatients() {
+    allPatients = window.patientsDetails || mockData.patients;
+    renderPatientsPage(1);
+}
+
+function renderPatientsPage(page) {
     const tbody = document.getElementById('patientsTableBody');
     if (!tbody) return;
 
+    paginationState.patients.currentPage = page;
+    const paginatedData = paginateData(allPatients, page, paginationState.patients.pageSize);
+    
     tbody.innerHTML = '';
-    mockData.patients.forEach(patient => {
+    paginatedData.forEach(patient => {
         const row = createPatientRow(patient);
         tbody.appendChild(row);
     });
+    
+    // Re-initialize Feather icons after all rows are added
+    feather.replace();
+    
+    createPaginationControls('patientsPagination', allPatients.length, page, paginationState.patients.pageSize, 'renderPatientsPage');
 }
 
 function createPatientRow(patient) {
     const row = document.createElement('tr');
     const statusClass = getStatusClass(patient.status);
     
+    // Check if current user is a doctor (based on URL path)
+    const isDoctorPage = window.location.pathname.startsWith('/doctor');
+    
+    // Check if patient is inpatient (Nội trú) and user is a doctor
+    const dischargeButton = (patient.status === 'Nội trú' && isDoctorPage)
+        ? `<button class="btn btn-sm" style="background-color: #10B981; color: white; margin-left: 0.5rem;" onclick="confirmDischargePatient('${patient.MABN}', '${patient.hoten}')">
+                <i data-feather="log-out"></i>
+                Xuất viện
+            </button>`
+        : '';
+    
     row.innerHTML = `
-        <td>${patient.id}</td>
-        <td>${patient.name}</td>
-        <td>${patient.age}</td>
-        <td>${patient.contact}</td>
-        <td>${formatDate(patient.admissionDate)}</td>
-        <td>${patient.department}</td>
+        <td>${patient.MABN}</td>
+        <td>${patient.hoten}</td>
+        <td>${patient.tuoi}</td>
+        <td>${patient.sdt}</td>
+        <td>${formatDate(patient.ngaykham)}</td>
+        <td>${patient.tenkhoa}</td>
         <td><span class="badge ${statusClass}">${patient.status}</span></td>
         <td>
-            <button class="btn btn-sm btn-primary" onclick="viewPatientDetails(${patient.id})">
+            <button class="btn btn-sm btn-primary" onclick="viewPatientDetails('${patient.MABN}')">
                 <i data-feather="eye"></i>
-                View Details
+                Theo dõi
             </button>
+            ${dischargeButton}
         </td>
     `;
     
-    // Re-initialize Feather icons for the new content
-    feather.replace();
     return row;
 }
 
-function filterPatients(searchTerm) {
+function applyPatientFilters() {
     const tbody = document.getElementById('patientsTableBody');
     if (!tbody) return;
 
-    const filteredPatients = mockData.patients.filter(patient =>
-        patient.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const searchTerm = document.getElementById('patientSearch')?.value || '';
+    const facultyFilter = document.getElementById('facultyFilter')?.value || '';
+    const statusFilter = document.getElementById('statusFilter')?.value || '';
 
-    tbody.innerHTML = '';
-    filteredPatients.forEach(patient => {
-        const row = createPatientRow(patient);
-        tbody.appendChild(row);
+    allPatients = (window.patientsDetails || mockData.patients).filter(patient => {
+        // Search filter
+        const matchesSearch = patient.hoten.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        // Faculty filter
+        const matchesFaculty = !facultyFilter || patient.tenkhoa === facultyFilter;
+        
+        // Status filter
+        const matchesStatus = !statusFilter || patient.status === statusFilter;
+        
+        return matchesSearch && matchesFaculty && matchesStatus;
     });
+
+    renderPatientsPage(1);
 }
 
 function viewPatientDetails(patientId) {
-    const patient = mockData.patients.find(p => p.id === patientId);
-    if (!patient) return;
+    console.log('viewPatientDetails called with:', patientId);
+    
+    // Convert patientId to string for comparison
+    const patient = window.patientsDetails.find(p => String(p.MABN) === String(patientId));
+    
+    if (!patient) {
+        console.error('Patient not found:', patientId);
+        alert('Không tìm thấy thông tin bệnh nhân');
+        return;
+    }
 
     const modalBody = document.getElementById('patientModalBody');
+    if (!modalBody) {
+        console.error('Modal body not found');
+        return;
+    }
+    
+    // Show loading state
     modalBody.innerHTML = `
-        <div class="patient-details">
-            <h4>Patient Information</h4>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <strong>ID:</strong> ${patient.id}
-                </div>
-                <div class="detail-item">
-                    <strong>Name:</strong> ${patient.name}
-                </div>
-                <div class="detail-item">
-                    <strong>Age:</strong> ${patient.age}
-                </div>
-                <div class="detail-item">
-                    <strong>Contact:</strong> ${patient.contact}
-                </div>
-                <div class="detail-item">
-                    <strong>Admission Date:</strong> ${formatDate(patient.admissionDate)}
-                </div>
-                <div class="detail-item">
-                    <strong>Department:</strong> ${patient.department}
-                </div>
-                <div class="detail-item">
-                    <strong>Status:</strong> <span class="badge ${getStatusClass(patient.status)}">${patient.status}</span>
-                </div>
-            </div>
+        <h3 style="margin-bottom: 1.5rem; margin-left: 1.5rem;">Thông tin bệnh nhân: ${patient.hoten}</h3>
+        <div style="text-align: center; padding: 2rem;">
+            <p>Đang tải dữ liệu...</p>
         </div>
     `;
+    
+    // Open modal immediately with loading state
+    const modal = document.getElementById('patientModal');
+    if (!modal) {
+        console.error('Modal not found');
+        return;
+    }
+    modal.classList.add('open');
+    
+    // Determine the correct endpoint based on current page
+    const isAdminPage = window.location.pathname.startsWith('/admin');
+    const isDoctorPage = window.location.pathname.startsWith('/doctor');
+    const endpoint = isDoctorPage ? `/doctor/patients/${patientId}` : `/admin/patients/${patientId}`;
+    
+    // Fetch data from backend
+    fetch(endpoint)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const examinationHistory = data.examination_history || [];
+            const relatives = data.relatives || [];
+            
+            let examinationRows = '';
+            if (examinationHistory.length > 0) {
+                examinationRows = examinationHistory.map(exam => `
+                    <tr>
+                        <td>${formatDate(exam.date || exam.ngaykham)}</td>
+                        <td><span class="badge ${getPrescriptionStatusClass(exam.status || exam.tinhtrang)}">${exam.status || exam.tinhtrang || 'N/A'}</span></td>
+                        <td>${exam.thuoc || 'N/A'}</td>
+                        <td>${exam.bacsi || 'N/A'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                examinationRows = '<tr><td colspan="5" style="text-align: center;">Không có dữ liệu</td></tr>';
+            }
+            
+            let relativesRows = '';
+            if (relatives.length > 0) {
+                relativesRows = relatives.map(rel => `
+                    <tr>
+                        <td>${rel.name || rel.hoten}</td>
+                        <td>${rel.relationship || rel.quanhe}</td>
+                        <td>${rel.phone || rel.sdt}</td>
+                        <td>${rel.address || rel.diachi || 'N/A'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                relativesRows = '<tr><td colspan="5" style="text-align: center;">Không có người giám hộ</td></tr>';
+            }
+            
+            modalBody.innerHTML = `
+                <div class="patient-details">
+                    <h3 style="margin-bottom: 1.5rem;">Thông tin bệnh nhân: ${patient.hoten}</h3>
+                    
+                    <!-- Tabs -->
+                    <div class="medicine-tabs">
+                        <button class="medicine-tab active" onclick="switchPatientTab('history')">
+                            Lịch sử khám chữa
+                        </button>
+                        <button class="medicine-tab" onclick="switchPatientTab('relatives')">
+                            Người giám hộ
+                        </button>
+                    </div>
 
-    document.getElementById('patientModal').classList.add('open');
+                    <!-- Examination History Tab -->
+                    <div id="historyTab" class="medicine-form-container active">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày khám</th>
+                                        <th>Tình trạng</th>
+                                        <th>Thuốc</th>
+                                        <th>Bác sĩ kê đơn</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${examinationRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Relatives Tab -->
+                    <div id="relativesTab" class="medicine-form-container">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Họ tên</th>
+                                        <th>Quan hệ</th>
+                                        <th>Số điện thoại</th>
+                                        <th>Địa chỉ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${relativesRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            feather.replace();
+        })
+        .catch(error => {
+            console.error('Error fetching patient details:', error);
+            modalBody.innerHTML = `
+                <h3 style="margin-bottom: 1.5rem;">Thông tin bệnh nhân: ${patient.hoten}</h3>
+                <div style="text-align: center; padding: 2rem; color: #EF4444;">
+                    <p>Lỗi khi tải dữ liệu. Vui lòng thử lại.</p>
+                </div>
+            `;
+        });
 }
 
-// Appointment Functions
-function loadAppointments() {
-    const tbody = document.getElementById('appointmentsTableBody');
-    if (!tbody) return;
+function switchPatientTab(tabName) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('#patientModal .medicine-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Update tab containers
+    document.getElementById('historyTab').classList.remove('active');
+    document.getElementById('relativesTab').classList.remove('active');
+    
+    if (tabName === 'history') {
+        tabs[0].classList.add('active');
+        document.getElementById('historyTab').classList.add('active');
+    } else {
+        tabs[1].classList.add('active');
+        document.getElementById('relativesTab').classList.add('active');
+    }
+}
 
-    tbody.innerHTML = '';
-    mockData.appointments.forEach(appointment => {
-        const row = createAppointmentRow(appointment);
-        tbody.appendChild(row);
+// Discharge Patient Confirmation
+function confirmDischargePatient(patientId, patientName) {
+    const confirmed = confirm(`Bạn có chắc chắn muốn xuất viện cho bệnh nhân "${patientName}" (Mã: ${patientId}) không?\n\nHành động này sẽ chuyển trạng thái bệnh nhân từ Nội trú sang Đã xuất viện.`);
+    
+    if (confirmed) {
+        dischargePatient(patientId);
+    }
+}
+
+// Discharge Patient Function
+function dischargePatient(patientId) {
+    // Determine the correct endpoint based on current page
+    const isAdminPage = window.location.pathname.startsWith('/admin');
+    const isDoctorPage = window.location.pathname.startsWith('/doctor');
+    const endpoint = isDoctorPage ? `/doctor/patients/${patientId}/discharge` : `/admin/patients/${patientId}/discharge`;
+    
+    fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            patientId: patientId
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Xuất viện thành công!');
+            // Reload the page to refresh the data
+            window.location.reload();
+        } else {
+            alert('Lỗi: ' + (data.message || 'Không thể xuất viện'));
+        }
+    })
+    .catch(error => {
+        console.error('Error discharging patient:', error);
+        alert('Có lỗi xảy ra khi xuất viện. Vui lòng thử lại.');
     });
 }
 
-function createAppointmentRow(appointment) {
+// Room Functions (formerly Appointments)
+let allAppointments = [];
+
+function loadAppointments() {
+    allAppointments = window.allRoomsDetail || [];
+    renderAppointmentsPage(1);
+}
+
+function renderAppointmentsPage(page) {
+    const tbody = document.getElementById('appointmentsTableBody');
+    if (!tbody) return;
+
+    paginationState.appointments.currentPage = page;
+    const paginatedData = paginateData(allAppointments, page, paginationState.appointments.pageSize);
+    
+    tbody.innerHTML = '';
+    paginatedData.forEach(room => {
+        const row = createAppointmentRow(room);
+        tbody.appendChild(row);
+    });
+    
+    feather.replace();
+    createPaginationControls('appointmentsPagination', allAppointments.length, page, paginationState.appointments.pageSize, 'renderAppointmentsPage');
+}
+
+function createAppointmentRow(room) {
     const row = document.createElement('tr');
-    const statusClass = getAppointmentStatusClass(appointment.status);
+    const statusClass = getAppointmentStatusClass(room.so_giuong_trong, room.tong_giuong);
     
     row.innerHTML = `
-        <td>${formatDate(appointment.date)} ${appointment.time}</td>
-        <td>${appointment.patientName}</td>
-        <td>${appointment.doctor}</td>
-        <td><span class="badge ${statusClass}">${appointment.status}</span></td>
+        <td> ${room.MAPHG}</td>
+        <td>${room.tenkhoa}</td>
+        <td>${room.tentoa}</td>
+        <td><span class="badge ${statusClass}">${room.so_giuong_trong} / ${room.tong_giuong}</span></td>
         <td>
-            <button class="btn btn-sm btn-primary">
+            <button class="btn btn-sm btn-primary" onclick="viewRoomPatients('${room.MAPHG}', '${room.tentoa}')">
                 <i data-feather="eye"></i>
-                View
-            </button>
-            <button class="btn btn-sm btn-secondary">
-                <i data-feather="edit"></i>
-                Reschedule
+                Danh sách bệnh nhân
             </button>
         </td>
     `;
     
-    feather.replace();
+    
     return row;
 }
 
+function viewRoomPatients(roomId, roomName) {
+    const modalBody = document.getElementById('roomPatientsModalBody');
+    if (!modalBody) {
+        console.error('Room patients modal not found');
+        return;
+    }
+    
+    // Show loading state
+    modalBody.innerHTML = `
+        <h3 style="margin-left: 1rem;">Danh sách bệnh nhân - Phòng ${roomId} (${roomName})</h3>
+        <div style="text-align: center; padding: 2rem;">
+            <p>Đang tải dữ liệu...</p>
+        </div>
+    `;
+    
+    // Open modal immediately with loading state
+    const modal = document.getElementById('roomPatientsModal');
+    if (!modal) {
+        console.error('Modal not found');
+        return;
+    }
+    modal.classList.add('open');
+    
+    // Fetch data from backend
+    fetch(`/admin/room/${roomId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            let tableRows = '';
+            if (data.length > 0) {
+                tableRows = data.map(patient => {
+                    const statusClass = getPrescriptionStatusClass(patient.tinhtrang || 'N/A');
+                    return `
+                        <tr>
+                            <td>${patient.hoten}</td>
+                            <td>${patient.sdt || 'N/A'}</td>
+                            <td>${patient.sdt_nguoidk || 'N/A'}</td>
+                            <td><span class="badge ${statusClass}">${patient.tinhtrang || 'N/A'}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tableRows = '<tr><td colspan="4" style="text-align: center;">Phòng không có bệnh nhân</td></tr>';
+            }
+            
+            modalBody.innerHTML = `
+                <h3 style="margin-bottom: 1.5rem;">Danh sách bệnh nhân - Phòng ${roomId} (${roomName})</h3>
+                <div class="table-container" style="margin-top: 1rem;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Họ tên</th>
+                                <th>Số điện thoại</th>
+                                <th>Số điện thoại người thân</th>
+                                <th>Tình trạng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error fetching room patients:', error);
+            modalBody.innerHTML = `
+                <h3 style="margin-bottom: 1.5rem;">Danh sách bệnh nhân - Phòng ${roomId} (${roomName})</h3>
+                <div style="text-align: center; padding: 2rem; color: #EF4444;">
+                    <p>Lỗi khi tải dữ liệu. Vui lòng thử lại.</p>
+                </div>
+            `;
+        });
+}
+
 // Staff Functions
+let allStaff = [];
+
 function loadStaff() {
+    allStaff = window.allDoctors || mockData.staff;
+    renderStaffPage(1);
+}
+
+function renderStaffPage(page) {
     const tbody = document.getElementById('staffTableBody');
     if (!tbody) return;
 
+    paginationState.staff.currentPage = page;
+    const paginatedData = paginateData(allStaff, page, paginationState.staff.pageSize);
+    
     tbody.innerHTML = '';
-    mockData.staff.forEach(member => {
+    paginatedData.forEach(member => {
         const row = createStaffRow(member);
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('staffPagination', allStaff.length, page, paginationState.staff.pageSize, 'renderStaffPage');
 }
 
 function createStaffRow(member) {
     const row = document.createElement('tr');
-    const statusClass = member.status === 'Available' ? 'badge-green' : 'badge-red';
+    const statusClass = member.trangthai === true ? 'badge-green' : 'badge-red';
     
     row.innerHTML = `
-        <td>${member.name}</td>
-        <td>${member.role}</td>
-        <td>${member.department}</td>
-        <td>${member.contact}</td>
-        <td><span class="badge ${statusClass}">${member.status}</span></td>
+        <td>${member.hoten}</td>
+        <td>${member.bangcap}</td>
+        <td>${member.khoa}</td>
+        <td>${member.phongkham}</td>
+        <td>${member.sdt}</td>
+        <td><span class="badge ${statusClass}">${member.trangthai}</span></td>
     `;
+    
+    // Add click handler to redirect to doctor's examination page
+    if (member.MABS) {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => {
+            window.location.href = `/admin/doctors/${member.MABS}/examinations`;
+        });
+        
+        // Add hover effect
+        row.addEventListener('mouseenter', () => {
+            row.style.backgroundColor = '#f3f4f6';
+        });
+        row.addEventListener('mouseleave', () => {
+            row.style.backgroundColor = '';
+        });
+    }
     
     return row;
 }
@@ -473,29 +1064,96 @@ function filterStaff(searchTerm) {
     const tbody = document.getElementById('staffTableBody');
     if (!tbody) return;
 
-    const filteredStaff = mockData.staff.filter(member =>
-        member.name.toLowerCase().includes(searchTerm.toLowerCase())
+    allStaff = (window.allDoctors || mockData.staff).filter(member =>
+        member.hoten.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    tbody.innerHTML = '';
-    filteredStaff.forEach(member => {
-        const row = createStaffRow(member);
-        tbody.appendChild(row);
-    });
+    renderStaffPage(1);
 }
 
-function filterStaffByRole(role) {
+function filterStaffByRole(faculty) {
     const tbody = document.getElementById('staffTableBody');
     if (!tbody) return;
 
-    const filteredStaff = role ? 
-        mockData.staff.filter(member => member.role === role) : 
-        mockData.staff;
+    allStaff = faculty ? 
+        (window.allDoctors || mockData.staff).filter(member => member.khoa === faculty) : 
+        (window.allDoctors || mockData.staff);
 
-    tbody.innerHTML = '';
-    filteredStaff.forEach(member => {
-        const row = createStaffRow(member);
-        tbody.appendChild(row);
+    renderStaffPage(1);
+}
+
+// Add Doctor Modal Functions
+function openAddDoctorModal() {
+    const modal = document.getElementById('addDoctorModal');
+    modal.classList.add('open');
+    
+    // Reset form
+    document.getElementById('addDoctorForm').reset();
+    
+    // Re-initialize icons
+    feather.replace();
+}
+
+function closeAddDoctorModal() {
+    const modal = document.getElementById('addDoctorModal');
+    modal.classList.remove('open');
+}
+
+function submitAddDoctor(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    const doctorData = {
+        hoten: formData.get('hoten'),        
+        bangcap: formData.get('bangcap'),
+        khoa: formData.get('khoa'),
+        phongkham: formData.get('phongkham'),
+        sdt: formData.get('sdt'),
+        trangthai: true
+    };
+    
+    // Disable submit button to prevent double submission
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang thêm...';
+    
+    // Send data to backend API
+    fetch('/admin/doctors/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(doctorData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.message || 'Có lỗi xảy ra khi thêm bác sĩ');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Show success message with credentials
+        const message = `Thêm bác sĩ mới thành công!\n\nThông tin đăng nhập:\nTên đăng nhập: ${data.username}\nMật khẩu: ${data.password}\n\nVui lòng lưu lại thông tin này!`;
+        alert(message);
+        
+        // Close modal
+        closeAddDoctorModal();
+        
+        // Reload the page to show updated data
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error adding doctor:', error);
+        alert('Lỗi: ' + error.message);
+        
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
     });
 }
 
@@ -527,7 +1185,7 @@ function createScheduleCard(appointment) {
     
     card.innerHTML = `
         <h4>${appointment.time} - ${appointment.patientName}</h4>
-        <p>Status: <span class="badge ${getAppointmentStatusClass(appointment.status)}">${appointment.status}</span></p>
+        <p>Status: <span class="badge ${getAppointmentStatusClass(appointment.so_giuong_trong, appointment.tong_giuong)}">${appointment.so_giuong_trong} / 4</span></p>
         <div class="schedule-actions">
             <button class="btn btn-sm btn-success">
                 <i data-feather="check"></i>
@@ -544,24 +1202,38 @@ function createScheduleCard(appointment) {
     return card;
 }
 
+let allMyPatients = [];
+
 function loadMyPatients() {
+    allMyPatients = window.examinationsData || mockData.doctorPatients;
+    renderMyPatientsPage(1);
+}
+
+function renderMyPatientsPage(page) {
     const tbody = document.getElementById('myPatientsTableBody');
     if (!tbody) return;
 
+    paginationState.myPatients.currentPage = page;
+    const paginatedData = paginateData(allMyPatients, page, paginationState.myPatients.pageSize);
+    
     tbody.innerHTML = '';
-    mockData.doctorPatients.forEach(patient => {
+    paginatedData.forEach(patient => {
         const row = document.createElement('tr');
-        const healthStatusClass = getHealthStatusClass(patient.healthStatus);
+        const healthStatusClass = getHealthStatusClass(patient.health_status);
         
         row.innerHTML = `
-            <td>${patient.name}</td>
-            <td>${formatDate(patient.lastVisit)}</td>
-            <td><span class="badge ${healthStatusClass}">${patient.healthStatus}</span></td>
-            <td>${patient.visitHistory}</td>
+            <td>${patient.patient_name}</td>
+            <td>${patient.giaidoan}</td>
+            <td>${formatDate(patient.last_visit)}</td>
+            <td><span class="badge ${healthStatusClass}">${patient.health_status}</span></td>
+            <td>${patient.medicine_name}</td>
+            <td>${patient.total_medicine_quantity}</td>
         `;
         
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('myPatientsPagination', allMyPatients.length, page, paginationState.myPatients.pageSize, 'renderMyPatientsPage');
 }
 
 function loadFeedback() {
@@ -599,10 +1271,10 @@ function initializeDoctorPortalCharts() {
         chartInstances.consultationTrends = new Chart(consultationCtx, {
             type: 'line',
             data: {
-                labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'],
+                labels: window.stringMonths,
                 datasets: [{
                     label: 'Consultations',
-                    data: [12, 15, 18, 14, 16, 20],
+                    data: window.consultationLast6Months,
                     borderColor: '#3B82F6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
@@ -612,6 +1284,10 @@ function initializeDoctorPortalCharts() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
                     legend: {
                         display: false
@@ -619,7 +1295,11 @@ function initializeDoctorPortalCharts() {
                 },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
                     }
                 }
             }
@@ -637,60 +1317,92 @@ function loadPharmacyAlerts() {
     const alertsContainer = document.getElementById('pharmacyAlerts');
     if (!alertsContainer) return;
 
-    const lowStockItems = mockData.medicines.filter(medicine => 
-        (medicine.quantity / medicine.maxQuantity) < 0.2
-    );
-    
-    const nearExpiryItems = mockData.medicines.filter(medicine => {
-        const expiryDate = new Date(medicine.expiryDate);
-        const today = new Date();
-        const diffTime = expiryDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays <= 30 && diffDays > 0;
-    });
+    // Prefer real backend data if available, otherwise fallback to mockData
+    const medicines = window.inventoryStatusTable ||
+                      window.backendData?.inventory?.medicines ||
+                      window.backendData?.medicines ||
+                      mockData.medicines;
 
     alertsContainer.innerHTML = '';
+    const today = new Date();
+    
+    // Track which medicine names have already shown alerts to avoid duplicates
+    const lowStockAlerted = new Set();
+    const expiryAlerted = new Set();
 
-    lowStockItems.forEach(medicine => {
-        const alert = document.createElement('div');
-        alert.className = 'alert alert-warning';
-        alert.innerHTML = `
-            <i data-feather="alert-triangle"></i>
-            Low stock: ${medicine.name} (${medicine.quantity}/${medicine.maxQuantity})
-        `;
-        alertsContainer.appendChild(alert);
-    });
+    medicines.forEach(med => {
+        const name = med.name || med.product_name || 'Unknown Medicine';
+        const quantity = Number(med.total_quantity ?? med.total_quantity ?? med.available_quantity ?? 0);
+        const maxQty = Number(med.total_stock_level ?? med.max_quantity ?? med.max ?? 1);
+        const expiryRaw = med.expiryDate ?? med.expiry_date ?? med.expiry;
 
-    nearExpiryItems.forEach(medicine => {
-        const alert = document.createElement('div');
-        alert.className = 'alert alert-danger';
-        alert.innerHTML = `
-            <i data-feather="alert-circle"></i>
-            Near expiry: ${medicine.name} expires on ${formatDate(medicine.expiryDate)}
-        `;
-        alertsContainer.appendChild(alert);
+        // Low stock alert - only show once per medicine name
+        const stockRatio = maxQty > 0 ? (quantity / maxQty) : 0;
+        if (stockRatio < 0.2 && !lowStockAlerted.has(name)) {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-warning';
+            alert.innerHTML = `
+                <i data-feather="alert-triangle"></i>
+                Tồn kho thấp: ${name} (${quantity}/${maxQty})
+            `;
+            alertsContainer.appendChild(alert);
+            lowStockAlerted.add(name);
+        }
+
+        // Near expiry alert - only show once per medicine name
+        if (expiryRaw && !expiryAlerted.has(name)) {
+            const expiryDate = new Date(expiryRaw);
+            if (!isNaN(expiryDate)) {
+                const diffTime = expiryDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays <= 60 && diffDays > 0) {
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-danger';
+                    alert.innerHTML = `
+                        <i data-feather="alert-circle"></i>
+                        Sắp hết hạn: ${name} (Mã lô: ${med.malo}) hết hạn vào ${formatDate(expiryDate)}
+                    `;
+                    alertsContainer.appendChild(alert);
+                    expiryAlerted.add(name);
+                }
+            }
+        }
     });
 
     feather.replace();
 }
 
+let allPharmacyMedicines = [];
+
 function loadPharmacyTable() {
+    allPharmacyMedicines = window.inventoryStatusTable || mockData.medicines;
+    renderPharmacyPage(1);
+}
+
+function renderPharmacyPage(page) {
     const tbody = document.getElementById('pharmacyTableBody');
     if (!tbody) return;
 
+    paginationState.pharmacy.currentPage = page;
+    const paginatedData = paginateData(allPharmacyMedicines, page, paginationState.pharmacy.pageSize);
+    
     tbody.innerHTML = '';
-    mockData.medicines.forEach(medicine => {
+    paginatedData.forEach(medicine => {
         const row = createPharmacyRow(medicine);
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('pharmacyPagination', allPharmacyMedicines.length, page, paginationState.pharmacy.pageSize, 'renderPharmacyPage');
 }
 
 function createPharmacyRow(medicine) {
     const row = document.createElement('tr');
-    const stockPercentage = (medicine.quantity / medicine.maxQuantity) * 100;
+    const stockPercentage = (medicine.quantity / medicine.max_quantity) * 100;
     const progressClass = stockPercentage > 50 ? 'progress-green' : 
                          stockPercentage > 20 ? 'progress-yellow' : 'progress-red';
-    
+    const allStockPercentages = (medicine.total_quantity / medicine.total_stock_level) * 100;
+    const allProgressClass = allStockPercentages > 50 ? 'progress-green' : 
+                         allStockPercentages > 20 ? 'progress-yellow' : 'progress-red';
     row.innerHTML = `
         <td>${medicine.name}</td>
         <td>${medicine.quantity}</td>
@@ -700,82 +1412,118 @@ function createPharmacyRow(medicine) {
             </div>
             <span style="font-size: 0.75rem; color: #6b7280;">${Math.round(stockPercentage)}%</span>
         </td>
-        <td>${formatDate(medicine.expiryDate)}</td>
-        <td>${medicine.supplier}</td>
-        <td>${medicine.batch}</td>
-        <td>${medicine.location}</td>
+        <td>${formatDate(medicine.expiry_date)}</td>
+        <td>${medicine.batch_count}</td>
+        <td>${medicine.total_quantity}</td>
+        <td>
+            <div class="progress-bar">
+                <div class="progress-fill ${allProgressClass}" style="width: ${allStockPercentages}%"></div>
+            </div>
+            <span style="font-size: 0.75rem; color: #6b7280;">${Math.round(allStockPercentages)}%</span>
+        </td>
     `;
     
     return row;
 }
 
 // Prescription Functions
+let allPrescriptions = [];
+
 function loadPrescriptions() {
+    allPrescriptions = window.prescriptionsData || mockData.prescriptions;
+    renderPrescriptionsPage(1);
+}
+
+function renderPrescriptionsPage(page) {
     const tbody = document.getElementById('prescriptionsTableBody');
     if (!tbody) return;
 
+    paginationState.prescriptions.currentPage = page;
+    const paginatedData = paginateData(allPrescriptions, page, paginationState.prescriptions.pageSize);
+    
     tbody.innerHTML = '';
-    mockData.prescriptions.forEach(prescription => {
+    paginatedData.forEach(prescription => {
         const row = createPrescriptionRow(prescription);
         tbody.appendChild(row);
     });
+    
+    feather.replace();
+    createPaginationControls('prescriptionsPagination', allPrescriptions.length, page, paginationState.prescriptions.pageSize, 'renderPrescriptionsPage');
 }
 
 function createPrescriptionRow(prescription) {
     const row = document.createElement('tr');
     const statusClass = getPrescriptionStatusClass(prescription.status);
+    const patientID = prescription.patient_id;
+    const patientName = prescription.patient_name;
+    const patientStatus = prescription.status || 'N/A';
+    const medications = prescription.medicine;
+    const dosageFrequency = prescription.dosage_frequency || `${prescription.dosage} - ${prescription.frequency}`;
+    const prescribing_doctor = prescription.prescribing_doctor || 'N/A';
     
     row.innerHTML = `
-        <td>${prescription.patientName}</td>
-        <td>${prescription.medications.join(', ')}</td>
-        <td>${prescription.dosage} - ${prescription.frequency}</td>
-        <td>${prescription.instructions}</td>
-        <td><span class="badge ${statusClass}">${prescription.status}</span></td>
+        <td>${patientName}</td>
+        <td><span class="badge ${statusClass}">${patientStatus}</span></td>
+        <td>${medications}</td>
+        <td>${dosageFrequency}</td>
+        <td>${prescribing_doctor}</td>
         <td>${formatDate(prescription.date)}</td>
-        <td>
-            <button class="btn btn-sm btn-primary" onclick="viewPrescriptionDetails(${prescription.id})">
-                <i data-feather="eye"></i>
-                View Details
-            </button>
-        </td>
+        
     `;
     
-    feather.replace();
+    
     return row;
 }
 
 function viewPrescriptionDetails(prescriptionId) {
-    const prescription = mockData.prescriptions.find(p => p.id === prescriptionId);
+    const prescriptions = window.prescriptionsData || mockData.prescriptions;
+    const prescription = prescriptions.find(p => p.id === prescriptionId);
     if (!prescription) return;
 
     const modalBody = document.getElementById('prescriptionModalBody');
+    
+    // Handle both backend data format and mock data format
+    const patientName = prescription.patient_name || prescription.patientName;
+    const medications = prescription.medicine || prescription.medications;
+    const dosageFrequency = prescription.dosage_frequency || `${prescription.dosage} - ${prescription.frequency}`;
+    const doctor = prescription.prescribing_doctor || 'N/A';
+    const instructions = prescription.instructions || 'N/A';
+    const prescriptionDate = prescription.date;
+    const prescriptionStatus = prescription.status;
+    
     modalBody.innerHTML = `
         <div class="prescription-details">
-            <h4>Prescription Details</h4>
+            <h4>Chi tiết đơn thuốc</h4>
             <div class="detail-grid">
                 <div class="detail-item">
-                    <strong>Patient:</strong> ${prescription.patientName}
+                    <strong>Bệnh nhân:</strong> ${patientName}
                 </div>
                 <div class="detail-item">
-                    <strong>Date:</strong> ${formatDate(prescription.date)}
+                    <strong>Ngày:</strong> ${formatDate(prescriptionDate)}
                 </div>
                 <div class="detail-item">
-                    <strong>Status:</strong> <span class="badge ${getPrescriptionStatusClass(prescription.status)}">${prescription.status}</span>
+                    <strong>Tình trạng:</strong> <span class="badge ${getPrescriptionStatusClass(prescriptionStatus)}">${prescriptionStatus}</span>
                 </div>
             </div>
             <div class="medications-section">
-                <h5>Medications:</h5>
+                <h5>Thuốc:</h5>
                 <ul>
-                    ${prescription.medications.map(med => `<li>${med}</li>`).join('')}
+                    ${Array.isArray(medications) ? medications.map(med => `<li>${med}</li>`).join('') : `<li>${medications}</li>`}
                 </ul>
             </div>
             <div class="dosage-section">
-                <h5>Dosage & Frequency:</h5>
-                <p>${prescription.dosage} - ${prescription.frequency}</p>
+                <h5>Liều lượng & Tần suất:</h5>
+                <p>${dosageFrequency}</p>
             </div>
+            ${instructions !== 'N/A' ? `
             <div class="instructions-section">
-                <h5>Instructions:</h5>
-                <p>${prescription.instructions}</p>
+                <h5>Hướng dẫn:</h5>
+                <p>${instructions}</p>
+            </div>
+            ` : ''}
+            <div class="instructions-section">
+                <h5>Bác sĩ kê đơn:</h5>
+                <p>${doctor}</p>
             </div>
         </div>
     `;
@@ -783,20 +1531,150 @@ function viewPrescriptionDetails(prescriptionId) {
     document.getElementById('prescriptionModal').classList.add('open');
 }
 
+function filterPrescriptionsByPatient(searchTerm) {
+    const prescriptionsData = window.prescriptionsData || mockData.prescriptions;
+    
+    // Get current doctor filter value if it exists
+    const doctorSearch = document.getElementById('prescriptionDoctorSearch')?.value || '';
+    
+    allPrescriptions = prescriptionsData.filter(prescription => {
+        const patientName = prescription.patient_name || prescription.patientName || '';
+        const doctorName = prescription.prescribing_doctor || '';
+        
+        const matchesPatient = patientName.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesDoctor = doctorName.toLowerCase().includes(doctorSearch.toLowerCase());
+        
+        return matchesPatient && matchesDoctor;
+    });
+    
+    renderPrescriptionsPage(1);
+}
+
+function filterPrescriptionsByDoctor(searchTerm) {
+    const prescriptionsData = window.prescriptionsData || mockData.prescriptions;
+    
+    // Get current patient filter value if it exists
+    const patientSearch = document.getElementById('prescriptionPatientSearch')?.value || '';
+    
+    allPrescriptions = prescriptionsData.filter(prescription => {
+        const patientName = prescription.patient_name || prescription.patientName || '';
+        const doctorName = prescription.prescribing_doctor || '';
+        
+        const matchesPatient = patientName.toLowerCase().includes(patientSearch.toLowerCase());
+        const matchesDoctor = doctorName.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        return matchesPatient && matchesDoctor;
+    });
+    
+    renderPrescriptionsPage(1);
+}
+
+function viewPatientMonitoring(patientID, patientName) {
+    const modalBody = document.getElementById('patientMonitoringModalBody');
+    if (!modalBody) {
+        console.error('Patient monitoring modal not found');
+        return;
+    }
+    
+    // Show loading state
+    modalBody.innerHTML = `
+        <h3 style="margin-left: 1rem;">${patientName}</h3>
+        <div style="text-align: center; padding: 2rem;">
+            <p>Đang tải dữ liệu...</p>
+        </div>
+    `;
+    
+    // Open modal immediately with loading state
+    document.getElementById('patientMonitoringModal').classList.add('open');
+    
+    const isAdminPage = window.location.pathname.startsWith('/admin');
+    const isDoctorPage = window.location.pathname.startsWith('/doctor');
+    const endpoint = isDoctorPage ? `/doctor/prescriptions/${patientID}` : `/admin/prescriptions/${patientID}`;
+
+    // Fetch data from backend
+    fetch(endpoint)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const patientData = data.monitoring_data || [];
+            
+            let tableRows = '';
+            if (patientData.length > 0) {
+                patientData.forEach(record => {
+                    const statusClass = getPrescriptionStatusClass(record.tinhtrang);
+                    tableRows += `
+                        <tr>
+                            <td>${formatDate(record.ngaykham)}</td>
+                            <td><span class="badge ${statusClass}">${record.tinhtrang}</span></td>
+                            <td>${record.medicine_name}</td>
+                            <td>${record.doctor}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tableRows = '<tr><td colspan="4" style="text-align: center;">Không có dữ liệu</td></tr>';
+            }
+            
+            modalBody.innerHTML = `
+                <h3 style="margin-left: 1rem;">${patientName}</h3>
+                <div class="table-container" style="margin-top: 1rem;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ngày</th>
+                                <th>Tình trạng</th>
+                                <th>Thuốc</th>
+                                <th>Bác sĩ kê đơn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error fetching patient monitoring data:', error);
+            modalBody.innerHTML = `
+                <h3 style="margin-left: 1rem;">${patientName}</h3>
+                <div style="text-align: center; padding: 2rem; color: #EF4444;">
+                    <p>Lỗi khi tải dữ liệu. Vui lòng thử lại.</p>
+                </div>
+            `;
+        });
+}
+
 // Dispensing Functions
+let allDispensing = [];
+
 function loadDispensing() {
     loadDispensingTable();
 }
 
 function loadDispensingTable() {
+    allDispensing = mockData.dispensing;
+    renderDispensingPage(1);
+}
+
+function renderDispensingPage(page) {
     const tbody = document.getElementById('dispensingTableBody');
     if (!tbody) return;
 
+    paginationState.dispensing.currentPage = page;
+    const paginatedData = paginateData(allDispensing, page, paginationState.dispensing.pageSize);
+    
     tbody.innerHTML = '';
-    mockData.dispensing.forEach(transaction => {
+    paginatedData.forEach(transaction => {
         const row = createDispensingRow(transaction);
         tbody.appendChild(row);
     });
+    
+    createPaginationControls('dispensingPagination', allDispensing.length, page, paginationState.dispensing.pageSize, 'renderDispensingPage');
 }
 
 function createDispensingRow(transaction) {
@@ -876,36 +1754,43 @@ function initializeDispensingCharts() {
 // Utility Functions
 function getStatusClass(status) {
     switch (status) {
-        case 'Active': return 'badge-green';
-        case 'Pending': return 'badge-yellow';
-        case 'Discharged': return 'badge-red';
+        case 'Đã xuất viện': return 'badge-green';
+        case 'Nội trú': return 'badge-yellow';
+        case 'Ngoại trú': return 'badge-blue';
         default: return 'badge-blue';
     }
 }
 
-function getAppointmentStatusClass(status) {
-    switch (status) {
-        case 'Scheduled': return 'badge-blue';
-        case 'Completed': return 'badge-green';
-        case 'Cancelled': return 'badge-red';
-        default: return 'badge-yellow';
+function getAppointmentStatusClass(so_giuong_trong, tong_giuong) {
+    if (so_giuong_trong == tong_giuong) {
+        return 'badge-red';
+    } else if (so_giuong_trong < tong_giuong / 2) {
+        return 'badge-green';
+    } else {
+        return 'badge-yellow';
     }
 }
 
 function getPrescriptionStatusClass(status) {
     switch (status) {
-        case 'Active': return 'badge-blue';
-        case 'Dispensed': return 'badge-yellow';
-        case 'Completed': return 'badge-green';
+        case 'Nhẹ': return 'badge-green';
+        case 'Trung bình': return 'badge-blue';
+        case 'Nặng': return 'badge-yellow';
+        case 'Nặng lên': return 'badge-red';
+        case 'Tiên lượng dè dặt': return 'badge-red';
+        case 'Nguy kịch': return 'badge-darkred';
         default: return 'badge-blue';
     }
 }
 
 function getHealthStatusClass(status) {
     switch (status) {
-        case 'Stable': return 'badge-green';
-        case 'Improving': return 'badge-blue';
-        case 'Recovering': return 'badge-yellow';
+        case 'Nhẹ': return 'badge-green';
+        case 'Trung bình': return 'badge-blue';
+        case 'Nặng': return 'badge-yellow';
+        case 'Nặng lên': return 'badge-orange';
+        case 'Tiên lượng dè dặt': return 'badge-red';
+        case 'Nguy kịch': return 'badge-darkred';
         default: return 'badge-blue';
     }
 }
@@ -953,9 +1838,483 @@ const additionalStyles = `
     color: #fbbf24;
     font-size: 1.2rem;
 }
+
+.medicine-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.medicine-tab {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.3s;
+}
+
+.medicine-tab:hover {
+    color: #3B82F6;
+}
+
+.medicine-tab.active {
+    color: #3B82F6;
+    border-bottom-color: #3B82F6;
+}
+
+.medicine-form-container {
+    display: none;
+}
+
+.medicine-form-container.active {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 1rem 0;
+}
+
+.pagination-btn {
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #3B82F6;
+    color: #3B82F6;
+}
+
+.pagination-btn.active {
+    background: #3B82F6;
+    border-color: #3B82F6;
+    color: white;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+    padding: 0.5rem;
+    color: #9ca3af;
+}
 `;
 
 // Add the additional styles to the page
 const styleSheet = document.createElement('style');
 styleSheet.textContent = additionalStyles;
 document.head.appendChild(styleSheet);
+
+// Add Medicine Modal Functions
+function openAddMedicineModal() {
+    const modal = document.getElementById('addMedicineModal');
+    modal.classList.add('open');
+    
+    // Populate existing medicine dropdown
+    populateExistingMedicines();
+    
+    // Reset to first tab
+    switchMedicineTab('new');
+    
+    // Reset forms
+    document.getElementById('newMedicineFormElement').reset();
+    document.getElementById('existingMedicineFormElement').reset();
+    
+    // Re-initialize icons
+    feather.replace();
+}
+
+function closeAddMedicineModal() {
+    const modal = document.getElementById('addMedicineModal');
+    modal.classList.remove('open');
+}
+
+function switchMedicineTab(tabName) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('.medicine-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Update form containers
+    document.getElementById('newMedicineForm').classList.remove('active');
+    document.getElementById('existingMedicineForm').classList.remove('active');
+    
+    if (tabName === 'new') {
+        tabs[0].classList.add('active');
+        document.getElementById('newMedicineForm').classList.add('active');
+    } else {
+        tabs[1].classList.add('active');
+        document.getElementById('existingMedicineForm').classList.add('active');
+    }
+}
+
+function populateExistingMedicines() {
+    const select = document.getElementById('existingMedicineName');
+    
+    // Get unique medicine names from inventory data
+    const medicinesData = window.inventoryStatusTable || mockData.medicines;
+    const uniqueMedicines = [...new Set(medicinesData.map(m => m.name))];
+    
+    // Clear existing options except the first one
+    select.innerHTML = '<option value="">-- Chọn thuốc --</option>';
+    
+    // Add options for each unique medicine
+    uniqueMedicines.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+    });
+}
+
+function submitNewMedicine(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = {
+        tenthuoc: form.tenthuoc.value,
+        congdung: form.congdung.value,
+        giatien: parseInt(form.giatien.value),
+        solo: parseInt(form.soluong.value),
+        hsd: form.hsd.value
+    };
+    
+    console.log('Submitting new medicine:', formData);
+    
+    // Send data to backend API
+    fetch('/admin/add-new-medicine-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Đã thêm thuốc mới thành công!');
+            closeAddMedicineModal();
+            loadPharmacyTable(); // Reload table
+        }
+    });
+    
+    alert('Đã thêm thuốc mới: ' + formData.tenthuoc + '\n(TODO: Kết nối backend API)');
+    closeAddMedicineModal();
+}
+
+function submitExistingMedicine(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = {
+        tenthuoc: form.tenthuoc.value,
+        solo: parseInt(form.soluong.value),
+        hsd: form.hsd.value
+    };
+    
+    console.log('Submitting existing medicine batch:', formData);
+    
+    // Send data to backend API
+    fetch('/admin/add-medicine-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Đã thêm lô thuốc thành công!\n' + data.message);
+            closeAddMedicineModal();
+            loadPharmacyTable(); // Reload table
+            loadPharmacyAlerts(); // Reload alerts
+        } else {
+            alert('Lỗi: ' + (data.message || 'Không thể thêm lô thuốc'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Lỗi kết nối: ' + error.message);
+    });
+}
+
+// Add Prescription Modal Functions
+// Check if patient exists in database
+let patientCheckTimeout = null;
+function checkPatientExists(patientId) {
+    const icon = document.getElementById('patientValidationIcon');
+    const message = document.getElementById('patientValidationMessage');
+    const typeSelect = document.getElementById('existingPatientType');
+    
+    // Clear previous timeout
+    if (patientCheckTimeout) {
+        clearTimeout(patientCheckTimeout);
+    }
+    
+    // Hide icon and message if input is empty
+    if (!patientId || patientId.trim() === '') {
+        icon.style.display = 'none';
+        message.style.display = 'none';
+        // Reset patient type select to default options
+        resetPatientTypeSelect();
+        return;
+    }
+    
+    // Show loading state
+    icon.style.display = 'inline';
+    icon.innerHTML = '<span style="color: #6B7280;">...</span>';
+    message.style.display = 'none';
+    
+    // Debounce the API call
+    patientCheckTimeout = setTimeout(() => {
+        fetch(`/doctor/prescriptions/check-patient/${patientId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    icon.innerHTML = '<i data-feather="check-circle" style="color: #10B981; width: 20px; height: 20px;"></i>';
+                    message.innerHTML = '<span style="color: #10B981;">✓ Bệnh nhân tồn tại</span>';
+                    message.style.display = 'block';
+                    
+                    // Fetch patient type and update select options
+                    // fetch(`/doctor/prescriptions/check-loaibn/${patientId}`)
+                    //     .then(response => response.json())
+                    //     .then(loaibnData => {
+                    //         const loaibenhnhan = loaibnData.loaibenhnhan;
+                    //         const value = loaibenhnhan === 'Nội trú' ? 'noitru' : 'ngoaitru';
+                            
+                    //         // Update select with dynamic option
+                    //         typeSelect.innerHTML = `
+                    //             <option value="">-- Chọn loại --</option>
+                    //             <option value="duytri">Duy trì hình thức cũ</option>
+                    //             <option value="${loaibenhnhan}">${loaibenhnhan}</option>
+                    //         `;
+                    //     })
+                    //     .catch(error => {
+                    //         console.error('Error fetching patient type:', error);
+                    //         resetPatientTypeSelect();
+                    //     });
+                } else {
+                    icon.innerHTML = '<i data-feather="x-circle" style="color: #EF4444; width: 20px; height: 20px;"></i>';
+                    message.innerHTML = '<span style="color: #EF4444;">✗ Không tìm thấy bệnh nhân</span>';
+                    message.style.display = 'block';
+                    resetPatientTypeSelect();
+                }
+                feather.replace();
+            })
+            .catch(error => {
+                console.error('Error checking patient:', error);
+                icon.innerHTML = '<i data-feather="alert-circle" style="color: #F59E0B; width: 20px; height: 20px;"></i>';
+                message.innerHTML = '<span style="color: #F59E0B;">⚠ Lỗi kiểm tra</span>';
+                message.style.display = 'block';
+                resetPatientTypeSelect();
+                feather.replace();
+            });
+    }, 500); // Wait 500ms after user stops typing
+}
+
+function resetPatientTypeSelect() {
+    const typeSelect = document.getElementById('existingPatientType');
+    if (typeSelect) {
+        typeSelect.innerHTML = `
+            <option value="">-- Chọn loại --</option>
+            <option value="Ngoại trú">Ngoại trú</option>
+            <option value="Nội trú">Nội trú</option>
+        `;
+    }
+}
+
+function openAddPrescriptionModal() {
+    const modal = document.getElementById('addPrescriptionModal');
+    modal.classList.add('open');
+    
+    // Reset to first tab
+    switchPrescriptionTab('existing');
+    
+    // Reset forms
+    document.getElementById('existingPatientPrescriptionFormElement').reset();
+    document.getElementById('newPatientPrescriptionFormElement').reset();
+    
+    // Reset validation indicators
+    const icon = document.getElementById('patientValidationIcon');
+    const message = document.getElementById('patientValidationMessage');
+    if (icon) icon.style.display = 'none';
+    if (message) message.style.display = 'none';
+    
+    // Reset patient type select to default
+    resetPatientTypeSelect();
+    
+    // Re-initialize icons
+    feather.replace();
+}
+
+function closeAddPrescriptionModal() {
+    const modal = document.getElementById('addPrescriptionModal');
+    modal.classList.remove('open');
+}
+
+function switchPrescriptionTab(tabName) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('#addPrescriptionModal .medicine-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Update form containers
+    document.getElementById('existingPatientPrescriptionForm').classList.remove('active');
+    document.getElementById('newPatientPrescriptionForm').classList.remove('active');
+    
+    if (tabName === 'existing') {
+        tabs[0].classList.add('active');
+        document.getElementById('existingPatientPrescriptionForm').classList.add('active');
+    } else {
+        tabs[1].classList.add('active');
+        document.getElementById('newPatientPrescriptionForm').classList.add('active');
+    }
+}
+
+function submitExistingPatientPrescription(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    const prescriptionData = {
+        MABN: formData.get('MABN'),
+        loaibenhnhan: formData.get('loaibenhnhan'),
+        tenbenh: formData.get('tenbenh'),
+        giaidoan: formData.get('giaidoan'),
+        tinhtrang: formData.get('tinhtrang'),
+        tenthuoc: formData.get('tenthuoc'),
+        soluong: parseInt(formData.get('soluong')),
+        songayuong: parseInt(formData.get('songayuong'))
+    };
+    
+    console.log('Submitting prescription for existing patient:', prescriptionData);
+    
+    // Send data to backend API
+    fetch('/doctor/prescriptions/add-existing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prescriptionData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Đã thêm đơn thuốc thành công!');
+        closeAddPrescriptionModal();
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Lỗi khi thêm đơn thuốc: ' + error.message);
+    });
+    
+    alert('Đã thêm đơn thuốc cho bệnh nhân ' + prescriptionData.MABN + '\n(TODO: Kết nối backend API)');
+    closeAddPrescriptionModal();
+}
+
+function submitNewPatientPrescription(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    const prescriptionData = {
+        // Patient info
+        hoten: formData.get('hoten'),
+        sdt: formData.get('sdt'),
+        loaibenhnhan: formData.get('loaibenhnhan'),
+        // Prescription info
+        tenbenh: formData.get('tenbenh'),
+        giaidoan: formData.get('giaidoan'),
+        tinhtrang: formData.get('tinhtrang'),
+        tenthuoc: formData.get('tenthuoc'),
+        soluong: parseInt(formData.get('soluong')),
+        songayuong: parseInt(formData.get('songayuong'))
+    };
+    
+    console.log('Submitting prescription for new patient:', prescriptionData);
+    
+    // Send data to backend API
+    fetch('/doctor/prescriptions/add-new', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prescriptionData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        let message = 'Đã thêm bệnh nhân và đơn thuốc thành công!';
+        if (data.account_created && data.username && data.password) {
+            message += '\n\n📋 Thông tin tài khoản bệnh nhân:\n';
+            message += '👤 Tên đăng nhập: ' + data.username + '\n';
+            message += '🔑 Mật khẩu: ' + data.password;
+        }
+        alert(message);
+        closeAddPrescriptionModal();
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Lỗi khi thêm đơn thuốc: ' + error.message);
+    });
+    
+    alert('Đã thêm bệnh nhân mới: ' + prescriptionData.hoten + '\nvà đơn thuốc\n(TODO: Kết nối backend API)');
+    closeAddPrescriptionModal();
+}

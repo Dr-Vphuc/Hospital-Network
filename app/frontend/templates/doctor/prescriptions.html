@@ -1,0 +1,232 @@
+{% extends 'doctor/base/base.html' %}
+
+{% block title %}My Prescriptions{% endblock %}
+
+{% block content %}
+
+<!-- Prescriptions Section -->
+    <section id="prescriptions" class="content-section active">
+        <div class="section-header">
+            <h2>Đơn thuốc khoa {{ doctor_faculty_name }}</h2>
+            <div class="section-actions">
+                <button class="btn btn-primary" onclick="openAddPrescriptionModal()">
+                    <i data-feather="plus"></i>
+                    Thêm đơn thuốc mới
+                </button>
+            </div>
+            
+        </div>
+
+        <div class="section-actions" style="align-items:rights">
+            <div class="search-box">
+                <i data-feather="search"></i>
+                <input type="text" id="prescriptionPatientSearch" placeholder="Tìm kiếm bệnh nhân..." onkeyup="filterPrescriptionsByPatient(this.value)">
+            </div>
+            <div class="search-box">
+                <i data-feather="search"></i>
+                <input type="text" id="prescriptionDoctorSearch" placeholder="Tìm kiếm bác sĩ..." onkeyup="filterPrescriptionsByDoctor(this.value)">
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="data-table" id="prescriptionsTable">
+                <thead>
+                    <tr>
+                        <th>Bệnh nhân</th>
+                        <th>Tình trạng</th>
+                        <th>Thuốc</th>
+                        <th>Liều lượng & Tần suất</th>
+                        <th>Bác sĩ kê đơn</th>
+                        <th>Ngày</th>
+                        <th>Theo dõi bệnh nhân</th>
+                    </tr>
+                </thead>
+                <tbody id="prescriptionsTableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+            <div id="prescriptionsPagination"></div>
+        </div>
+    </section>
+
+<!-- Patient Monitoring Modal -->
+<div id="patientMonitoringModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div id="patientMonitoringModalBody"></div>
+    </div>
+</div>
+
+<!-- Add Prescription Modal -->
+<div id="addPrescriptionModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeAddPrescriptionModal()">&times;</span>
+        <div class="modal-body">
+            <h3>Thêm đơn thuốc mới</h3>
+            
+            <!-- Tabs -->
+            <div class="medicine-tabs">
+                <button class="medicine-tab active" onclick="switchPrescriptionTab('existing')">
+                    Cho bệnh nhân đã khám
+                </button>
+                <button class="medicine-tab" onclick="switchPrescriptionTab('new')">
+                    Cho bệnh nhân mới
+                </button>
+            </div>
+
+            <!-- Existing Patient Form -->
+            <div id="existingPatientPrescriptionForm" class="medicine-form-container active">
+                <form id="existingPatientPrescriptionFormElement" onsubmit="submitExistingPatientPrescription(event)">
+                    <div class="form-group">
+                        <label for="existingPatientMABN">Mã bệnh nhân *</label>
+                        <div style="position: relative;">
+                            <input type="text" id="existingPatientMABN" name="MABN" class="form-control" required oninput="checkPatientExists(this.value)">
+                            <span id="patientValidationIcon" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: none;">
+                                <!-- Will be populated by JavaScript -->
+                            </span>
+                        </div>
+                        <small id="patientValidationMessage" style="display: none; margin-top: 0.25rem;"></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="existingPatientDisease">Tên bệnh *</label>
+                        <input type="text" id="existingPatientDisease" name="tenbenh" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="existingPatientStage">Giai đoạn *</label>
+                        <select id="existingPatientStage" name="giaidoan" class="form-control" required>
+                            <option value="">-- Chọn giai đoạn --</option>
+                            <option value="Theo dõi">Theo dõi</option>
+                            <option value="Điều trị">Điều trị</option>
+                            <option value="Ổn định">Ổn định</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="existingPatientStatus">Tình trạng *</label>
+                        <select id="existingPatientStatus" name="tinhtrang" class="form-control" required>
+                            <option value="">-- Chọn tình trạng --</option>
+                            <option value="Nặng">Nặng</option>
+                            <option value="Trung bình">Trung bình</option>
+                            <option value="Nhẹ">Nhẹ</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="existingPatientType">Hình thức điều trị *</label>
+                        <select id="existingPatientType" name="loaibenhnhan" class="form-control" required>
+                            <option value="">-- Chọn loại --</option>
+                            <option value="Ngoại trú">Ngoại trú</option>
+                            <option value="Nội trú">Nội trú</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="existingPatientMedicine">Tên thuốc *</label>
+                        <input type="text" id="existingPatientMedicine" name="tenthuoc" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="existingPatientQuantity">Số lượng *</label>
+                        <input type="number" id="existingPatientQuantity" name="soluong" class="form-control" min="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="existingPatientDays">Số ngày uống *</label>
+                        <input type="number" id="existingPatientDays" name="songayuong" class="form-control" min="1" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddPrescriptionModal()">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Thêm đơn thuốc</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- New Patient Form -->
+            <div id="newPatientPrescriptionForm" class="medicine-form-container">
+                <form id="newPatientPrescriptionFormElement" onsubmit="submitNewPatientPrescription(event)">
+                    <!-- Section 1: Patient Information -->
+                    <h4 style="margin-bottom: 1rem; color: #374151; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                        Thông tin bệnh nhân
+                    </h4>
+                    
+                    <div class="form-group">
+                        <label for="newPatientName">Họ tên *</label>
+                        <input type="text" id="newPatientName" name="hoten" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPatientPhone">Số điện thoại *</label>
+                        <input type="tel" id="newPatientPhone" name="sdt" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPatientType">Hình thức điều trị *</label>
+                        <select id="newPatientType" name="loaibenhnhan" class="form-control" required>
+                            <option value="">-- Chọn loại --</option>
+                            <option value="Ngoại trú">Ngoại trú</option>
+                            <option value="Nội trú">Nội trú</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Section 2: Prescription Information -->
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: #374151; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                        Thông tin đơn thuốc
+                    </h4>
+                    
+                    <div class="form-group">
+                        <label for="newPatientDisease">Tên bệnh *</label>
+                        <input type="text" id="newPatientDisease" name="tenbenh" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPatientStage">Giai đoạn *</label>
+                        <select id="newPatientStatus" name="giaidoan" class="form-control" required>
+                            <option value="">-- Chọn giai đoạn --</option>
+                            <option value="Theo dõi">Theo dõi</option>
+                            <option value="Điều trị">Điều trị</option>
+                            <option value="Ổn định">Ổn định</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPatientStatus">Tình trạng *</label>
+                        <select id="newPatientStatus" name="tinhtrang" class="form-control" required>
+                            <option value="">-- Chọn tình trạng --</option>
+                            <option value="Nặng">Nặng</option>
+                            <option value="Trung bình">Trung bình</option>
+                            <option value="Nhẹ">Nhẹ</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPatientMedicine">Tên thuốc *</label>
+                        <input type="text" id="newPatientMedicine" name="tenthuoc" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPatientQuantity">Số lượng *</label>
+                        <input type="number" id="newPatientQuantity" name="soluong" class="form-control" min="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPatientDays">Số ngày uống *</label>
+                        <input type="number" id="newPatientDays" name="songayuong" class="form-control" min="1" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddPrescriptionModal()">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Thêm đơn thuốc</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.prescriptionsData = {{ prescriptions | tojson | safe}};
+    window.patientMonitoringData = {{ monitoring_data | tojson | safe }};
+</script>
+{% endblock %}

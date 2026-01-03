@@ -3,13 +3,20 @@
     <div class="header-content">
         <div class="logo">
             <i data-feather="heart" class="logo-icon"></i>
-            <h1>Bệnh viện Tự Nhiên</h1>
+            <h1>Bệnh viện Khoa Học Tự Nhiên</h1>
         </div>
         <div class="header-actions">
             <span class="welcome-text">Chào mừng, Admin</span>
             <button class="profile-btn">
                 <i data-feather="user"></i>
             </button>
+            <div style="border-radius: 10px; overflow: hidden;">
+                <form action="{{ url_for('auth.logout') }}" method="get" style="display: inline;">
+                    <button type="submit" class="logout-btn">
+                        <i data-feather="log-out"></i>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </header>

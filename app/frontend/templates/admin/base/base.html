@@ -32,11 +32,11 @@
                 <span>Bệnh nhân</span>
             </a>
             
-            <a href="{{ url_for('admin.medicines') }}" 
-               class="nav-tab {% if request.endpoint == 'admin.medicines' %}active{% endif %}"
+            <a href="{{ url_for('admin.room') }}" 
+               class="nav-tab {% if request.endpoint == 'admin.room' %}active{% endif %}"
                style="text-decoration: none;">
                 <i data-feather="calendar"></i>
-                <span>Thuốc</span>
+                <span>Phòng bệnh</span>
             </a>
             
             <a href="{{ url_for('admin.doctors') }}" 
@@ -70,6 +70,6 @@
 
     {% include 'admin/base/footer.html' %}
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js', v=range(1, 10000)|random) }}"></script>
 </body>
 </html>

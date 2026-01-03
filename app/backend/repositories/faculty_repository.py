@@ -1,5 +1,9 @@
-from app.backend.models.faculty import Faculty
-from app.backend.db import db
+from backend.models.faculty import Faculty
+from backend.models.examination import Examination
+from backend.repositories.examination_repository import ExaminationRepository
+from backend.repositories.xuatvien_repository import XuatVienRepository
+from backend.repositories.nhapvien_repository import NhapVienRepository
+from backend.db import db
 
 class FacultyRepository:
     def get_faculty_by_id(self, faculty_id):
@@ -28,3 +32,26 @@ class FacultyRepository:
         db.session.delete(faculty)
         db.session.commit()
         return True
+    
+    def get_all_faculties(self):
+        return [(faculty.MAKHOA, faculty.tenkhoa) for faculty in Faculty.query.all()]
+    
+    def get_all_faculties_names(self):
+        return [faculty.tenkhoa for faculty in Faculty.query.all()]
+    
+    def get_total_patients_by_faculty(self, faculty_id):
+        all_patients_in_faculty = ExaminationRepository().get_distinct_patients_by_faculty(faculty_id)
+        
+        return len(all_patients_in_faculty)
+    
+    def get_id_by_name(self, tenkhoa):
+        faculty = Faculty.query.filter_by(tenkhoa=tenkhoa).first()
+        if faculty:
+            return faculty.MAKHOA
+        return None
+    
+    def get_faculty_name_by_id(self, faculty_id):
+        faculty = Faculty.query.filter_by(MAKHOA=faculty_id).first()
+        if faculty:
+            return faculty.tenkhoa
+        return None

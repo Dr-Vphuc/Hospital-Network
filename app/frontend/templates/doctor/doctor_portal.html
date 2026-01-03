@@ -1,0 +1,67 @@
+{% extends 'doctor/base/base.html' %}
+
+{% block title %}{{ doctor_name }}{% endblock %}
+
+{% block content %}
+
+<!-- Doctor Portal Sub-tabs -->
+<div class="sub-tabs">
+    <a href="{{ url_for('doctor.doctor_examinations') }}" class="sub-tab {% if active_tab == 'my-patients' %}active{% endif %}" data-subsection="my-patients">Các lượt khám chữa</a>
+    <a href="{{ url_for('doctor.doctor_performance') }}" class="sub-tab {% if active_tab == 'performance' %}active{% endif %}" data-subsection="performance">Hiệu suất làm việc</a>
+</div>
+
+<!-- Sub-sections -->
+<div class="sub-content">
+    
+    <div id="my-patients" class="sub-section {% if active_tab == 'my-patients' %}active{% endif %}">
+        <h3>Bác sĩ {{ doctor_name }}</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Tên bệnh nhân</th>
+                    <th>Giai đoạn</th>
+                    <th>Ngày khám</th>
+                    <th>Tình trạng sức khỏe</th>
+                    <th>Thuốc được kê</th>
+                    <th>Tổng đơn vị thuốc</th>
+                </tr>
+            </thead>
+            <tbody id="myPatientsTableBody">
+                <!-- Populated by JavaScript -->
+            </tbody>
+        </table>
+        <div id="myPatientsPagination"></div>
+    </div>
+
+    <div id="performance" class="sub-section {% if active_tab == 'performance' %}active{% endif %}">
+        <h3>Bác sĩ {{ doctor_name }}</h3>
+        <div class="performance-stats">
+            <div class="stat-card">
+                <h4>{{ total_examinations if total_examinations is not none else 0 }}</h4>
+                <p>Tổng số lượt khám</p>
+            </div>
+            <div class="stat-card">
+                <h4>{{ total_patients if total_patients is not none else 0 }}</h4>
+                <p>Tổng số bệnh nhân</p>
+            </div>
+            <div class="stat-card">
+                <h4>{{ stable_patients_ratio if stable_patients_ratio is not none else 0 }} %</h4>
+                <p>Tỉ lệ bệnh nhân Ổn định</p>
+            </div>
+        </div>
+        <div class="chart-card">
+            <h4>Hiệu suất khám chữa</h4>
+            <canvas id="consultationTrendsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+</section>
+
+<script>
+    window.examinationsData = {{ examinations_data | tojson | safe if examinations_data is not none else '[]' | safe }};
+    window.consultationLast6Months = {{ consultation_last_6_months | tojson | safe if consultation_last_6_months is not none else '[]' | safe }};
+    window.stringMonths = {{ string_months | tojson | safe if string_months is not none else '[]' | safe }};
+    window.activeTab = '{{ active_tab }}';
+</script>
+{% endblock %}

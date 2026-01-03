@@ -1,0 +1,45 @@
+{% extends 'admin/base/base.html' %}
+
+{% block title %}Medicines{% endblock %}
+
+{% block content %}
+
+<!-- Appointments Section -->
+<section id="appointments" class="content-section active">
+    <div class="section-header">
+        <h2>Quản lí phòng bệnh</h2>
+    </div>
+
+    <div class="appointments-grid">
+        <div class="appointments-table">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Phòng</th>
+                        <th>Khoa</th>
+                        <th>Tòa nhà</th>
+                        <th>Tình trạng giường</th>
+                        <th>Danh sách bệnh nhân</th>
+                    </tr>
+                </thead>
+                <tbody id="appointmentsTableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+            <div id="appointmentsPagination"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Room Patients Modal -->
+<div id="roomPatientsModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div id="roomPatientsModalBody"></div>
+    </div>
+</div>
+
+<script>
+    window.allRoomsDetail = {{ all_rooms_detail | tojson }};
+</script>
+{% endblock %}

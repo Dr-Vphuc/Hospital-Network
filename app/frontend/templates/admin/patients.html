@@ -5,39 +5,62 @@
 {% block content %}
 
 <!-- Patients Section -->
-    <section id="patients" class="content-section active">
-        <div class="section-header">
-            <h2>Patient Management</h2>
-            <div class="section-actions">
-                <div class="search-box">
-                    <i data-feather="search"></i>
-                    <input type="text" id="patientSearch" placeholder="Search patients...">
-                </div>
-                <button class="btn btn-primary">
-                    <i data-feather="plus"></i>
-                    Add Patient
-                </button>
+<section id="patients" class="content-section active">
+    <div class="section-header">
+        <h2>Quản lý bệnh nhân</h2>
+        <div class="section-actions">
+            <div class="search-box">
+                <i data-feather="search"></i>
+                <input type="text" id="patientSearch" placeholder="Tìm kiếm bệnh nhân...">
             </div>
+            <select id="facultyFilter" class="filter-select">
+                <option value="">Tất cả các khoa</option>
+                {% for name in all_faculty_names %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <select id="statusFilter" class="filter-select">
+                <option value="">Tất cả trạng thái</option>
+                {% for name in ['Đã xuất viện', 'Nội trú', 'Ngoại trú'] %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
         </div>
+    </div>
 
-        <div class="table-container">
-            <table class="data-table" id="patientsTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Age</th>
-                        <th>Contact</th>
-                        <th>Admission Date</th>
-                        <th>Department</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="patientsTableBody">
-                    <!-- Populated by JavaScript -->
-                </tbody>
-            </table>
+    <div class="table-container">
+        <table class="data-table" id="patientsTable">
+            <thead>
+                <tr>
+                    <th>MABN</th>
+                    <th>Tên</th>
+                    <th>Tuổi</th>
+                    <th>Liên hệ</th>
+                    <th>Ngày khám gần nhất</th>
+                    <th>Khoa</th>
+                    <th>Trạng thái</th>
+                    <th>Thông tin liên quan</th>
+                </tr>
+            </thead>
+            <tbody id="patientsTableBody">
+                <!-- Populated by JavaScript -->
+            </tbody>
+        </table>
+        <div id="patientsPagination"></div>
+    </div>
+</section>
+
+<!-- Patient Details Modal -->
+<div id="patientModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div id="patientModalBody">
+            <!-- Tabs will be inserted here by JavaScript -->
         </div>
-    </section>
+    </div>
+</div>
+
+<script>
+    window.patientsDetails = {{ patients_details | tojson }};
+</script>
 {% endblock %}

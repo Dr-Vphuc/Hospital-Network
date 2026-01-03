@@ -4,7 +4,7 @@ class Room(db.Model):
     __tablename__ = 'phongbenh'
 
     MAPHG = db.Column(db.String(50), primary_key=True)
-    makhoa = db.Column(db.String(50), db.ForeignKey('khoa.MAKHOA'), nullable=False)
+    MAKHOA = db.Column(db.String(50), db.ForeignKey('khoa.MAKHOA'), nullable=False)
     sogiuong = db.Column(db.Integer, nullable=False)
     gia = db.Column(db.Float, nullable=False)
 
